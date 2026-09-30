@@ -1,0 +1,56 @@
+name: Reviewer gate
+
+on:
+  workflow_run:
+    workflows: [Reviewer gate signal]
+    types: [completed]
+
+permissions:
+  checks: write
+  pull-requests: read
+
+concurrency:
+  group: reviewer-gate-${{ github.event.workflow_run.display_title }}
+  cancel-in-progress: true
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v8
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            if (!['pull_request', 'pull_request_review'].includes(run.event)) return;
+
+            const match = /^Reviewer gate signal PR #([1-9]\d*)$/.exec(run.display_title);
+            if (!match) throw new Error('Cannot identify the pull request');
+
+            const { owner, repo } = context.repo;
+            const pull_number = Number(match[1]);
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number });
+            if (pr.state !== 'open' || pr.base.ref !== 'main') return;
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner, repo, pull_number, per_page: 100
+            });
+            const latest = new Map();
+            for (const review of reviews) {
+              if (['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(review.state)) {
+                latest.set(review.user.login.toLowerCase(), review.state);
+              }
+            }
+
+            const allowed = ['kim-jeong-hun', 'hyeonseochoi20-dev', 'shortpeng96'];
+            const approvals = allowed.filter(user => latest.get(user) === 'APPROVED');
+            const rejected = allowed.filter(user => latest.get(user) === 'CHANGES_REQUESTED');
+            const success = approvals.length >= 2 && rejected.length === 0;
+            const summary = rejected.length
+              ? 'Changes requested by: ' + rejected.join(', ')
+              : approvals.length + '/2 approvals from the designated reviewers';
+
+            await github.rest.checks.create({
+              owner, repo, name: 'designated-reviewers', head_sha: pr.head.sha,
+              status: 'completed', conclusion: success ? 'success' : 'failure',
+              output: { title: success ? 'Review requirement met' : 'Review requirement not met', summary }
+            });
