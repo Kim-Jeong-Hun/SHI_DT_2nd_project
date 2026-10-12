@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS users (
 -- 모델 버전 레지스트리 (MLflow 없이도 "어떤 모델이 배포됐나" 관리)
 CREATE TABLE IF NOT EXISTS model_versions (
     model_id      SERIAL PRIMARY KEY,
-    topic         TEXT        NOT NULL,                 -- 예: 'nsr', 'welding', 'paint'
-    name          TEXT        NOT NULL,                 -- 예: 'nsr_hgb_lead30'
+    topic         TEXT        NOT NULL,                 -- 예: 'ship_orders'
+    name          TEXT        NOT NULL,                 -- 예: 'ship_orders_container_lgbm'
     version       TEXT        NOT NULL,                 -- 예: '2026-10-05.1'
     artifact_path TEXT        NOT NULL,                 -- joblib 파일 경로/URL
     sha256        CHAR(64)    NOT NULL,                 -- 아티팩트 무결성 확인
@@ -121,65 +121,3 @@ GROUP BY m.topic, m.name, m.version;
 -- -- SELECT incident_type, count(*) FROM incidents
 -- --  WHERE ST_DWithin(geom, ST_MakePoint(:lon, :lat)::geography, 20000)
 -- --  GROUP BY incident_type ORDER BY 2 DESC;
-
--- =====================================================================
--- 관제 로그 (ops) — 관제 화면 이벤트를 운항 빅데이터로 적재
---   흐름: 관제 화면 → 서빙 API POST /ops/events → ① 공유 볼륨 원본 data/01_raw/ops_logs/*.jsonl (추가만)
---                                               ② 이 테이블 (조회·집계)
---   Kedro ops_logs 파이프라인이 원본을 구간·일 단위 병목 표와 항차 결과 표로 만들어 재학습 특성으로 쓴다.
---   스키마 버전: ops.control_events/v1 (src/shi_dt/ops_log.py 와 1:1)
--- =====================================================================
-CREATE SCHEMA IF NOT EXISTS ops;
-
-CREATE TABLE IF NOT EXISTS ops.control_events (
-    event_id    BIGSERIAL PRIMARY KEY,
-    session     TEXT        NOT NULL,                     -- 관제 화면 세션 (브라우저 1회 접속)
-    source      TEXT        NOT NULL DEFAULT 'control-ui',
-    ts_wall     TIMESTAMPTZ NOT NULL,                     -- 이벤트가 생긴 실제 시각
-    ts_sim      TIMESTAMPTZ,                              -- 관제 화면 속 운항 시각 (해빙 관측일 기준)
-    type        TEXT        NOT NULL CHECK (type IN ('DEPART','ENTER_SEGMENT','ESCORT_REQUEST','ESCORT_JOIN','ESCORT_END',
-                                                     'HOLD','RESUME','ARRIVE','ABORT','ICE_ALERT','OPERATOR_VIEW','OPERATOR_PLAN')),
-    vessel      TEXT,
-    voyage      INT,
-    ship_type   TEXT,
-    ice_class   TEXT,                                     -- 예: 'Arc4', 'Ice1~3'
-    route       TEXT        CHECK (route IN ('NSR','NWP','TSR','') OR route IS NULL),
-    direction   TEXT,                                     -- 'EB' 동행 / 'WB' 서행
-    segment     TEXT,                                     -- 예: '카라해', '동시베리아해'
-    km          REAL,                                     -- 항로 누적 거리
-    x_km        REAL,                                     -- NSIDC 극좌표(EPSG:3411) km
-    y_km        REAL,
-    sic         REAL        CHECK (sic IS NULL OR sic BETWEEN 0 AND 100),   -- 항로 폭 75 km 안 해빙 농도 %
-    status      TEXT,
-    detail      TEXT,
-    payload     JSONB       NOT NULL DEFAULT '{}',
-    ingested_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    CONSTRAINT ux_control_event UNIQUE (session, ts_wall, type, voyage, km)   -- 재전송·재적재 시 중복 방지
-);
-CREATE INDEX IF NOT EXISTS ix_ops_sim_brin ON ops.control_events USING BRIN (ts_sim);   -- 시계열 대량 적재에 가벼운 인덱스
-CREATE INDEX IF NOT EXISTS ix_ops_route_seg ON ops.control_events (route, segment, type);
-CREATE INDEX IF NOT EXISTS ix_ops_class ON ops.control_events (ice_class, type);
-
--- 구간별 병목: 일·해역·등급별 호위 요청·대기 횟수와 평균 해빙
-CREATE OR REPLACE VIEW ops.v_segment_bottleneck AS
-SELECT date_trunc('day', ts_sim)                               AS sim_day,
-       route, segment, ice_class,
-       count(*) FILTER (WHERE type = 'ESCORT_REQUEST')         AS escort_requests,
-       count(*) FILTER (WHERE type = 'HOLD')                   AS holds,
-       round(avg(sic)::numeric, 1)                             AS mean_sic
-FROM ops.control_events
-WHERE type IN ('ESCORT_REQUEST', 'HOLD', 'ENTER_SEGMENT')
-GROUP BY 1, 2, 3, 4;
-
--- 항차 결과: 출항~도착 소요일 (세션·항차 단위)
-CREATE OR REPLACE VIEW ops.v_voyage_outcome AS
-SELECT session, voyage, max(vessel) AS vessel, max(ice_class) AS ice_class, max(route) AS route, max(direction) AS direction,
-       min(ts_sim) FILTER (WHERE type = 'DEPART')                               AS departed,
-       max(ts_sim) FILTER (WHERE type = 'ARRIVE')                               AS arrived,
-       extract(epoch FROM max(ts_sim) FILTER (WHERE type = 'ARRIVE')
-                        - min(ts_sim) FILTER (WHERE type = 'DEPART')) / 86400.0  AS days,
-       count(*) FILTER (WHERE type = 'ESCORT_REQUEST')                          AS escort_requests,
-       count(*) FILTER (WHERE type = 'HOLD')                                    AS holds
-FROM ops.control_events
-WHERE voyage IS NOT NULL
-GROUP BY session, voyage;

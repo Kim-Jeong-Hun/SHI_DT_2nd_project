@@ -1,6 +1,6 @@
 """Render 웹 서빙(가벼운 이미지) — 선박 수주 예측 화면 + 예측 API만.
 
-전체 앱(serving/app.py)은 북극항로 모델·Kedro·MLflow·PostgreSQL 로그까지 묶여 있어 무료 플랜(512MB)에 무겁다.
+로컬 전체 앱(Kedro·MLflow·PostgreSQL 포함)은 무료 플랜(512MB)에 무겁다.
 여기서는 같은 shi_dt.ship.service 로직과 같은 정적 화면을 그대로 쓰고, 데이터는 이미지에 넣은 보고서 스냅샷을 읽는다.
   /            → /ship/ops 로 이동
   /ship/ops    통합 관제 — 3D 전경 · 관제 콘솔 · Airflow 워크플로 · Kedro 파이프라인 · MLflow 실험 기록 · 발표 릴을 한 페이지에서 전환

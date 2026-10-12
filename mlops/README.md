@@ -20,20 +20,19 @@ Airflow 리스너 플러그인 → 실행 상태를 Postgres(Neon)로 동기화 
 |---|---|
 | `src/shi_dt/pipelines/ship_orders/` | Kedro 파이프라인 (팀 `2026_독립검증.py` 를 노드로 분해) |
 | `src/shi_dt/ship/` | 서빙용 예측 조회 서비스 |
+| `conf/base/` | Kedro 설정 |
 | `airflow/dags/shi_ship_order_pipeline.py` | 월간 DAG |
 | `airflow/plugins/` | 실행 상태를 DB로 보내는 리스너 (관제 화면용) |
 | `airflow/install_airflow_wsl.sh` | WSL2 에 Airflow standalone 설치 |
 | `docker-compose.yml`, `docker/` | app(Kedro·MLflow·서빙) + db(PostgreSQL) 컨테이너 |
 | `deploy/render/` | Render 배포본 (FastAPI `web.py`, MLflow 프록시, Kedro-Viz 정적 페이지, 팀 코드 사본 `team/`) |
-| `serving/static/` | 3D 관제·대시보드·발표 릴·발표 장표(`ship_story.html`) |
-| `scripts/build_story_deck.py` | 발표 장표 데이터(`story/data.js`) 생성 |
-| `scripts/trim_weakc.py` | 필터2 약신호 막대 그림에서 0% 행을 잘라 낸 요약판 생성(빌드에 연결) |
-| `scripts/cute_cat.py` · `scripts/recolor_cat.py` | 도메인 장 3D 삐용이: 모델 얼굴 다듬기 · 털 재채색과 사진 얼굴 굽기 |
-| `docs/` | 작업 기록(슬랙 아카이브 A1~A25)·결정 문서·기획서(선박 수주예측) |
+| `serving/static/` | 서빙 화면 (3D 관제 · 관제 콘솔 · 통합 관제 · 발표 릴 · 워크플로) |
 
-### 외부 자산 출처
-- 3D 고양이 모델: "cat Walk" by Erina eka syaharani (Sketchfab), CC BY 4.0 — `serving/static/story/img/fun/biyong_cat.glb`. 얼굴 형상·털 색·얼굴 무늬는 조장님 반려묘 삐용이 사진으로 수정함.
-| `docs/analysis/` | 수주예측 분석 검토 자료 |
+## 데이터 준비
+
+데이터는 저장소에 넣지 않습니다(원본: 팀 구글 드라이브 `Ship orders forcasting`).
+파이프라인은 `SHIP_ORDERS_REPO`(기본 `deploy/render/team`) 아래 `data/raw/수주실적.csv` · `data/processed/…` 를 읽으므로,
+실행 전에 드라이브의 `data/` 폴더를 `deploy/render/team/data/` 로 복사합니다.
 
 ## 실행
 
@@ -46,4 +45,4 @@ docker exec shi-app kedro run --pipeline=ship_orders
 Airflow 는 WSL 에서 `airflow/install_airflow_wsl.sh` 로 설치하고, DAG 가 이 폴더를 찾도록 `SHI_PROJECT_DIR` 을 이 `mlops` 폴더 경로로 지정합니다.
 관제 탭으로 상태를 보내려면 `AIRFLOW_STATUS_DB_URL` 을 환경 변수로만 넣습니다(저장소에 값 넣지 않음).
 
-`SHI_PIPELINES=ship` 이면 선박 수주 파이프라인만 등록합니다. 북극항로 등 다른 과제 코드는 이 저장소에 포함하지 않았습니다.
+Kedro 에는 선박 수주 파이프라인 3개(`ship_orders` · `ship_orders_preprocess` · `ship_orders_track`)만 등록돼 있습니다. 이 저장소는 선박 수주 예측 프로젝트만 다룹니다.

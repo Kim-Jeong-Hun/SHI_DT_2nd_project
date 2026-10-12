@@ -19,7 +19,7 @@ COPY deploy/render/web.py deploy/render/mlflow_proxy.py deploy/render/start.sh d
 COPY deploy/render/team /app/team
 RUN mkdir -p conf/local data/01_raw/ship mlartifacts && kedro run --pipeline=ship_orders \
     && test -s data/01_raw/ship/2026_독립검증.json \
-    && SHI_PIPELINES=ship kedro viz build && python deploy/render/kedro_viz_static.py build deploy/render/static/kedro \
+    && kedro viz build && python deploy/render/kedro_viz_static.py build deploy/render/static/kedro \
     && useradd -m web && chown -R web /app && chmod +x deploy/render/start.sh
 USER web
 EXPOSE 10000

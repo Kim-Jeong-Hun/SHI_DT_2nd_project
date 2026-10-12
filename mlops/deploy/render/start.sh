@@ -9,8 +9,8 @@ if [ "${ROLE:-web}" != "mlflow" ]; then
 fi
 if [ -z "${DATABASE_URL:-}" ]; then echo "[start] DATABASE_URL 없음 — MLflow 서비스를 띄울 수 없습니다"; exit 1; fi
 export MLFLOW_TRACKING_URI="$(python -c 'import os,re;print(re.sub(r"^postgres(ql)?://","postgresql+psycopg://",os.environ["DATABASE_URL"]))')"
-# SHI_PIPELINES=ship: 북극항로 파이프라인(matplotlib · pyproj)을 불러오지 않아 기록 단계 최대 약 257MB (전체 등록 346MB)
+# 수주 파이프라인만 등록돼 있어 기록 단계 메모리 최대 약 257MB
 # 기록은 서버보다 먼저, 끝까지 마친 뒤 프로세스가 내려가 메모리를 돌려준다
-SHI_PIPELINES=ship kedro run --pipeline=ship_orders_track || echo "[start] MLflow 기록 실패 — 화면은 계속 띄웁니다"
+kedro run --pipeline=ship_orders_track || echo "[start] MLflow 기록 실패 — 화면은 계속 띄웁니다"
 # MLflow 앱 + 읽기 전용 필터를 한 uvicorn 프로세스로 (mlflow server CLI 는 프로세스가 여러 개라 512MB 초과)
 exec uvicorn deploy.render.mlflow_proxy:app --host 0.0.0.0 --port "${PORT:-10000}" --proxy-headers

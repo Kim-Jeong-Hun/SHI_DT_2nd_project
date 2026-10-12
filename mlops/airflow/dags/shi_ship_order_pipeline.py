@@ -12,8 +12,26 @@ from datetime import datetime, timedelta
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.sdk import DAG
 
-PROJECT_DIR = os.environ.get("SHI_PROJECT_DIR", "/mnt/c/Users/Molly/projects/shi-dt-mlops")
+# 환경 변수가 없으면 이 파일 기준 mlops 폴더(airflow/dags 의 두 단계 위)
+PROJECT_DIR = os.environ.get("SHI_PROJECT_DIR") or os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 APP = "shi-app"
+CHECK_API = r"""
+set -euo pipefail
+if [ "$(docker exec "$APP" printenv SERVING_ENABLED || echo 1)" != "1" ]; then
+  echo "SERVING_ENABLED != 1 → 서빙 확인 건너뜀"; exit 99
+fi
+docker exec "$APP" curl -fsS --retry 5 --retry-delay 3 --retry-all-errors --max-time 10   'http://localhost:8000/ship/forecast?ship=%EC%BB%A8%ED%85%8C%EC%9D%B4%EB%84%88%EC%84%A0&horizon=3' > /dev/null
+docker exec "$APP" curl -fsS --retry 5 --retry-delay 3 --retry-all-errors --max-time 10 'http://localhost:8000/ship/meta'   | docker exec -i -e RUN_START="$RUN_START" "$APP" python3 -c '
+import json, os, sys
+from datetime import datetime
+m = json.load(sys.stdin)
+n = len(m.get("선종", []))
+assert n == 5, f"선종 {n}개 (5개여야 함)"
+rep = datetime.fromisoformat(m["보고서수정시각"]); run = datetime.fromisoformat(os.environ["RUN_START"])
+assert rep >= run, f"보고서가 이번 실행 전 것: 보고서 {rep} < 실행 시작 {run}"
+print(f"서빙 정상: 선종 {n}개 · 보고서 {rep}")
+'
+"""
 
 with DAG(
     dag_id="shi_ship_order_pipeline",
@@ -27,6 +45,13 @@ with DAG(
     containers_up = BashOperator(task_id="docker_containers_up",
                                  bash_command=f"cd {PROJECT_DIR} && docker compose up -d --wait --wait-timeout 300")
     kedro_ship = BashOperator(task_id="kedro_ship_orders", bash_command=f"docker exec {APP} kedro run --pipeline=ship_orders")
-    check_api = BashOperator(task_id="check_serving_api",
-                             bash_command=f"docker exec {APP} curl -fs 'http://localhost:8000/ship/meta' || echo 'serving off (SERVING_ENABLED)'")
+    # 서빙 확인: 실패는 실패로 남긴다(예전에는 `|| echo` 때문에 API가 죽어도 DAG가 성공했다).
+    #   SERVING_ENABLED != 1 → exit 99 = Airflow '건너뜀'(skipped) · 응답 없음/5개 선종 아님/보고서가 이번 실행 전 것 → 실패
+    check_api = BashOperator(
+        task_id="check_serving_api",
+        bash_command=CHECK_API,
+        env={"APP": APP, "RUN_START": "{{ dag_run.start_date.isoformat() }}"},
+        append_env=True,
+        retries=0,
+    )
     containers_up >> kedro_ship >> check_api

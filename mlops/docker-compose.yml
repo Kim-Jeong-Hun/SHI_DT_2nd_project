@@ -47,7 +47,6 @@ services:
       SHI_PROJECT_DIR: /workspace
       SHIP_ORDERS_REPO: /workspace/deploy/render/team   # 팀 파이프라인 사본(Render 이미지와 같은 코드) — kedro run --pipeline=ship_orders 가 읽는다
       SERVING_ENABLED: "1"
-      SHI_PIPELINES: ship                # 선박 수주 파이프라인만 등록 (팀 저장소에는 수주 부문만 포함)
       MLFLOW_DISABLE_AGENT_HINT: "1"
     volumes:
       - ./:/workspace            # 코드 + 공유 볼륨(./data)을 컨테이너 /workspace/data 로
