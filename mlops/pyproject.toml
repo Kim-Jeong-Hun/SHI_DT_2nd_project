@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shi_dt"
+version = "0.1.0"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = "requirements.txt" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.kedro]
+package_name = "shi_dt"
+project_name = "shi-dt-mlops"
+kedro_init_version = "1.7.0"
+source_dir = "src"
+
+[tool.kedro_telemetry]
+project_id = "2ff34688b7b94ec484ba72bd869731ce"

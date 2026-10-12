@@ -1,0 +1,421 @@
+﻿기준월,선종,대표선형,원자료평균용량,용량단위,신조선가_백만USD,가격원관측월,가격관측경과월수,원자료품질등급,원자료출처ID,원자료출처URL
+2015-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,53.5,2015-01,0,B,EWS_2015_01,https://www.eworldship.com/html/2015/NewShipMarket_0216/98795.html
+2015-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,52.0,2015-02,0,B,EWS_2015_02,https://www.eworldship.com/html/2015/NewShipMarket_0317/99642.html
+2015-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,52.0,2015-03,0,B,EWS_2015_03,https://www.eworldship.com/html/2015/NewShipMarket_0415/100882.html
+2015-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.5,2015-04,0,B,EWS_2015_04,https://www.eworldship.com/html/2015/NewShipMarket_0516/101964.html
+2015-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,50.0,2015-05,0,B,EWS_2015_05,https://www.eworldship.com/html/2015/NewShipMarket_0619/103314.html
+2015-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.0,2015-06,0,B,EWS_2015_06,https://www.eworldship.com/html/2015/NewShipMarket_0723/104661.html
+2015-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.0,2015-07,0,B,EWS_2015_07,https://www.eworldship.com/html/2015/NewShipMarket_0819/105660.html
+2015-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.5,2015-08,0,B,EWS_2015_08,https://www.eworldship.com/html/2015/NewShipMarket_0925/107006.html
+2015-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.0,2015-09,0,B,EWS_2015_09,https://www.eworldship.com/html/2015/NewShipMarket_1022/107846.html
+2015-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.0,2015-10,0,B,EWS_2015_10,https://www.eworldship.com/html/2015/NewShipMarket_1122/108991.html
+2015-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2015-11,0,B,EWS_2015_11,https://www.eworldship.com/html/2015/NewShipMarket_1218/110277.html
+2015-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2015-12,0,B,EWS_2015_12,https://www.eworldship.com/html/2016/NewShipMarket_0122/111393.html
+2016-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2016-01,0,B,EWS_2016_01,https://www.eworldship.com/html/2016/NewShipMarket_0226/112358.html
+2016-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,45.5,2016-02,0,B,EWS_2016_02,https://www.eworldship.com/html/2016/NewShipMarket_0321/113194.html
+2016-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,45.0,2016-03,0,B,EWS_2016_03,https://www.eworldship.com/html/2016/NewShipMarket_0420/114351.html
+2016-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,45.0,2016-04,0,B,EWS_2016_04,https://www.eworldship.com/html/2016/NewShipMarket_0527/115725.html
+2016-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,45.0,2016-04,1,B,EWS_2016_04,https://www.eworldship.com/html/2016/NewShipMarket_0527/115725.html
+2016-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2016-06,0,B,EWS_2016_06,https://www.eworldship.com/html/2016/NewShipMarket_0720/117644.html
+2016-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2016-07,0,B,EWS_2016_07,https://www.eworldship.com/html/2016/NewShipMarket_0824/118798.html
+2016-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,41.75,2016-08,0,B,EWS_2016_08,https://www.eworldship.com/html/2016/NewShipMarket_0923/119982.html
+2016-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2016-09,0,B,EWS_2016_09,https://www.eworldship.com/html/2016/NewShipMarket_1024/121113.html
+2016-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2016-09,1,B,EWS_2016_09,https://www.eworldship.com/html/2016/NewShipMarket_1024/121113.html
+2016-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2016-09,2,B,EWS_2016_09,https://www.eworldship.com/html/2016/NewShipMarket_1024/121113.html
+2016-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2016-09,3,B,EWS_2016_09,https://www.eworldship.com/html/2016/NewShipMarket_1024/121113.html
+2017-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2017-01,0,B,EWS_2017_01,https://www.eworldship.com/html/2017/NewShipMarket_0225/125070.html
+2017-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2017-02,0,B,EWS_2017_02,https://www.eworldship.com/html/2017/NewShipMarket_0324/125919.html
+2017-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.0,2017-03,0,B,EWS_2017_03,https://www.eworldship.com/html/2017/NewShipMarket_0425/127185.html
+2017-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.5,2017-04,0,B,EWS_2017_04,https://www.eworldship.com/html/2017/NewShipMarket_0525/128531.html
+2017-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.5,2017-05,0,B,EWS_2017_05,https://www.eworldship.com/html/2017/NewShipMarket_0618/129197.html
+2017-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.5,2017-06,0,B,EWS_2017_06,https://www.eworldship.com/html/2017/NewShipMarket_0721/130294.html
+2017-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.5,2017-07,0,B,EWS_2017_07,https://www.eworldship.com/html/2017/NewShipMarket_0825/131130.html
+2017-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.5,2017-08,0,B,EWS_2017_08,https://www.eworldship.com/html/2017/NewShipMarket_0922/131956.html
+2017-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,42.5,2017-09,0,B,EWS_2017_09,https://www.eworldship.com/html/2017/NewShipMarket_1023/132822.html
+2017-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,43.0,2017-10,0,B,EWS_2017_10,https://www.eworldship.com/html/2017/NewShipMarket_1117/133753.html
+2017-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,44.0,2017-11,0,B,EWS_2017_11,https://www.eworldship.com/html/2017/NewShipMarket_1215/134762.html
+2017-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,44.0,2017-12,0,B,EWS_2017_12,https://www.eworldship.com/html/2018/NewShipMarket_0118/135753.html
+2018-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,44.0,2018-01,0,B,EWS_2018_01,https://www.eworldship.com/html/2018/NewShipMarket_0227/136763.html
+2018-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,44.5,2018-02,0,B,EWS_2018_02,https://www.eworldship.com/html/2018/NewShipMarket_0323/137405.html
+2018-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.0,2018-03,0,B,EWS_2018_03,https://www.eworldship.com/html/2018/NewShipMarket_0421/138368.html
+2018-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,47.0,2018-04,0,B,EWS_2018_04,https://www.eworldship.com/html/2018/NewShipMarket_0519/139270.html
+2018-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,47.5,2018-05,0,B,EWS_2018_05,https://www.eworldship.com/html/2018/NewShipMarket_0622/140276.html
+2018-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.0,2018-06,0,B,EWS_2018_06,https://www.eworldship.com/html/2018/NewShipMarket_0720/141200.html
+2018-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.0,2018-07,0,B,EWS_2018_07,https://www.eworldship.com/html/2018/NewShipMarket_0827/142468.html
+2018-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.0,2018-08,0,B,EWS_2018_08,https://www.eworldship.com/html/2018/NewShipMarket_0922/143103.html
+2018-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.25,2018-09,0,B,EWS_2018_09,https://www.eworldship.com/html/2018/NewShipMarket_1025/143936.html
+2018-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,50.0,2018-10,0,B,EWS_2018_10,https://www.eworldship.com/html/2018/NewShipMarket_1124/144759.html
+2018-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,50.0,2018-11,0,B,EWS_2018_11,https://www.eworldship.com/html/2018/NewShipMarket_1222/145534.html
+2018-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,50.0,2018-12,0,B,EWS_2018_12,https://www.eworldship.com/html/2019/NewShipMarket_0130/146635.html
+2019-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-01,0,B,EWS_2019_01,https://www.eworldship.com/html/2019/NewShipMarket_0228/147106.html
+2019-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-02,0,B,EWS_2019_02,https://www.eworldship.com/html/2019/NewShipMarket_0329/147894.html
+2019-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-03,0,B,EWS_2019_03,https://www.eworldship.com/html/2019/NewShipMarket_0426/148710.html
+2019-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-04,0,B,EWS_2019_04,https://www.eworldship.com/html/2019/NewShipMarket_0524/149570.html
+2019-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-05,0,B,EWS_2019_05,https://www.eworldship.com/html/2019/NewShipMarket_0624/150461.html
+2019-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-06,0,B,EWS_2019_06,https://www.eworldship.com/html/2019/NewShipMarket_0722/151243.html
+2019-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-07,0,B,EWS_2019_07,https://www.eworldship.com/html/2019/NewShipMarket_0823/152119.html
+2019-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.0,2019-08,0,B,EWS_2019_08,https://www.eworldship.com/html/2019/NewShipMarket_0921/152902.html
+2019-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,50.5,2019-09,0,B,EWS_2019_09,https://www.eworldship.com/html/2019/NewShipMarket_1026/153672.html
+2019-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,50.0,2019-10,0,B,EWS_2019_10,https://www.eworldship.com/html/2019/NewShipMarket_1128/154713.html
+2019-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.5,2019-11,0,B,EWS_2019_11,https://www.eworldship.com/html/2019/NewShipMarket_1223/155524.html
+2019-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.5,2019-11,1,B,EWS_2019_11,https://www.eworldship.com/html/2019/NewShipMarket_1223/155524.html
+2020-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.5,2020-01,0,B,EWS_2020_01,https://www.eworldship.com/html/2020/NewShipMarket_0227/157038.html
+2020-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.5,2020-02,0,B,EWS_2020_02,https://www.eworldship.com/html/2020/NewShipMarket_0327/157790.html
+2020-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.25,2020-03,0,B,EWS_2020_03,https://www.eworldship.com/html/2020/NewShipMarket_0428/158816.html
+2020-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.5,2020-04,0,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.5,2020-04,1,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.5,2020-04,2,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.5,2020-04,3,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.5,2020-04,4,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2020-09,0,B,EWS_2020_09,https://www.eworldship.com/html/2020/NewShipMarket_1027/164503.html
+2020-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2020-10,0,B,EWS_2020_10,https://www.eworldship.com/html/2020/NewShipMarket_1129/165523.html
+2020-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2020-11,0,B,EWS_2020_11,https://www.eworldship.com/html/2020/NewShipMarket_1225/166469.html
+2020-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,46.5,2020-12,0,B,EWS_2020_12,https://www.eworldship.com/html/2021/NewShipMarket_0130/167633.html
+2021-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,48.0,2021-01,0,B,EWS_2021_01,https://www.eworldship.com/html/2021/NewShipMarket_0221/168225.html
+2021-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,49.5,2021-02,0,B,EWS_2021_02,https://www.eworldship.com/html/2021/NewShipMarket_0326/169337.html
+2021-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,51.5,2021-03,0,B,EWS_2021_03,https://www.eworldship.com/html/2021/NewShipMarket_0422/170234.html
+2021-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,53.5,2021-04,0,B,EWS_2021_04,https://www.eworldship.com/html/2021/NewShipMarket_0529/171223.html
+2021-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,56.0,2021-05,0,B,EWS_2021_05,https://www.eworldship.com/html/2021/NewShipMarket_0702/171937.html
+2021-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,59.0,2021-06,0,B,EWS_2021_06,https://www.eworldship.com/html/2021/NewShipMarket_0729/173237.html
+2021-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,59.5,2021-07,0,B,EWS_2021_07,https://www.eworldship.com/html/2021/NewShipMarket_0820/173956.html
+2021-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,59.5,2021-08,0,B,EWS_2021_08,https://www.eworldship.com/html/2021/NewShipMarket_0919/174909.html
+2021-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.25,2021-09,0,B,EWS_2021_09,https://www.eworldship.com/html/2021/NewShipMarket_1105/175663.html
+2021-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.25,2021-10,0,B,EWS_2021_10,https://www.eworldship.com/html/2021/NewShipMarket_1129/176836.html
+2021-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.25,2021-11,0,B,EWS_2021_11,https://www.eworldship.com/html/2021/NewShipMarket_1221/177848.html
+2021-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2021-12,0,B,EWS_2021_12,https://www.eworldship.com/html/2022/NewShipMarket_0125/178673.html
+2022-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2022-01,0,B,EWS_2022_01,https://www.eworldship.com/html/2022/NewShipMarket_0219/179562.html
+2022-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,61.0,2022-02,0,B,EWS_2022_02,https://www.eworldship.com/html/2022/NewShipMarket_0320/180259.html
+2022-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,61.5,2022-03,0,B,EWS_2022_03,https://www.eworldship.com/html/2022/NewShipMarket_0424/181306.html
+2022-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,62.5,2022-04,0,B,EWS_2022_04,https://www.eworldship.com/html/2022/NewShipMarket_0528/182115.html
+2022-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,63.0,2022-05,0,B,EWS_2022_05,https://www.eworldship.com/html/2022/NewShipMarket_0625/183187.html
+2022-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,64.0,2022-06,0,B,EWS_2022_06,https://www.eworldship.com/html/2022/NewShipMarket_0718/183992.html
+2022-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,64.5,2022-07,0,B,EWS_2022_07,https://www.eworldship.com/html/2022/NewShipMarket_0823/184901.html
+2022-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,64.5,2022-08,0,B,EWS_2022_08,https://www.eworldship.com/html/2022/NewShipMarket_0919/185822.html
+2022-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,64.0,2022-09,0,B,EWS_2022_09,https://www.eworldship.com/html/2022/NewShipMarket_1024/186604.html
+2022-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,63.0,2022-10,0,B,EWS_2022_10,https://www.eworldship.com/html/2022/NewShipMarket_1119/187516.html
+2022-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,61.5,2022-11,0,B,EWS_2022_11,https://www.eworldship.com/html/2022/NewShipMarket_1221/188381.html
+2022-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2022-12,0,B,EWS_2022_12,https://www.eworldship.com/html/2023/NewShipMarket_0126/189213.html
+2023-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2023-01,0,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2023-01,1,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2023-01,2,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,60.5,2023-01,3,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,63.0,2023-05,0,C,CISN_2023_05,https://zhuzaotoutiao.com/xw/html/12214.shtml
+2023-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,63.5,2023-06,0,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,63.5,2023-06,1,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,63.5,2023-06,2,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,64.5,2023-09,0,C,CISN_2023_09,https://info.chineseshipping.com.cn/cninfo/News/202310/t20231024_1382467.shtml
+2023-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,64.5,2023-09,1,C,CISN_2023_09,https://info.chineseshipping.com.cn/cninfo/News/202310/t20231024_1382467.shtml
+2023-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,65.5,2023-11,0,C,CISN_2023_11,https://zhuzaotoutiao.com/xw/html/14087.shtml
+2023-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,67.0,2023-12,0,C,CISN_2023_12,https://www.zallsteel.com/news/article/detail?id=12185
+2024-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,67.75,2024-01,0,C,CISN_2024_01,https://zhuzaotoutiao.com/xw/html/14658.shtml
+2024-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,67.75,2024-02,0,C,CISN_2024_02,https://zhuzaotoutiao.com/xw/html/14970.shtml
+2024-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,68.5,2024-03,0,C,CISN_2024_03,https://news.metal.net.cn/content-193-7738519-1.html
+2024-04,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,68.5,2024-03,1,C,CISN_2024_03,https://news.metal.net.cn/content-193-7738519-1.html
+2024-05,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,74.5,2024-05,0,C,CISN_2024_05,https://news.csi.com.cn/d32719be-8a68-40e1-99ae-fd888933cb6b.html
+2024-06,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,74.5,2024-05,1,C,CISN_2024_05,https://news.csi.com.cn/d32719be-8a68-40e1-99ae-fd888933cb6b.html
+2024-07,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.5,2024-07,0,C,CISN_2024_07,https://finance.sina.com.cn/money/future/indu/2024-08-22/doc-inckpkpm8961437.shtml
+2024-08,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.5,2024-08,0,C,CISN_2024_08,https://www.mmsonline.com.cn/info/340435.shtml
+2024-09,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.5,2024-09,0,C,CISN_2024_09,https://news.mysteel.com/a/24102308/A86759F3957C5D6A.html
+2024-10,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.5,2024-09,1,C,CISN_2024_09,https://news.mysteel.com/a/24102308/A86759F3957C5D6A.html
+2024-11,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.0,2024-11,0,C,CISN_2024_11,https://info.lgmi.com/html/202412/23/9197.htm
+2024-12,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.0,2024-12,0,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-01,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.0,2024-12,1,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-02,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.0,2024-12,2,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-03,벌크선,케이프사이즈 17.5~18.5만 DWT,178000.0,DWT,76.0,2024-12,3,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-04,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.5,2025-04,0,C,CISN_2025_04,https://zhuzaotoutiao.com/mobile/xw/html/19517.shtml
+2025-05,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.5,2025-05,0,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-06,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.5,2025-05,1,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-07,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.5,2025-05,2,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-08,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.5,2025-08,0,C,CISN_2025_08,https://info.lgmi.com/html/202509/22/8149.htm
+2025-09,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.5,2025-08,1,C,CISN_2025_08,https://info.lgmi.com/html/202509/22/8149.htm
+2025-10,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.0,2025-10,0,C,CISN_2025_10,https://news.csi.com.cn/c7434655-94b7-4efd-9f88-abfd300590ef.html
+2025-11,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,73.0,2025-10,1,C,CISN_2025_10,https://news.csi.com.cn/c7434655-94b7-4efd-9f88-abfd300590ef.html
+2025-12,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,75.0,2025-12,0,C,CISN_2025_12,https://zhuzaotoutiao.com/xw/html/22031.shtml
+2026-01,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,75.0,2025-12,1,C,CISN_2025_12,https://zhuzaotoutiao.com/xw/html/22031.shtml
+2026-02,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,75.0,2026-02,0,C,CISN_2026_02,https://zhuzaotoutiao.com/xw/html/22572.shtml
+2026-03,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,75.0,2026-03,0,C,CISN_2026_03,https://zhuzaotoutiao.com/xw/html/22950.shtml
+2026-04,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,75.5,2026-04,0,C,CISN_2026_04,https://zhuzaotoutiao.com/xw/html/23214.shtml
+2026-05,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,75.5,2026-05,0,C,CISN_2026_05,https://zhuzaotoutiao.com/mobile/xw/html/23612.shtml
+2026-06,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,76.0,2026-06,0,C,CISN_2026_06,https://zhuzaotoutiao.com/xw/html/23970.shtml
+2026-07,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,76.0,2026-07,0,C,CISN_2026_07,https://zhuzaotoutiao.com/mobile/xw/html/24320.shtml
+2026-08,벌크선,케이프사이즈 17.5~18.5만 DWT,181000.0,DWT,76.0,2026-08,0,C,CISN_2026_08,https://zhuzaotoutiao.com/xw/html/24728.shtml
+2015-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.5,2015-01,0,B,EWS_2015_01,https://www.eworldship.com/html/2015/NewShipMarket_0216/98795.html
+2015-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.5,2015-02,0,B,EWS_2015_02,https://www.eworldship.com/html/2015/NewShipMarket_0317/99642.html
+2015-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.5,2015-03,0,B,EWS_2015_03,https://www.eworldship.com/html/2015/NewShipMarket_0415/100882.html
+2015-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.5,2015-04,0,B,EWS_2015_04,https://www.eworldship.com/html/2015/NewShipMarket_0516/101964.html
+2015-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-05,0,B,EWS_2015_05,https://www.eworldship.com/html/2015/NewShipMarket_0619/103314.html
+2015-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-06,0,B,EWS_2015_06,https://www.eworldship.com/html/2015/NewShipMarket_0723/104661.html
+2015-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-07,0,B,EWS_2015_07,https://www.eworldship.com/html/2015/NewShipMarket_0819/105660.html
+2015-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-08,0,B,EWS_2015_08,https://www.eworldship.com/html/2015/NewShipMarket_0925/107006.html
+2015-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-09,0,B,EWS_2015_09,https://www.eworldship.com/html/2015/NewShipMarket_1022/107846.html
+2015-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-10,0,B,EWS_2015_10,https://www.eworldship.com/html/2015/NewShipMarket_1122/108991.html
+2015-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-11,0,B,EWS_2015_11,https://www.eworldship.com/html/2015/NewShipMarket_1218/110277.html
+2015-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,53.0,2015-12,0,B,EWS_2015_12,https://www.eworldship.com/html/2016/NewShipMarket_0122/111393.html
+2016-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,51.5,2016-01,0,B,EWS_2016_01,https://www.eworldship.com/html/2016/NewShipMarket_0226/112358.html
+2016-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,51.0,2016-02,0,B,EWS_2016_02,https://www.eworldship.com/html/2016/NewShipMarket_0321/113194.html
+2016-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,50.0,2016-03,0,B,EWS_2016_03,https://www.eworldship.com/html/2016/NewShipMarket_0420/114351.html
+2016-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,50.0,2016-04,0,B,EWS_2016_04,https://www.eworldship.com/html/2016/NewShipMarket_0527/115725.html
+2016-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,50.0,2016-04,1,B,EWS_2016_04,https://www.eworldship.com/html/2016/NewShipMarket_0527/115725.html
+2016-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2016-06,0,B,EWS_2016_06,https://www.eworldship.com/html/2016/NewShipMarket_0720/117644.html
+2016-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,46.75,2016-07,0,B,EWS_2016_07,https://www.eworldship.com/html/2016/NewShipMarket_0824/118798.html
+2016-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,46.0,2016-08,0,B,EWS_2016_08,https://www.eworldship.com/html/2016/NewShipMarket_0923/119982.html
+2016-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,45.0,2016-09,0,B,EWS_2016_09,https://www.eworldship.com/html/2016/NewShipMarket_1024/121113.html
+2016-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,45.0,2016-10,0,B,EWS_2016_10,https://www.eworldship.com/html/2016/NewShipMarket_1123/122134.html
+2016-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,45.0,2016-11,0,B,EWS_2016_11,https://www.eworldship.com/html/2016/NewShipMarket_1223/123229.html
+2016-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,44.5,2016-12,0,B,EWS_2016_12,https://www.eworldship.com/html/2017/NewShipMarket_0118/124124.html
+2017-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.5,2017-01,0,B,EWS_2017_01,https://www.eworldship.com/html/2017/NewShipMarket_0225/125070.html
+2017-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.5,2017-02,0,B,EWS_2017_02,https://www.eworldship.com/html/2017/NewShipMarket_0324/125919.html
+2017-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-03,0,B,EWS_2017_03,https://www.eworldship.com/html/2017/NewShipMarket_0425/127185.html
+2017-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-04,0,B,EWS_2017_04,https://www.eworldship.com/html/2017/NewShipMarket_0525/128531.html
+2017-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-05,0,B,EWS_2017_05,https://www.eworldship.com/html/2017/NewShipMarket_0618/129197.html
+2017-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-06,0,B,EWS_2017_06,https://www.eworldship.com/html/2017/NewShipMarket_0721/130294.html
+2017-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-07,0,B,EWS_2017_07,https://www.eworldship.com/html/2017/NewShipMarket_0825/131130.html
+2017-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-08,0,B,EWS_2017_08,https://www.eworldship.com/html/2017/NewShipMarket_0922/131956.html
+2017-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-09,0,B,EWS_2017_09,https://www.eworldship.com/html/2017/NewShipMarket_1023/132822.html
+2017-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.0,2017-10,0,B,EWS_2017_10,https://www.eworldship.com/html/2017/NewShipMarket_1117/133753.html
+2017-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,44.0,2017-11,0,B,EWS_2017_11,https://www.eworldship.com/html/2017/NewShipMarket_1215/134762.html
+2017-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,44.0,2017-12,0,B,EWS_2017_12,https://www.eworldship.com/html/2018/NewShipMarket_0118/135753.html
+2018-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,45.0,2018-01,0,B,EWS_2018_01,https://www.eworldship.com/html/2018/NewShipMarket_0227/136763.html
+2018-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,45.0,2018-02,0,B,EWS_2018_02,https://www.eworldship.com/html/2018/NewShipMarket_0323/137405.html
+2018-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,43.5,2018-03,0,B,EWS_2018_03,https://www.eworldship.com/html/2018/NewShipMarket_0421/138368.html
+2018-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,45.5,2018-04,0,B,EWS_2018_04,https://www.eworldship.com/html/2018/NewShipMarket_0519/139270.html
+2018-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,46.0,2018-05,0,B,EWS_2018_05,https://www.eworldship.com/html/2018/NewShipMarket_0622/140276.html
+2018-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,47.0,2018-06,0,B,EWS_2018_06,https://www.eworldship.com/html/2018/NewShipMarket_0720/141200.html
+2018-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,47.5,2018-07,0,B,EWS_2018_07,https://www.eworldship.com/html/2018/NewShipMarket_0827/142468.html
+2018-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,47.75,2018-08,0,B,EWS_2018_08,https://www.eworldship.com/html/2018/NewShipMarket_0922/143103.html
+2018-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2018-09,0,B,EWS_2018_09,https://www.eworldship.com/html/2018/NewShipMarket_1025/143936.html
+2018-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2018-10,0,B,EWS_2018_10,https://www.eworldship.com/html/2018/NewShipMarket_1124/144759.html
+2018-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2018-11,0,B,EWS_2018_11,https://www.eworldship.com/html/2018/NewShipMarket_1222/145534.html
+2018-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2018-12,0,B,EWS_2018_12,https://www.eworldship.com/html/2019/NewShipMarket_0130/146635.html
+2019-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-01,0,B,EWS_2019_01,https://www.eworldship.com/html/2019/NewShipMarket_0228/147106.html
+2019-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-02,0,B,EWS_2019_02,https://www.eworldship.com/html/2019/NewShipMarket_0329/147894.html
+2019-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-03,0,B,EWS_2019_03,https://www.eworldship.com/html/2019/NewShipMarket_0426/148710.html
+2019-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-04,0,B,EWS_2019_04,https://www.eworldship.com/html/2019/NewShipMarket_0524/149570.html
+2019-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-05,0,B,EWS_2019_05,https://www.eworldship.com/html/2019/NewShipMarket_0624/150461.html
+2019-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-06,0,B,EWS_2019_06,https://www.eworldship.com/html/2019/NewShipMarket_0722/151243.html
+2019-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-07,0,B,EWS_2019_07,https://www.eworldship.com/html/2019/NewShipMarket_0823/152119.html
+2019-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-08,0,B,EWS_2019_08,https://www.eworldship.com/html/2019/NewShipMarket_0921/152902.html
+2019-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-09,0,B,EWS_2019_09,https://www.eworldship.com/html/2019/NewShipMarket_1026/153672.html
+2019-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-10,0,B,EWS_2019_10,https://www.eworldship.com/html/2019/NewShipMarket_1128/154713.html
+2019-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-11,0,B,EWS_2019_11,https://www.eworldship.com/html/2019/NewShipMarket_1223/155524.html
+2019-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2019-11,1,B,EWS_2019_11,https://www.eworldship.com/html/2019/NewShipMarket_1223/155524.html
+2020-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-01,0,B,EWS_2020_01,https://www.eworldship.com/html/2020/NewShipMarket_0227/157038.html
+2020-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-02,0,B,EWS_2020_02,https://www.eworldship.com/html/2020/NewShipMarket_0327/157790.html
+2020-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-03,0,B,EWS_2020_03,https://www.eworldship.com/html/2020/NewShipMarket_0428/158816.html
+2020-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-04,0,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-05,0,B,EWS_2020_05,https://www.eworldship.com/html/2020/NewShipMarket_0622/160871.html
+2020-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-06,0,B,EWS_2020_06,https://www.eworldship.com/html/2020/NewShipMarket_0729/161939.html
+2020-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.5,2020-07,0,B,EWS_2020_07,https://www.eworldship.com/html/2020/NewShipMarket_0829/162906.html
+2020-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2020-08,0,B,EWS_2020_08,https://www.eworldship.com/html/2020/NewShipMarket_0928/163727.html
+2020-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,47.0,2020-09,0,B,EWS_2020_09,https://www.eworldship.com/html/2020/NewShipMarket_1027/164503.html
+2020-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,46.0,2020-10,0,B,EWS_2020_10,https://www.eworldship.com/html/2020/NewShipMarket_1129/165523.html
+2020-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,46.0,2020-11,0,B,EWS_2020_11,https://www.eworldship.com/html/2020/NewShipMarket_1225/166469.html
+2020-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,46.5,2020-12,0,B,EWS_2020_12,https://www.eworldship.com/html/2021/NewShipMarket_0130/167633.html
+2021-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,47.5,2021-01,0,B,EWS_2021_01,https://www.eworldship.com/html/2021/NewShipMarket_0221/168225.html
+2021-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,48.0,2021-02,0,B,EWS_2021_02,https://www.eworldship.com/html/2021/NewShipMarket_0326/169337.html
+2021-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,49.5,2021-03,0,B,EWS_2021_03,https://www.eworldship.com/html/2021/NewShipMarket_0422/170234.html
+2021-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,50.5,2021-04,0,B,EWS_2021_04,https://www.eworldship.com/html/2021/NewShipMarket_0529/171223.html
+2021-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,50.5,2021-05,0,B,EWS_2021_05,https://www.eworldship.com/html/2021/NewShipMarket_0702/171937.html
+2021-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,51.0,2021-06,0,B,EWS_2021_06,https://www.eworldship.com/html/2021/NewShipMarket_0729/173237.html
+2021-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,55.0,2021-07,0,B,EWS_2021_07,https://www.eworldship.com/html/2021/NewShipMarket_0820/173956.html
+2021-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,56.5,2021-08,0,B,EWS_2021_08,https://www.eworldship.com/html/2021/NewShipMarket_0919/174909.html
+2021-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,59.0,2021-09,0,B,EWS_2021_09,https://www.eworldship.com/html/2021/NewShipMarket_1105/175663.html
+2021-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,59.0,2021-10,0,B,EWS_2021_10,https://www.eworldship.com/html/2021/NewShipMarket_1129/176836.html
+2021-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,59.0,2021-11,0,B,EWS_2021_11,https://www.eworldship.com/html/2021/NewShipMarket_1221/177848.html
+2021-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,59.0,2021-12,0,B,EWS_2021_12,https://www.eworldship.com/html/2022/NewShipMarket_0125/178673.html
+2022-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,60.0,2022-01,0,B,EWS_2022_01,https://www.eworldship.com/html/2022/NewShipMarket_0219/179562.html
+2022-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,60.0,2022-02,0,B,EWS_2022_02,https://www.eworldship.com/html/2022/NewShipMarket_0320/180259.html
+2022-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,60.0,2022-03,0,B,EWS_2022_03,https://www.eworldship.com/html/2022/NewShipMarket_0424/181306.html
+2022-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,60.5,2022-04,0,B,EWS_2022_04,https://www.eworldship.com/html/2022/NewShipMarket_0528/182115.html
+2022-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-05,0,B,EWS_2022_05,https://www.eworldship.com/html/2022/NewShipMarket_0625/183187.html
+2022-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-06,0,B,EWS_2022_06,https://www.eworldship.com/html/2022/NewShipMarket_0718/183992.html
+2022-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-07,0,B,EWS_2022_07,https://www.eworldship.com/html/2022/NewShipMarket_0823/184901.html
+2022-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-08,0,B,EWS_2022_08,https://www.eworldship.com/html/2022/NewShipMarket_0919/185822.html
+2022-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-09,0,B,EWS_2022_09,https://www.eworldship.com/html/2022/NewShipMarket_1024/186604.html
+2022-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-10,0,B,EWS_2022_10,https://www.eworldship.com/html/2022/NewShipMarket_1119/187516.html
+2022-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,61.5,2022-11,0,B,EWS_2022_11,https://www.eworldship.com/html/2022/NewShipMarket_1221/188381.html
+2022-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,62.0,2022-12,0,B,EWS_2022_12,https://www.eworldship.com/html/2023/NewShipMarket_0126/189213.html
+2023-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,62.5,2023-01,0,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,62.5,2023-01,1,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,62.5,2023-01,2,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,62.5,2023-01,3,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,67.5,2023-05,0,C,CISN_2023_05,https://zhuzaotoutiao.com/xw/html/12214.shtml
+2023-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,67.5,2023-06,0,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,67.5,2023-06,1,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,67.5,2023-06,2,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,68.5,2023-09,0,C,CISN_2023_09,https://info.chineseshipping.com.cn/cninfo/News/202310/t20231024_1382467.shtml
+2023-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,68.5,2023-09,1,C,CISN_2023_09,https://info.chineseshipping.com.cn/cninfo/News/202310/t20231024_1382467.shtml
+2023-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,70.0,2023-11,0,C,CISN_2023_11,https://zhuzaotoutiao.com/xw/html/14087.shtml
+2023-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,70.0,2023-12,0,C,CISN_2023_12,https://www.zallsteel.com/news/article/detail?id=12185
+2024-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,70.5,2024-01,0,C,CISN_2024_01,https://zhuzaotoutiao.com/xw/html/14658.shtml
+2024-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,71.0,2024-02,0,C,CISN_2024_02,https://zhuzaotoutiao.com/xw/html/14970.shtml
+2024-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2024-03,0,C,CISN_2024_03,https://news.metal.net.cn/content-193-7738519-1.html
+2024-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2024-03,1,C,CISN_2024_03,https://news.metal.net.cn/content-193-7738519-1.html
+2024-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,73.0,2024-05,0,C,CISN_2024_05,https://news.csi.com.cn/d32719be-8a68-40e1-99ae-fd888933cb6b.html
+2024-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,73.0,2024-05,1,C,CISN_2024_05,https://news.csi.com.cn/d32719be-8a68-40e1-99ae-fd888933cb6b.html
+2024-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-07,0,C,CISN_2024_07,https://finance.sina.com.cn/money/future/indu/2024-08-22/doc-inckpkpm8961437.shtml
+2024-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-08,0,C,CISN_2024_08,https://www.mmsonline.com.cn/info/340435.shtml
+2024-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-09,0,C,CISN_2024_09,https://news.mysteel.com/a/24102308/A86759F3957C5D6A.html
+2024-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-09,1,C,CISN_2024_09,https://news.mysteel.com/a/24102308/A86759F3957C5D6A.html
+2024-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-11,0,C,CISN_2024_11,https://info.lgmi.com/html/202412/23/9197.htm
+2024-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-12,0,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-12,1,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-12,2,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2024-12,3,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.5,2025-04,0,C,CISN_2025_04,https://zhuzaotoutiao.com/mobile/xw/html/19517.shtml
+2025-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.5,2025-05,0,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.5,2025-05,1,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.5,2025-05,2,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2025-08,0,C,CISN_2025_08,https://info.lgmi.com/html/202509/22/8149.htm
+2025-09,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2025-08,1,C,CISN_2025_08,https://info.lgmi.com/html/202509/22/8149.htm
+2025-10,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2025-10,0,C,CISN_2025_10,https://news.csi.com.cn/c7434655-94b7-4efd-9f88-abfd300590ef.html
+2025-11,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2025-10,1,C,CISN_2025_10,https://news.csi.com.cn/c7434655-94b7-4efd-9f88-abfd300590ef.html
+2025-12,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2025-12,0,C,CISN_2025_12,https://zhuzaotoutiao.com/xw/html/22031.shtml
+2026-01,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.0,2025-12,1,C,CISN_2025_12,https://zhuzaotoutiao.com/xw/html/22031.shtml
+2026-02,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,72.5,2026-02,0,C,CISN_2026_02,https://zhuzaotoutiao.com/xw/html/22572.shtml
+2026-03,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,73.5,2026-03,0,C,CISN_2026_03,https://zhuzaotoutiao.com/xw/html/22950.shtml
+2026-04,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,74.0,2026-04,0,C,CISN_2026_04,https://zhuzaotoutiao.com/xw/html/23214.shtml
+2026-05,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,74.5,2026-05,0,C,CISN_2026_05,https://zhuzaotoutiao.com/mobile/xw/html/23612.shtml
+2026-06,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2026-06,0,C,CISN_2026_06,https://zhuzaotoutiao.com/xw/html/23970.shtml
+2026-07,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.0,2026-07,0,C,CISN_2026_07,https://zhuzaotoutiao.com/mobile/xw/html/24320.shtml
+2026-08,유조선,수에즈막스 11.0~11.8만 DWT,114000.0,DWT,75.5,2026-08,0,C,CISN_2026_08,https://zhuzaotoutiao.com/xw/html/24728.shtml
+2015-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.0,2015-01,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.0,2015-02,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.0,2015-03,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.0,2015-04,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2015-05,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.25,2015-06,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.75,2015-07,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.75,2015-08,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.5,2015-09,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.75,2015-10,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2015-11,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2015-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.25,2015-12,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2016-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.25,2016-01,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2016-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.0,2016-02,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2016-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.75,2016-03,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2016-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.75,2016-04,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2016-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.25,2016-05,0,D,SK_YU_2018_CHART_P2,https://file.mk.co.kr/imss/write/20180726114344__00.pdf
+2016-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.5,2016-06,0,B,EWS_2016_06,https://www.eworldship.com/html/2016/NewShipMarket_0720/117644.html
+2016-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.5,2016-07,0,B,EWS_2016_07,https://www.eworldship.com/html/2016/NewShipMarket_0824/118798.html
+2016-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2016-08,0,C,EWS_2016_08,https://www.eworldship.com/html/2016/NewShipMarket_0923/119982.html
+2016-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2016-09,0,B,EWS_2016_09,https://www.eworldship.com/html/2016/NewShipMarket_1024/121113.html
+2016-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2016-10,0,B,EWS_2016_10,https://www.eworldship.com/html/2016/NewShipMarket_1123/122134.html
+2016-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2016-11,0,B,EWS_2016_11,https://www.eworldship.com/html/2016/NewShipMarket_1223/123229.html
+2016-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.25,2016-12,0,B,EWS_2016_12,https://www.eworldship.com/html/2017/NewShipMarket_0118/124124.html
+2017-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,16.25,2017-01,0,B,EWS_2017_01,https://www.eworldship.com/html/2017/NewShipMarket_0225/125070.html
+2017-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,16.25,2017-01,1,B,EWS_2017_01,https://www.eworldship.com/html/2017/NewShipMarket_0225/125070.html
+2017-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,16.25,2017-01,2,B,EWS_2017_01,https://www.eworldship.com/html/2017/NewShipMarket_0225/125070.html
+2017-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,16.25,2017-01,3,B,EWS_2017_01,https://www.eworldship.com/html/2017/NewShipMarket_0225/125070.html
+2017-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-05,0,B,EWS_2017_05,https://www.eworldship.com/html/2017/NewShipMarket_0618/129197.html
+2017-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-06,0,B,EWS_2017_06,https://www.eworldship.com/html/2017/NewShipMarket_0721/130294.html
+2017-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-07,0,B,EWS_2017_07,https://www.eworldship.com/html/2017/NewShipMarket_0825/131130.html
+2017-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-08,0,B,EWS_2017_08,https://www.eworldship.com/html/2017/NewShipMarket_0922/131956.html
+2017-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.55,2017-09,0,B,EWS_2017_09,https://www.eworldship.com/html/2017/NewShipMarket_1023/132822.html
+2017-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-10,0,B,EWS_2017_10,https://www.eworldship.com/html/2017/NewShipMarket_1117/133753.html
+2017-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-11,0,B,EWS_2017_11,https://www.eworldship.com/html/2017/NewShipMarket_1215/134762.html
+2017-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2017-12,0,B,EWS_2017_12,https://www.eworldship.com/html/2018/NewShipMarket_0118/135753.html
+2018-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.25,2018-01,0,B,EWS_2018_01,https://www.eworldship.com/html/2018/NewShipMarket_0227/136763.html
+2018-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.25,2018-02,0,B,EWS_2018_02,https://www.eworldship.com/html/2018/NewShipMarket_0323/137405.html
+2018-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.0,2018-03,0,B,EWS_2018_03,https://www.eworldship.com/html/2018/NewShipMarket_0421/138368.html
+2018-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.0,2018-04,0,B,EWS_2018_04,https://www.eworldship.com/html/2018/NewShipMarket_0519/139270.html
+2018-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.0,2018-05,0,B,EWS_2018_05,https://www.eworldship.com/html/2018/NewShipMarket_0622/140276.html
+2018-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.75,2018-06,0,B,EWS_2018_06,https://www.eworldship.com/html/2018/NewShipMarket_0720/141200.html
+2018-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.0,2018-07,0,B,EWS_2018_07,https://www.eworldship.com/html/2018/NewShipMarket_0827/142468.html
+2018-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.25,2018-08,0,B,EWS_2018_08,https://www.eworldship.com/html/2018/NewShipMarket_0922/143103.html
+2018-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2018-09,0,B,EWS_2018_09,https://www.eworldship.com/html/2018/NewShipMarket_1025/143936.html
+2018-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2018-10,0,B,EWS_2018_10,https://www.eworldship.com/html/2018/NewShipMarket_1124/144759.html
+2018-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2018-11,0,B,EWS_2018_11,https://www.eworldship.com/html/2018/NewShipMarket_1222/145534.html
+2018-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2018-12,0,B,EWS_2018_12,https://www.eworldship.com/html/2019/NewShipMarket_0130/146635.html
+2019-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2019-01,0,B,EWS_2019_01,https://www.eworldship.com/html/2019/NewShipMarket_0228/147106.html
+2019-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2019-02,0,B,EWS_2019_02,https://www.eworldship.com/html/2019/NewShipMarket_0329/147894.html
+2019-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2019-03,0,B,EWS_2019_03,https://www.eworldship.com/html/2019/NewShipMarket_0426/148710.html
+2019-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2019-04,0,B,EWS_2019_04,https://www.eworldship.com/html/2019/NewShipMarket_0524/149570.html
+2019-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2019-05,0,B,EWS_2019_05,https://www.eworldship.com/html/2019/NewShipMarket_0624/150461.html
+2019-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.5,2019-06,0,B,EWS_2019_06,https://www.eworldship.com/html/2019/NewShipMarket_0722/151243.html
+2019-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.75,2019-07,0,B,EWS_2019_07,https://www.eworldship.com/html/2019/NewShipMarket_0823/152119.html
+2019-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.5,2019-08,0,B,EWS_2019_08,https://www.eworldship.com/html/2019/NewShipMarket_0921/152902.html
+2019-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.5,2019-09,0,B,EWS_2019_09,https://www.eworldship.com/html/2019/NewShipMarket_1026/153672.html
+2019-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.5,2019-10,0,B,EWS_2019_10,https://www.eworldship.com/html/2019/NewShipMarket_1128/154713.html
+2019-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.5,2019-11,0,B,EWS_2019_11,https://www.eworldship.com/html/2019/NewShipMarket_1223/155524.html
+2019-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.5,2019-11,1,B,EWS_2019_11,https://www.eworldship.com/html/2019/NewShipMarket_1223/155524.html
+2020-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.0,2020-01,0,B,EWS_2020_01,https://www.eworldship.com/html/2020/NewShipMarket_0227/157038.html
+2020-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.75,2020-02,0,B,EWS_2020_02,https://www.eworldship.com/html/2020/NewShipMarket_0327/157790.html
+2020-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.5,2020-03,0,B,EWS_2020_03,https://www.eworldship.com/html/2020/NewShipMarket_0428/158816.html
+2020-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.5,2020-04,0,B,EWS_2020_04,https://www.eworldship.com/html/2020/NewShipMarket_0525/159994.html
+2020-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.0,2020-05,0,B,EWS_2020_05,https://www.eworldship.com/html/2020/NewShipMarket_0622/160871.html
+2020-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.0,2020-06,0,B,EWS_2020_06,https://www.eworldship.com/html/2020/NewShipMarket_0729/161939.html
+2020-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.75,2020-07,0,B,EWS_2020_07,https://www.eworldship.com/html/2020/NewShipMarket_0829/162906.html
+2020-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.5,2020-08,0,B,EWS_2020_08,https://www.eworldship.com/html/2020/NewShipMarket_0928/163727.html
+2020-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2020-09,0,B,EWS_2020_09,https://www.eworldship.com/html/2020/NewShipMarket_1027/164503.html
+2020-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2020-10,0,B,EWS_2020_10,https://www.eworldship.com/html/2020/NewShipMarket_1129/165523.html
+2020-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2020-11,0,B,EWS_2020_11,https://www.eworldship.com/html/2020/NewShipMarket_1225/166469.html
+2020-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,22.5,2020-12,0,B,EWS_2020_12,https://www.eworldship.com/html/2021/NewShipMarket_0130/167633.html
+2021-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2021-01,0,B,EWS_2021_01,https://www.eworldship.com/html/2021/NewShipMarket_0221/168225.html
+2021-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,23.0,2021-02,0,B,EWS_2021_02,https://www.eworldship.com/html/2021/NewShipMarket_0326/169337.html
+2021-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,24.5,2021-03,0,B,EWS_2021_03,https://www.eworldship.com/html/2021/NewShipMarket_0422/170234.html
+2021-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,25.5,2021-04,0,B,EWS_2021_04,https://www.eworldship.com/html/2021/NewShipMarket_0529/171223.html
+2021-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,26.0,2021-05,0,B,EWS_2021_05,https://www.eworldship.com/html/2021/NewShipMarket_0702/171937.html
+2021-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.0,2021-06,0,B,EWS_2021_06,https://www.eworldship.com/html/2021/NewShipMarket_0729/173237.html
+2021-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.0,2021-07,0,B,EWS_2021_07,https://www.eworldship.com/html/2021/NewShipMarket_0820/173956.html
+2021-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,27.5,2021-08,0,B,EWS_2021_08,https://www.eworldship.com/html/2021/NewShipMarket_0919/174909.html
+2021-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,28.75,2021-09,0,B,EWS_2021_09,https://www.eworldship.com/html/2021/NewShipMarket_1105/175663.html
+2021-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,29.0,2021-10,0,B,EWS_2021_10,https://www.eworldship.com/html/2021/NewShipMarket_1129/176836.html
+2021-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,29.5,2021-11,0,B,EWS_2021_11,https://www.eworldship.com/html/2021/NewShipMarket_1221/177848.html
+2021-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,29.5,2021-12,0,B,EWS_2021_12,https://www.eworldship.com/html/2022/NewShipMarket_0125/178673.html
+2022-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,29.5,2022-01,0,B,EWS_2022_01,https://www.eworldship.com/html/2022/NewShipMarket_0219/179562.html
+2022-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,29.5,2022-02,0,B,EWS_2022_02,https://www.eworldship.com/html/2022/NewShipMarket_0320/180259.html
+2022-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,29.5,2022-03,0,B,EWS_2022_03,https://www.eworldship.com/html/2022/NewShipMarket_0424/181306.html
+2022-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.0,2022-04,0,B,EWS_2022_04,https://www.eworldship.com/html/2022/NewShipMarket_0528/182115.html
+2022-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-05,0,B,EWS_2022_05,https://www.eworldship.com/html/2022/NewShipMarket_0625/183187.html
+2022-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-06,0,B,EWS_2022_06,https://www.eworldship.com/html/2022/NewShipMarket_0718/183992.html
+2022-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-07,0,B,EWS_2022_07,https://www.eworldship.com/html/2022/NewShipMarket_0823/184901.html
+2022-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-08,0,B,EWS_2022_08,https://www.eworldship.com/html/2022/NewShipMarket_0919/185822.html
+2022-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-09,0,B,EWS_2022_09,https://www.eworldship.com/html/2022/NewShipMarket_1024/186604.html
+2022-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-10,0,B,EWS_2022_10,https://www.eworldship.com/html/2022/NewShipMarket_1119/187516.html
+2022-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-11,0,B,EWS_2022_11,https://www.eworldship.com/html/2022/NewShipMarket_1221/188381.html
+2022-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2022-12,0,B,EWS_2022_12,https://www.eworldship.com/html/2023/NewShipMarket_0126/189213.html
+2023-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-01,0,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-01,1,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-01,2,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-01,3,C,CISN_2023_01,https://zhuzaotoutiao.com/xw/html/10955.shtml
+2023-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2023-05,0,C,CISN_2023_05,https://zhuzaotoutiao.com/xw/html/12214.shtml
+2023-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-06,0,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-06,1,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.0,2023-06,2,C,CISN_2023_06,https://price.mofcom.gov.cn/article/yjzx/hyzx/hy/202307/60099.html
+2023-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2023-09,0,C,CISN_2023_09,https://info.chineseshipping.com.cn/cninfo/News/202310/t20231024_1382467.shtml
+2023-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2023-09,1,C,CISN_2023_09,https://info.chineseshipping.com.cn/cninfo/News/202310/t20231024_1382467.shtml
+2023-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2023-11,0,C,CISN_2023_11,https://zhuzaotoutiao.com/xw/html/14087.shtml
+2023-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2023-12,0,C,CISN_2023_12,https://www.zallsteel.com/news/article/detail?id=12185
+2024-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2024-01,0,C,CISN_2024_01,https://zhuzaotoutiao.com/xw/html/14658.shtml
+2024-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2024-02,0,C,CISN_2024_02,https://zhuzaotoutiao.com/xw/html/14970.shtml
+2024-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2024-03,0,C,CISN_2024_03,https://news.metal.net.cn/content-193-7738519-1.html
+2024-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2024-03,1,C,CISN_2024_03,https://news.metal.net.cn/content-193-7738519-1.html
+2024-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2024-05,0,C,CISN_2024_05,https://news.csi.com.cn/d32719be-8a68-40e1-99ae-fd888933cb6b.html
+2024-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,30.5,2024-05,1,C,CISN_2024_05,https://news.csi.com.cn/d32719be-8a68-40e1-99ae-fd888933cb6b.html
+2024-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,31.5,2024-07,0,C,CISN_2024_07,https://finance.sina.com.cn/money/future/indu/2024-08-22/doc-inckpkpm8961437.shtml
+2024-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2024-08,0,C,CISN_2024_08,https://www.mmsonline.com.cn/info/340435.shtml
+2024-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2024-09,0,C,CISN_2024_09,https://news.mysteel.com/a/24102308/A86759F3957C5D6A.html
+2024-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2024-09,1,C,CISN_2024_09,https://news.mysteel.com/a/24102308/A86759F3957C5D6A.html
+2024-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.25,2024-11,0,C,CISN_2024_11,https://info.lgmi.com/html/202412/23/9197.htm
+2024-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.5,2024-12,0,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.5,2024-12,1,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-02,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.5,2024-12,2,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-03,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.5,2024-12,3,C,CISN_2024_12,https://zhuzaotoutiao.com/xw/html/18476.shtml
+2025-04,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-04,0,C,CISN_2025_04,https://zhuzaotoutiao.com/mobile/xw/html/19517.shtml
+2025-05,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-05,0,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-06,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-05,1,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-07,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-05,2,C,CISN_2025_05,https://finance.sina.com.cn/money/future/indu/2025-06-26/doc-infckxse6972307.shtml
+2025-08,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-08,0,C,CISN_2025_08,https://info.lgmi.com/html/202509/22/8149.htm
+2025-09,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-08,1,C,CISN_2025_08,https://info.lgmi.com/html/202509/22/8149.htm
+2025-10,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-10,0,C,CISN_2025_10,https://news.csi.com.cn/c7434655-94b7-4efd-9f88-abfd300590ef.html
+2025-11,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-10,1,C,CISN_2025_10,https://news.csi.com.cn/c7434655-94b7-4efd-9f88-abfd300590ef.html
+2025-12,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-12,0,C,CISN_2025_12,https://zhuzaotoutiao.com/xw/html/22031.shtml
+2026-01,컨테이너선,"약 2,000 TEU 컨테이너선",1975.0,TEU,32.0,2025-12,1,C,CISN_2025_12,https://zhuzaotoutiao.com/xw/html/22031.shtml
+2026-02,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,32.0,2026-02,0,C,CISN_2026_02,https://zhuzaotoutiao.com/xw/html/22572.shtml
+2026-03,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,32.0,2026-03,0,C,CISN_2026_03,https://zhuzaotoutiao.com/xw/html/22950.shtml
+2026-04,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,32.75,2026-04,0,C,CISN_2026_04,https://zhuzaotoutiao.com/xw/html/23214.shtml
+2026-05,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,32.75,2026-05,0,C,CISN_2026_05,https://zhuzaotoutiao.com/mobile/xw/html/23612.shtml
+2026-06,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,32.75,2026-06,0,C,CISN_2026_06,https://zhuzaotoutiao.com/xw/html/23970.shtml
+2026-07,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,33.5,2026-07,0,C,CISN_2026_07,https://zhuzaotoutiao.com/mobile/xw/html/24320.shtml
+2026-08,컨테이너선,"약 2,000 TEU 컨테이너선",1950.0,TEU,33.5,2026-08,0,C,CISN_2026_08,https://zhuzaotoutiao.com/xw/html/24728.shtml

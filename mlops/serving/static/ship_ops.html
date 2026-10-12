@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>선(船)견지명 통합 관제</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 한국어는 어절 단위로 줄바꿈 (CLAUDE.md 표기 규칙) */
+html{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
+
+/* 통합 관제 — 한 페이지 안에서 3D 전경 · 관제 콘솔 · Airflow 워크플로 · Kedro 파이프라인 · MLflow 실험 기록 · 발표 릴을 오간다.
+   각 화면은 처음 열 때만 불러오고(iframe) 이후에는 숨겼다 보였다만 해서 상태(카메라 · 선택 선종 · 스크롤)가 유지된다. */
+:root{--bg:#04060a;--p:#080b11;--ln:#161d2a;--ln2:#222c3d;--fg:#dfe6ee;--mu:#7b8899;--dim:#4a5566;--ac:#7fd3e0;--gr:#5fd39a;--am:#e0a050;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;--body:"IBM Plex Sans KR",system-ui,"Malgun Gothic",sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:13px;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--ln);background:var(--p);min-height:44px;flex:0 0 auto}
+.brand{display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--ln);white-space:nowrap}
+.brand b{font-weight:700;letter-spacing:.02em}
+.brand .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mu)}
+.live{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--gr)}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--gr);box-shadow:0 0 0 0 rgba(95,211,154,.6);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(95,211,154,.55)}70%{box-shadow:0 0 0 7px rgba(95,211,154,0)}100%{box-shadow:0 0 0 0 rgba(95,211,154,0)}}
+@media (prefers-reduced-motion:reduce){.live i{animation:none}}
+nav{display:flex;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;padding:0 16px;border-right:1px solid var(--ln);color:var(--mu);white-space:nowrap;position:relative}
+nav button .n{font-family:var(--mono);font-size:10px;color:var(--dim)}
+nav button .s{font-size:11px;color:var(--dim)}
+nav button:hover{color:var(--fg);background:rgba(127,211,224,.04)}
+nav button[aria-selected=true]{color:var(--fg);background:var(--bg)}
+nav button[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ac)}
+nav button:focus-visible{outline:1px solid var(--ac);outline-offset:-3px}
+.side{display:flex;align-items:center;gap:12px;padding:0 14px;border-left:1px solid var(--ln);white-space:nowrap}
+.side a{color:var(--mu);font-size:12px;text-decoration:none}
+.side a:hover{color:var(--fg)}
+.side .clk{font-family:var(--mono);font-size:11px;color:var(--mu)}
+main{position:relative;flex:1 1 auto;min-height:0}
+main iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:var(--bg);visibility:hidden}
+main iframe.on{visibility:visible}
+.wait{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.wait div{max-width:420px;padding:18px 20px;border:1px solid var(--ln2);background:var(--p);line-height:1.6;color:var(--mu)}
+.wait b{display:block;color:var(--fg);margin-bottom:4px;font-weight:600}
+.wait .bar{height:2px;margin-top:12px;background:var(--ln);overflow:hidden}
+.wait .bar i{display:block;height:100%;width:30%;background:var(--ac);animation:slide 1.4s ease-in-out infinite}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+@media (max-width:720px){.brand .k,.side .clk,nav button .s{display:none}nav button{padding:0 12px}.brand{padding:0 12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>선(船)견지명</b><span class="k">통합 관제</span><span class="live"><i></i>LIVE</span></div>
+  <nav role="tablist" aria-label="화면 전환" id="tabs"></nav>
+  <div class="side"><span class="clk" id="clk"></span><a id="pop" href="/ship" target="_blank" rel="noopener">새 창 ↗</a></div>
+</header>
+<main id="stage"></main>
+<script>
+/* 화면 목록 — path 는 같은 서버(FastAPI) 기준, MLflow 는 /mlflow 가 MLflow 서비스로 넘긴다 */
+const VIEWS=[
+  {id:'hub',    t:'3D 전경',      s:'선종별 레인 · 운영 예측', path:'/ship'},
+  {id:'console',t:'관제 콘솔',    s:'월별 흐름 · SHAP',       path:'/ship/console'},
+  {id:'airflow',t:'워크플로',     s:'Airflow',                path:'/airflow'},
+  {id:'kedro',  t:'파이프라인',   s:'Kedro',                  path:'/kedro/'},
+  {id:'mlflow', t:'실험 기록',    s:'MLflow',                 path:'/mlflow/#/experiments/1/runs', slow:'MLflow 서비스를 깨우는 중입니다',
+   note:'무료 플랜이라 15분 동안 접속이 없으면 잠듭니다. 처음 열 때 최대 1분 정도 걸립니다.'},
+  {id:'reel',   t:'발표 릴',      s:'스크롤 발표',            path:'/ship/reel'}];
+const $=id=>document.getElementById(id),tabs=$('tabs'),stage=$('stage'),frames={};
+let cur=null;
+VIEWS.forEach((v,i)=>{const b=document.createElement('button');b.role='tab';b.id='tab-'+v.id;b.setAttribute('aria-selected','false');
+  b.innerHTML=`<span class="n">${i+1}</span><span>${v.t}</span><span class="s">${v.s}</span>`;b.onclick=()=>show(v.id);tabs.appendChild(b);});
+
+function frameFor(v){
+  if(frames[v.id])return frames[v.id];
+  const f=document.createElement('iframe');f.title=v.t;f.src=v.path;f.dataset.id=v.id;
+  f.allow='fullscreen';stage.appendChild(f);frames[v.id]=f;
+  let w=null;
+  if(v.slow){w=document.createElement('div');w.className='wait';w.innerHTML=`<div><b>${v.slow}</b>${v.note}<div class="bar"><i></i></div></div>`;stage.appendChild(w);w.hidden=cur!==v.id;f._wait=w;}
+  f.addEventListener('load',()=>{if(w){w.remove();f._wait=null;}route(f,v);});
+  return f;}
+
+/* 화면 안의 링크(예: 콘솔의 '3D 전경으로')가 다른 화면 경로로 이동하면, 그 화면 탭으로 옮기고 원래 프레임은 제자리로 돌린다 */
+function route(f,v){let p;try{p=f.contentWindow.location.pathname;}catch(e){return;}   // MLflow(다른 도메인)는 읽을 수 없음 — 그대로 둔다
+  const base=x=>x.split('#')[0].split('?')[0],home=base(v.path);if(p===home||p===home.replace(/\/$/,''))return;
+  const to=VIEWS.find(x=>x.id!==v.id&&(p===base(x.path)||p===base(x.path).replace(/\/$/,'')));
+  if(to){f.src=v.path;show(to.id);}}
+
+function show(id){
+  const v=VIEWS.find(x=>x.id===id)||VIEWS[0];cur=v.id;
+  const f=frameFor(v);
+  for(const k in frames){frames[k].classList.toggle('on',k===v.id);if(frames[k]._wait)frames[k]._wait.hidden=k!==v.id;}
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-selected',String(b.id==='tab-'+v.id)));
+  $('pop').href=v.path;document.title=v.t+' · 선(船)견지명 통합 관제';
+  if(location.hash.slice(1)!==v.id)history.replaceState(null,'','#'+v.id);
+  try{f.contentWindow.dispatchEvent(new Event('resize'));}catch(e){}   // 숨겨져 있던 캔버스(3D · 콘솔)가 크기를 다시 잡게
+}
+addEventListener('hashchange',()=>show(location.hash.slice(1)));
+/* 숫자 1~6 으로 전환 (관제 화면 바깥, 상단 막대에 초점이 있을 때) · 좌우 화살표로 탭 이동 */
+addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,textarea'))return;
+  const n=+e.key;if(n>=1&&n<=VIEWS.length){show(VIEWS[n-1].id);return;}
+  if(e.target.closest&&e.target.closest('nav')&&(e.key==='ArrowRight'||e.key==='ArrowLeft')){const i=VIEWS.findIndex(x=>x.id===cur),j=(i+(e.key==='ArrowRight'?1:VIEWS.length-1))%VIEWS.length;show(VIEWS[j].id);$('tab-'+VIEWS[j].id).focus();}});
+const tick=()=>{const d=new Date();$('clk').textContent=d.toLocaleString('ko-KR',{hour12:false,month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});};
+tick();setInterval(tick,1000);
+show(location.hash.slice(1)||'hub');
+</script>
+</body>
+</html>

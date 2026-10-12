@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>워크플로 현황</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/* 한국어는 어절 단위로 줄바꿈 (CLAUDE.md 표기 규칙) */
+html{word-break:keep-all;overflow-wrap:break-word;line-break:strict}
+
+/* 워크플로(Airflow) — 로컬 WSL Airflow 가 Neon 에 남긴 스냅샷(/airflow/status)을 읽기 전용으로 그린다.
+   DAG 마다 태스크 흐름(선행 관계)과 최근 실행 그리드(행=태스크, 열=실행)를 보여준다. 30초마다 다시 읽는다. */
+:root{--bg:#04060a;--p:#080b11;--p2:#0b0f17;--ln:#161d2a;--ln2:#222c3d;--fg:#dfe6ee;--mu:#7b8899;--dim:#4a5566;--ac:#7fd3e0;
+  --ok:#5fd39a;--bad:#e5636b;--run:#7fd3e0;--wait:#8a93a3;--retry:#e0a050;--upf:#d0805a;--skip:#a98be0;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;--body:"IBM Plex Sans KR",system-ui,"Malgun Gothic",sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:13px;line-height:1.5;padding:18px 20px 40px}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:16px}
+.top h1{margin:0;font-size:18px;font-weight:600;letter-spacing:.01em}
+.top .k{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--mu);margin-bottom:4px}
+.top p{margin:4px 0 0;color:var(--mu);max-width:640px}
+.sync{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-family:var(--mono);font-size:11px;color:var(--mu)}
+.sync .st{display:inline-flex;align-items:center;gap:6px}
+.sync .st i{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.sync .st.fresh i{background:var(--ok)}
+.sum{display:flex;flex-wrap:wrap;gap:1px;background:var(--ln);border:1px solid var(--ln);margin-bottom:16px}
+.sum div{flex:1 1 120px;background:var(--p);padding:10px 14px}
+.sum b{display:block;font-family:var(--mono);font-size:20px;font-weight:500}
+.sum span{color:var(--mu);font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 14px;color:var(--mu);font-size:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dags{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,560px),1fr));gap:14px}
+.dag{border:1px solid var(--ln2);background:var(--p);min-width:0}
+.dag header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:12px 14px 0}
+.dag h2{margin:0;font-family:var(--mono);font-size:13px;font-weight:700;word-break:break-all}
+.pill{font-size:11px;padding:1px 7px;border:1px solid var(--ln2);color:var(--mu);white-space:nowrap}
+.pill.on{color:var(--ok);border-color:rgba(95,211,154,.4)}
+.pill.err{color:var(--bad);border-color:rgba(229,99,107,.5)}
+.desc{padding:4px 14px 0;color:var(--mu)}
+.meta{display:flex;flex-wrap:wrap;gap:4px 16px;padding:6px 14px 0;font-size:12px;color:var(--mu)}
+.meta b{color:var(--fg);font-weight:500}
+.sec{padding:12px 14px 0}
+.sec h3{margin:0 0 8px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.14em;color:var(--dim)}
+/* 태스크 흐름: 단계(선행 관계 깊이)별 열 */
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.lvl{display:flex;flex-direction:column;gap:6px}
+.arr{color:var(--dim);font-family:var(--mono)}
+.node{display:flex;align-items:center;gap:7px;padding:5px 9px;border:1px solid var(--ln2);background:var(--p2);font-family:var(--mono);font-size:11.5px;white-space:nowrap}
+.node small{color:var(--dim);font-size:10px}
+/* 실행 그리드 */
+.gridw{overflow-x:auto;padding-bottom:4px}
+table{border-collapse:separate;border-spacing:3px 3px;margin-left:-3px}
+th,td{padding:0}
+td.tn{font-family:var(--mono);font-size:11.5px;color:var(--mu);padding-right:12px;white-space:nowrap;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+/* all:unset 은 :where 로 감싸 특이도 0 — 아래 상태 색(.s-*)이 이긴다 */
+:where(.cell,.bar button){all:unset}
+.cell{display:block;width:16px;height:16px;cursor:pointer;box-sizing:border-box}
+.cell:focus-visible{outline:1px solid var(--ac);outline-offset:1px}
+.bar{display:flex;align-items:flex-end;height:38px}
+.bar button{display:block;width:16px;cursor:pointer;min-height:3px;box-sizing:border-box}
+.bar button:focus-visible{outline:1px solid var(--ac);outline-offset:1px}
+th.sel .bar button,td.sel .cell{box-shadow:0 0 0 1px var(--fg)}
+.sw{display:inline-block;width:11px;height:11px;flex:0 0 auto}
+.s-success{background:var(--ok)}.s-failed{background:var(--bad)}.s-running{background:var(--run);animation:blink 1.6s ease-in-out infinite}
+.s-queued,.s-scheduled,.s-deferred,.s-restarting{background:transparent;border:1px solid var(--wait)}
+.s-up_for_retry,.s-up_for_reschedule{background:var(--retry)}.s-upstream_failed{background:var(--upf)}.s-skipped,.s-removed{background:var(--skip)}
+.s-none{background:transparent;border:1px dashed var(--ln2)}
+@keyframes blink{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.s-running{animation:none}}
+.run{margin:10px 14px 14px;padding:10px 12px;border:1px solid var(--ln);background:var(--p2)}
+.run .h{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-bottom:6px}
+.run .id{font-family:var(--mono);font-size:11.5px;color:var(--fg);word-break:break-all}
+.run dl{display:grid;grid-template-columns:auto 1fr auto;gap:3px 12px;margin:0;font-size:12px}
+.run dt{font-family:var(--mono);color:var(--mu);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.run dd{margin:0;display:flex;align-items:center;gap:6px}
+.run .t{font-family:var(--mono);font-size:11px;color:var(--mu);text-align:right;white-space:nowrap}
+.empty{padding:12px 14px 14px;color:var(--mu)}
+.msg{max-width:560px;margin:40px auto;padding:18px 20px;border:1px solid var(--ln2);background:var(--p);color:var(--mu);line-height:1.7}
+.msg b{display:block;color:var(--fg);font-weight:600;margin-bottom:4px}
+.warn{margin:0 0 14px;padding:9px 12px;border:1px solid rgba(224,160,80,.4);color:var(--retry);background:rgba(224,160,80,.06)}
+@media (max-width:640px){body{padding:14px 16px 32px}.sync{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div><div class="k">WORKFLOW · APACHE AIRFLOW</div><h1>워크플로 현황</h1>
+    <p>Airflow는 로컬 WSL 서버에서 돌고, 상태가 바뀔 때마다 실행 기록을 Neon 데이터베이스에 남깁니다. 이 화면은 그 기록을 읽기만 합니다.</p></div>
+  <div class="sync" id="sync"></div>
+</div>
+<div id="root"><div class="msg"><b>불러오는 중</b>실행 기록을 읽고 있습니다.</div></div>
+<script>
+const STATE={success:'성공',failed:'실패',running:'실행 중',queued:'대기',scheduled:'예약됨',deferred:'보류',restarting:'재시작',
+  up_for_retry:'재시도 대기',up_for_reschedule:'재예약 대기',upstream_failed:'선행 실패',skipped:'건너뜀',removed:'제거됨',none:'미실행'};
+const LEGEND=['success','failed','running','queued','up_for_retry','upstream_failed','skipped','none'];
+const BY={UI:'웹 화면',CLI:'명령줄',TIMETABLE:'일정',REST_API:'API',BACKFILL:'백필',ASSET:'데이터 갱신',TEST:'테스트'};
+const DOW=['일','월','화','수','목','금','토'];
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const sel={};   // DAG별 선택한 실행
+const kst=(iso,o)=>iso?new Date(iso).toLocaleString('ko-KR',{timeZone:'Asia/Seoul',hour12:false,...(o||{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}):'—';
+const dur=s=>s==null?'—':s<60?`${Math.round(s)}초`:s<3600?`${Math.floor(s/60)}분 ${Math.round(s%60)}초`:`${Math.floor(s/3600)}시간 ${Math.round(s%3600/60)}분`;
+const secs=(a,b)=>a?((b?new Date(b):new Date())-new Date(a))/1000:null;
+const ago=iso=>{const s=secs(iso);return s==null?'—':s<60?'방금':s<3600?`${Math.floor(s/60)}분 전`:s<86400?`${Math.floor(s/3600)}시간 전`:`${Math.floor(s/86400)}일 전`;};
+const sw=st=>`<i class="sw s-${esc(st||'none')}" aria-hidden="true"></i>`;
+
+/* cron(UTC) → 한국 시간 문장. 단순한 형태(분 시 일 * 요일)만 옮기고 나머지는 원문을 보여준다 */
+function cronKo(c){
+  const m=/^(\d+) (\d+) (\*|\d+) \* (\*|\d)$/.exec(c||'');if(!m)return c||'수동 실행만';
+  let [_,mi,h,dom,dow]=m;h=+h+9;let next=h>=24;h%=24;
+  const t=`${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+  if(dom!=='*')return `매월 ${+dom+(next?1:0)}일 ${t}`;
+  if(dow!=='*')return `매주 ${DOW[(+dow+(next?1:0))%7]}요일 ${t}`;
+  return `매일 ${t}`;}
+
+/* 선행 관계 깊이로 단계 나누기 */
+function levels(tasks){const d={};const get=t=>d[t.id]??(d[t.id]=t.upstream.length?1+Math.max(...t.upstream.map(u=>get(tasks.find(x=>x.id===u)||{id:u,upstream:[]}))):0);
+  tasks.forEach(get);const L=[];tasks.forEach(t=>(L[d[t.id]]??=[]).push(t));return L.filter(Boolean);}
+
+function dagHtml(g){
+  const runs=[...g.runs].reverse();   // 오래된 것 → 최신
+  const pick=runs.find(r=>r.run_id===sel[g.dag_id])||runs[runs.length-1];
+  const latest=g.runs[0];
+  const flow=levels(g.tasks).map(l=>`<div class="lvl">${l.map(t=>`<div class="node">${sw(latest?.tasks[t.id]?.state)}${esc(t.id)}</div>`).join('')}</div>`).join('<span class="arr" aria-hidden="true">→</span>');
+  const maxS=Math.max(60,...runs.map(r=>secs(r.start,r.end)||0));
+  const head=runs.map(r=>{const s=secs(r.start,r.end)||0;return `<th class="${r===pick?'sel':''}"><div class="bar"><button class="s-${esc(r.state||'none')}" style="height:${Math.max(3,Math.round(36*s/maxS))}px" data-dag="${esc(g.dag_id)}" data-run="${esc(r.run_id)}" title="${esc(STATE[r.state]||r.state)} · ${kst(r.start)} · ${dur(secs(r.start,r.end))}" aria-label="실행 ${kst(r.start)} ${esc(STATE[r.state]||r.state)}"></button></div></th>`;}).join('');
+  const rows=g.tasks.map(t=>`<tr><td class="tn" title="${esc(t.id)}">${esc(t.id)}</td>${runs.map(r=>{const x=r.tasks[t.id],st=x?.state||'none';
+    return `<td class="${r===pick?'sel':''}"><button class="cell s-${esc(st)}" data-dag="${esc(g.dag_id)}" data-run="${esc(r.run_id)}" title="${esc(t.id)} · ${esc(STATE[st]||st)}${x?.sec?' · '+dur(x.sec):''}${x?.try>1?' · 시도 '+x.try:''}" aria-label="${esc(t.id)} ${esc(STATE[st]||st)}"></button></td>`;}).join('')}</tr>`).join('');
+  const detail=pick?`<div class="run"><div class="h">${sw(pick.state)}<b>${esc(STATE[pick.state]||pick.state)}</b><span class="id">${esc(pick.run_id)}</span></div>
+    <div class="meta" style="padding:0 0 8px"><span>방식 <b>${pick.type==='scheduled'?'일정':'수동'}</b> (${esc(BY[pick.by]||pick.by||'—')})</span><span>시작 <b>${kst(pick.start)}</b></span><span>걸린 시간 <b>${dur(secs(pick.start,pick.end))}</b></span></div>
+    <dl>${g.tasks.map(t=>{const x=pick.tasks[t.id];return `<dt title="${esc(t.id)}">${esc(t.id)}</dt><dd>${sw(x?.state)}${esc(STATE[x?.state||'none'])}${x?.try>1?` <span class="t">시도 ${x.try}</span>`:''}</dd><dd class="t">${x?.sec?dur(x.sec):x?.state==='running'?dur(secs(x.start)):'—'}</dd>`;}).join('')}</dl></div>`:'';
+  return `<section class="dag" aria-label="${esc(g.dag_id)}"><header><h2>${esc(g.dag_id)}</h2>
+      <span class="pill ${g.paused?'':'on'}">${g.paused?'일시 중지':'활성'}</span>${g.import_error?'<span class="pill err">코드 오류</span>':''}</header>
+    ${g.description?`<div class="desc">${esc(g.description)}</div>`:''}
+    <div class="meta"><span>일정 <b>${esc(cronKo(g.schedule))}</b></span>${!g.paused&&g.next_run?`<span>다음 실행 <b>${kst(g.next_run)}</b></span>`:''}${latest?`<span>최근 실행 <b>${ago(latest.start||latest.queued)}</b></span>`:''}</div>
+    <div class="sec"><h3>태스크 흐름</h3><div class="flow">${flow||'<span class="empty">태스크 없음</span>'}</div></div>
+    ${runs.length?`<div class="sec"><h3>최근 실행 ${runs.length}회 · 왼쪽이 오래된 실행</h3><div class="gridw"><table><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div></div>${detail}`
+      :'<div class="empty">아직 실행한 적이 없습니다.</div>'}</section>`;}
+
+function render(d){
+  if(!d.ok){const why={not_configured:['아직 연결되지 않았습니다','웹 서비스에 실행 기록 데이터베이스 주소(AIRFLOW_STATUS_DB_URL)가 설정되지 않았습니다.'],
+      no_snapshot:['아직 받은 기록이 없습니다','로컬 Airflow가 첫 실행 기록을 보내면 여기에 나타납니다.'],
+      db_unavailable:['기록을 읽지 못했습니다','데이터베이스에 연결할 수 없습니다. 잠시 뒤 다시 시도합니다.']}[d.reason]||['기록을 읽지 못했습니다',''];
+    $('root').innerHTML=`<div class="msg"><b>${why[0]}</b>${why[1]}</div>`;$('sync').innerHTML='';return;}
+  const fresh=secs(d.synced_at)<600;
+  $('sync').innerHTML=`<span class="st ${fresh?'fresh':''}"><i></i>마지막 동기화 ${ago(d.synced_at)}</span><span>${kst(d.synced_at,{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>`;
+  const all=d.dags.flatMap(g=>g.runs),n=s=>all.filter(r=>r.state===s).length,running=n('running');
+  const stale=running&&secs(d.synced_at)>1800;
+  $('root').innerHTML=`${stale?'<div class="warn">실행 중으로 표시된 작업이 있지만 30분 넘게 새 기록이 없습니다. 로컬 PC가 꺼졌거나 절전 상태일 수 있습니다.</div>':''}
+    <div class="sum"><div><b>${d.dags.length}</b><span>DAG</span></div><div><b>${d.dags.filter(g=>!g.paused).length}</b><span>활성</span></div>
+      <div><b>${running}</b><span>실행 중</span></div><div><b>${n('success')}</b><span>성공 (최근 기록)</span></div><div><b>${n('failed')}</b><span>실패 (최근 기록)</span></div></div>
+    <div class="legend">${LEGEND.map(s=>`<span>${sw(s)}${STATE[s]}</span>`).join('')}</div>
+    <div class="dags">${[...d.dags].sort((a,b)=>a.paused-b.paused||a.dag_id.localeCompare(b.dag_id)).map(dagHtml).join('')}</div>`;}
+
+let last=null;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-run]');if(!b||!last)return;sel[b.dataset.dag]=b.dataset.run;render(last);
+  document.querySelector(`[data-dag="${CSS.escape(b.dataset.dag)}"][data-run="${CSS.escape(b.dataset.run)}"]`)?.focus();});
+async function load(){try{const r=await fetch('/airflow/status',{cache:'no-store'});last=await r.json();}catch(e){last=last||{ok:false,reason:'db_unavailable'};}render(last);}
+load();setInterval(load,30000);
+</script>
+</body>
+</html>

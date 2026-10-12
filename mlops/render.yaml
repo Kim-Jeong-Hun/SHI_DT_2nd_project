@@ -1,0 +1,35 @@
+# Render Blueprint — 선박 수주 예측 서비스 (Kedro · MLflow · FastAPI, 같은 Docker 이미지)
+# 무료 플랜은 인스턴스당 512MB 라 웹과 MLflow 를 한 컨테이너에 같이 띄우면 메모리 초과로 죽는다 → 역할별 두 서비스.
+# 15분 접속 없으면 잠들고 다음 접속 때 약 1분 뒤 깨어난다.
+# DATABASE_URL = Neon PostgreSQL 접속 주소(MLflow 기록 저장) — 저장소에 두지 않고 Render 대시보드에 직접 입력(sync: false).
+services:
+  - type: web
+    name: ship-order-forecast
+    runtime: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ROLE
+        value: web
+      - key: MLFLOW_PUBLIC_URL
+        value: https://ship-order-mlflow.onrender.com
+      - key: AIRFLOW_STATUS_DB_URL   # Neon 접속 주소 — 로컬 Airflow 가 쓴 실행 현황(airflow_status.snapshot)을 읽기만 함
+        sync: false
+  - type: web
+    name: ship-order-mlflow
+    runtime: docker
+    plan: free
+    region: ohio   # Neon mlflow_ship(AWS US East 2 · Ohio)과 같은 지역 — MLflow DB 왕복 지연 최소화
+    dockerfilePath: ./deploy/render/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ROLE
+        value: mlflow
+      - key: DATABASE_URL
+        sync: false
