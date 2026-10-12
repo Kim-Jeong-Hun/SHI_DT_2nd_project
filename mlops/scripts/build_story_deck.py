@@ -28,7 +28,7 @@ SHIPS = ["컨테이너선", "벌크선", "유조선", "가스 운반선", "케�
 UNIT = {"컨테이너선": "TEU", "벌크선": "DWT", "유조선": "DWT", "가스 운반선": "CBM", "케미컬 탱커": "DWT"}
 # PDF 쪽 번호: 선종별 15쪽 묶음의 첫 쪽(1.2 초기 피라미드)
 FIRST_PAGE = {"컨테이너선": 4, "벌크선": 19, "유조선": 34, "가스 운반선": 49, "케미컬 탱커": 64}
-FIGS = {"pyr0": 0, "vif": 1, "weak": 2, "pyr1": 3, "pyr1t": 4, "psm": 13}   # 묶음 안 순번
+FIGS = {"pyr0": 0, "vif": 1, "weak": 2, "pyr1": 3, "pyr1t": 4, "pi": 8, "topn": 9, "psm": 13}   # 묶음 안 순번
 REDUCED_N = {"컨테이너선": 20, "벌크선": 29, "유조선": 21, "가스 운반선": 24, "케미컬 탱커": 24}  # 1.3.2 그림 제목
 TRAIN_MONTHS = {"케미컬 탱커": 36}
 META = {"기준월", "수주용량단위", "수주정보시차(개월)", "수주정보가용근거"}
@@ -395,11 +395,132 @@ def rolling_png(path: Path) -> dict:
         wins.append({"train": [str(vs - 53), str(vs - 6)], "val": [str(vs), str(vs + 11)], **score(ms, "val")})
     test = {"train": ["2021-04", "2025-03"], "val": ["2025-09", "2026-08"], **score(pd.period_range("2025-09", "2026-08", freq="M").astype(str).tolist(), "test")}
     allv = score(pd.period_range("2019-10", "2025-03", freq="M").astype(str).tolist(), "val")
+    # 조장 기준(10/12): 창마다 12개월을 3개월씩 묶은 '분기 누적' sMAPE → Score = Mean + 1.0 × Std (창 간)
+    def qsmape(ms, key):
+        vals = []
+        for q in range(0, len(ms), 3):
+            blk = ms[q:q + 3]
+            pr = [(out[key][idx[m]], out["actual"][idx[m]]) for m in blk if out[key][idx[m]] is not None and out["actual"][idx[m]] is not None]
+            if len(pr) < 3:
+                continue
+            P_, A_ = sum(p for p, _ in pr), sum(a for _, a in pr)
+            vals.append(0.0 if P_ + A_ == 0 else 200 * abs(P_ - A_) / (abs(P_) + abs(A_)))
+        return round(float(np.mean(vals)), 1) if vals else None
+    for x in wins:
+        x["qsmape"] = qsmape(pd.period_range(x["val"][0], x["val"][1], freq="M").astype(str).tolist(), "val")
+    test["qsmape"] = qsmape(pd.period_range("2025-09", "2026-08", freq="M").astype(str).tolist(), "test")
+    qv = [x["qsmape"] for x in wins if x["qsmape"] is not None]
+    # 조장 공지(10/12 11:51): 표준편차 ddof=0 · Score = Mean + λ₁·Std + λ₂·Peak Penalty (기본 λ₁=λ₂=1.0)
+    score = {"mean": round(float(np.mean(qv)), 1), "std": round(float(np.std(qv, ddof=0)), 1)}
+    score["peak"] = peak_penalty(out, wins)
+    score["score_ms"] = round(score["mean"] + 1.0 * score["std"], 1)
+    score["score"] = round(score["score_ms"] + 1.0 * score["peak"]["penalty"], 1)
+    qa = qv + ([test["qsmape"]] if test["qsmape"] is not None else [])
+    score["all_mean"], score["all_std"], score["n_val"], score["n_all"] = round(float(np.mean(qa)), 1), round(float(np.std(qa, ddof=0)), 1), len(qv), len(qa)
+    print(f"분기 누적 sMAPE: 검증 창 {len(qv)}개 Mean {score['mean']} Std {score['std']} Peak {score['peak']['penalty']} → Score {score['score']} · 검증+Test Mean±Std {score['all_mean']}±{score['all_std']} · Test {test['qsmape']}")
     w = sorted(x["wape"] for x in wins)
     cvar = round(float(np.mean(w[-int(np.ceil(len(w) * .2)):])), 1)
     print(f"롤링 그림 판독 상관 {r:.4f} · 검증 전체 WAPE {allv['wape']} sMAPE {allv['smape']} · 창 WAPE CVaR20 {cvar} · Test WAPE {test['wape']}")
-    out.update({"windows": wins, "testWin": test, "overall": allv, "cvar20": cvar})
+    out.update({"windows": wins, "testWin": test, "overall": allv, "cvar20": cvar, "score": score})
     return out
+
+
+def peak_penalty(out: dict, wins: list) -> dict:
+    """조장 공지(10/12) 피크 벌점 — 전체 Validation OOF(월별 검증 예측을 이은 선)에서 실제·예측 피크를 찾아 ±3개월 일대일 매칭.
+    선행 1개월당 1%p · 후행 1개월당 2%p · 미탐지 8%p · 가짜 피크 8%p → 합계 ÷ (실제 피크 수 + 가짜 피크 수), 피크가 없으면 0.
+    피크 기준은 첫 창 Train 실제값 분포로 미리 정함(높이 = 75백분위, 돌출도 = 표준편차의 0.5배 — 팀 노트북 확정 전 가정)."""
+    from scipy.signal import find_peaks
+    months = out["months"]; idx = {m: i for i, m in enumerate(months)}
+    tr = pd.period_range(wins[0]["train"][0], wins[0]["train"][1], freq="M").astype(str).tolist()
+    ta = np.array([out["actual"][idx[m]] for m in tr if m in idx and out["actual"][idx[m]] is not None], float)
+    h, prom = float(np.quantile(ta, .75)), float(np.std(ta) * .5)
+    vm = [m for m in months if out["val"][idx[m]] is not None and out["actual"][idx[m]] is not None]
+    A = np.array([out["actual"][idx[m]] for m in vm], float); P = np.array([out["val"][idx[m]] for m in vm], float)
+    pa, _ = find_peaks(A, height=h, prominence=prom); pp, _ = find_peaks(P, height=h, prominence=prom)
+    pairs = sorted(((abs(int(q) - int(a)), int(a), int(q)) for a in pa for q in pp if abs(int(q) - int(a)) <= 3))
+    ua, up, match = set(), set(), []
+    for d, a, q in pairs:
+        if a in ua or q in up:
+            continue
+        ua.add(a); up.add(q); match.append((a, q))
+    pen, rows = 0.0, []
+    for a, q in match:
+        d = q - a; c = (2.0 * d) if d > 0 else (1.0 * -d)
+        pen += c; rows.append({"a": vm[a], "p": vm[q], "d": d, "c": c})
+    miss = [vm[a] for a in pa if int(a) not in ua]; false = [vm[q] for q in pp if int(q) not in up]
+    pen += 8.0 * (len(miss) + len(false))
+    n = len(pa) + len(false)
+    return {"penalty": round(pen / n, 2) if n else 0.0, "sum": round(pen, 1), "n_actual": int(len(pa)), "n_pred": int(len(pp)),
+            "miss": miss, "false": false, "match": rows, "height": round(h), "prom": round(prom),
+            "actualPeaks": [vm[a] for a in pa], "predPeaks": [vm[q] for q in pp], "months": [vm[0], vm[-1]]}
+
+
+
+def topn(pdf) -> dict:
+    """3.2 Top-N 변수군과 기본 모형 비교: 막대 높이를 최저 막대 대비 비율로 읽는다(눈금 간격과 무관). 금색 = 강건성 우선 선택."""
+    out = {}
+    for ship, first in FIRST_PAGE.items():
+        a = np.asarray(render(pdf, first + 9, 3)).astype(int)
+        H, W, _ = a.shape
+        blue = (abs(a[..., 0] - 76) < 24) & (abs(a[..., 1] - 120) < 24) & (abs(a[..., 2] - 168) < 24)
+        gold = (abs(a[..., 0] - 212) < 26) & (abs(a[..., 1] - 160) < 30) & (abs(a[..., 2] - 30) < 40)
+        bar = blue | gold
+        cols = bar.sum(0) > 20
+        runs, st = [], None
+        for x in range(W):
+            if cols[x] and st is None:
+                st = x
+            if not cols[x] and st is not None:
+                if x - st > 8:
+                    runs.append((st, x))
+                st = None
+        hs, chosen = [], None
+        for k, (s_, e) in enumerate(runs):
+            ys = np.where(bar[:, (s_ + e) // 2])[0]
+            hs.append(ys.max() - ys.min())
+            if gold[:, (s_ + e) // 2].sum() > 20:
+                chosen = k
+        mn = min(hs)
+        n = len(hs)
+        labels = [f"상위 {8 + k}개" for k in range(n - 1)] + ["전체 통과"]
+        out[ship] = {"rel": [round(float(h / mn), 4) for h in hs], "labels": labels, "chosen": chosen}
+        print(f"{ship}: Top-N 막대 {n}개 · 선택 {labels[chosen] if chosen is not None else '?'}")
+    return out
+
+
+def trim_weak(paths: dict) -> None:
+    """약신호 막대 그림에서 빈 세로 띠(흰 열이 30px 넘게 이어지는 구간)를 12px로 줄인다."""
+    from PIL import Image
+    for ship, d in paths.items():
+        src = OUT.parent / d["weak"]
+        im = Image.open(src).convert("RGB"); a = np.asarray(im).astype(int)
+        white = (a.min(-1) > 238).all(0)
+        keep, run = [], []
+        for x, w in enumerate(white):
+            if w:
+                run.append(x)
+            else:
+                if len(run) > 30:
+                    keep += run[:6] + run[-6:]
+                else:
+                    keep += run
+                run = []
+                keep.append(x)
+        keep += run[:6]
+        b = a[:, keep]
+        rows = ~(b.min(-1) > 238).all(1)
+        ys = np.where(rows)[0]
+        b = b[max(0, ys.min() - 6):ys.max() + 6]
+        name = src.name.replace("_weak", "_weakt")
+        Image.fromarray(b.astype("uint8")).save(src.parent / name, "WEBP", quality=85, method=6)
+        d["weakt"] = f"story/img/{name}"
+        # 0% 행을 잘라 낸 요약판 — 필터2 마지막 단계(아래 절반)에 쓴다
+        from trim_weakc import trim_one
+        cname = name.replace("_weakt", "_weakc")
+        r = trim_one(src.parent / name, src.parent / cname)
+        d["weakc"] = f"story/img/{cname}"
+        d["weakZero"] = r["zero"]
+        d["weakShown"] = r["shown"]
 
 
 def main() -> None:
@@ -412,7 +533,8 @@ def main() -> None:
         "ships": SHIPS, "unit": UNIT, "reducedN": REDUCED_N,
         "features": {s: feature_block(s) for s in SHIPS},
         "cluster": clusters(),
-        "figs": crop_figures(pdf),
+        "figs": (lambda f: (trim_weak(f), f)[1])(crop_figures(pdf)),
+        "topn": topn(pdf),
         "robust": robustness(pdf),
         "holdout": holdout(pdf),
         "explored": explored(),

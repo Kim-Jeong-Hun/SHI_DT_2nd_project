@@ -27,6 +27,12 @@ Airflow 리스너 플러그인 → 실행 상태를 Postgres(Neon)로 동기화 
 | `deploy/render/` | Render 배포본 (FastAPI `web.py`, MLflow 프록시, Kedro-Viz 정적 페이지, 팀 코드 사본 `team/`) |
 | `serving/static/` | 3D 관제·대시보드·발표 릴·발표 장표(`ship_story.html`) |
 | `scripts/build_story_deck.py` | 발표 장표 데이터(`story/data.js`) 생성 |
+| `scripts/trim_weakc.py` | 필터2 약신호 막대 그림에서 0% 행을 잘라 낸 요약판 생성(빌드에 연결) |
+| `scripts/cute_cat.py` · `scripts/recolor_cat.py` | 도메인 장 3D 삐용이: 모델 얼굴 다듬기 · 털 재채색과 사진 얼굴 굽기 |
+| `docs/` | 작업 기록(슬랙 아카이브 A1~A25)·결정 문서·기획서(선박 수주예측) |
+
+### 외부 자산 출처
+- 3D 고양이 모델: "cat Walk" by Erina eka syaharani (Sketchfab), CC BY 4.0 — `serving/static/story/img/fun/biyong_cat.glb`. 얼굴 형상·털 색·얼굴 무늬는 조장님 반려묘 삐용이 사진으로 수정함.
 | `docs/analysis/` | 수주예측 분석 검토 자료 |
 
 ## 실행
