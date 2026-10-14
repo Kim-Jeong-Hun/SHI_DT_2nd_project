@@ -1,0 +1,65 @@
+# 서버 아키텍처.png / docker 프로세스 아키텍처.png 구현
+#   Docker Desktop 위 컨테이너 2개 + 공유 볼륨
+#   - app : Ubuntu 컨테이너 (Python · Kedro · MLflow)  ← Airflow(WSL)가 docker exec 로 kedro run 실행
+#   - db  : Database 컨테이너 (PostgreSQL) — MLflow 메타데이터 / Airflow 메타데이터 / 서비스 운영 데이터
+#   - ./data : 공유 볼륨 (원천·중간 데이터, 학습된 모델, MLflow 아티팩트, 로그·리포트)
+name: shi-dt
+
+services:
+  db:
+    image: postgres:16.4
+    container_name: shi-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      APP_DB: ${APP_DB}
+      MLFLOW_DB: ${MLFLOW_DB}
+      AIRFLOW_DB: ${AIRFLOW_DB}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/db/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"            # WSL의 Airflow가 메타DB로 접속
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: shi-dt/app:0.1.0
+    container_name: shi-app
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${MLFLOW_DB}
+      MLFLOW_TRACKING_URI: http://localhost:5000
+      MLFLOW_EXPERIMENT: ${MLFLOW_EXPERIMENT}
+      MLFLOW_REGISTER: "1"
+      APP_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${APP_DB}
+      PYTHONPATH: /workspace/src          # serving/app.py 가 shi_dt 패키지를 import
+      SHI_PROJECT_DIR: /workspace
+      SHIP_ORDERS_REPO: /workspace/deploy/render/team   # 팀 파이프라인 사본(Render 이미지와 같은 코드) — kedro run --pipeline=ship_orders 가 읽는다
+      SERVING_ENABLED: "1"
+      MLFLOW_DISABLE_AGENT_HINT: "1"
+    volumes:
+      - ./:/workspace            # 코드 + 공유 볼륨(./data)을 컨테이너 /workspace/data 로
+    working_dir: /workspace
+    ports:
+      - "5000:5000"            # MLflow UI
+      - "8000:8000"            # (선택) 추론/서빙 API
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:5000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+volumes:
+  db-data:
