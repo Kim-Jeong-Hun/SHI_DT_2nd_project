@@ -149,3 +149,18 @@ ENV/
 # Python bytecode cache
 __pycache__/
 *.py[cod]
+
+# Local datasets and generated artifacts
+/data/
+/references/
+/case_study/
+/reports/
+/archive/
+/scripts/archive/
+
+# Local-only project notes and operating-system files
+/기획(민규).md
+desktop.ini
+*.lnk
+**/Quick Launch/
+**/.ipynb_checkpoints/
