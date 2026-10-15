@@ -5,13 +5,11 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const localProjectRoot = "G:\\.shortcut-targets-by-id\\1Mzfsu50R-PR3fJQBchRx64TKYIX8S8Pj\\SHI_DT_2nd_project\\01 기획\\Ship orders forcasting";
+const defaultForecastServiceUrl = "https://ship-order-forecast.onrender.com";
 export const NOTEBOOK_FORECAST_VESSELS = new Set(["container", "tanker", "bulk", "gas", "chemical"]);
 const configCache = new Map();
 
-async function callForecastRunner(action, payload) {
-  const projectRoot = process.env.FORECAST_PROJECT_ROOT || localProjectRoot;
-  if (!existsSync(projectRoot)) throw new Error("FORECAST_PROJECT_ROOT에서 수주예측 프로젝트를 찾을 수 없습니다.");
+async function callLocalForecastRunner(action, payload, projectRoot) {
   const script = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../scripts/custom-forecast.py");
   const venvPython = path.join(projectRoot, "scripts", "분석", ".venv", "Scripts", "python.exe");
   const python = process.env.FORECAST_PYTHON || (existsSync(venvPython) ? venvPython : "python");
@@ -29,8 +27,33 @@ async function callForecastRunner(action, payload) {
   return JSON.parse(line.slice("__FORECAST_JSON__".length));
 }
 
+async function callForecastService(action, payload) {
+  const baseUrl = (process.env.FORECAST_SERVICE_URL || defaultForecastServiceUrl).replace(/\/$/, "");
+  const response = await fetch(`${baseUrl}/ship/custom-forecast/${action}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(10 * 60 * 1000),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.detail || body.error || "예측 서비스가 요청을 처리하지 못했습니다.");
+  return body;
+}
+
+async function callForecastRunner(action, payload) {
+  const projectRoot = process.env.FORECAST_PROJECT_ROOT;
+  if (projectRoot && existsSync(projectRoot)) return callLocalForecastRunner(action, payload, projectRoot);
+  return callForecastService(action, payload);
+}
+
 export function getCustomForecastConfig(vesselId) {
-  if (!configCache.has(vesselId)) configCache.set(vesselId, callForecastRunner("config", { vesselId }));
+  if (!configCache.has(vesselId)) {
+    const pending = callForecastRunner("config", { vesselId }).catch((error) => {
+      configCache.delete(vesselId);
+      throw error;
+    });
+    configCache.set(vesselId, pending);
+  }
   return configCache.get(vesselId);
 }
 

@@ -89,7 +89,7 @@ export function createApp(pool, authOptions = {}) {
   app.get("/api/v1/custom-forecast/config", requirePlan("enterprise"), async (request, response) => {
     const vesselId = request.query.vesselId;
     if (typeof vesselId !== "string" || !NOTEBOOK_FORECAST_VESSELS.has(vesselId)) {
-      response.status(400).json({ error: "container, tanker, gas, chemical 중 하나를 선택해 주세요." });
+      response.status(400).json({ error: "container, tanker, bulk, gas, chemical 중 하나를 선택해 주세요." });
       return;
     }
     try {
@@ -103,7 +103,7 @@ export function createApp(pool, authOptions = {}) {
   app.post("/api/v1/custom-forecast/run", requirePlan("enterprise"), async (request, response) => {
     const vesselId = request.body?.vesselId;
     if (typeof vesselId !== "string" || !NOTEBOOK_FORECAST_VESSELS.has(vesselId)) {
-      response.status(400).json({ error: "container, tanker, gas, chemical 중 하나를 선택해 주세요." });
+      response.status(400).json({ error: "container, tanker, bulk, gas, chemical 중 하나를 선택해 주세요." });
       return;
     }
 
