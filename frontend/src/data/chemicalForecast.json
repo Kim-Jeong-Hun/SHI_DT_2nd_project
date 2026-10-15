@@ -1,0 +1,550 @@
+{
+  "source": {
+    "notebook": "수주예측(케미컬 탱커)_WAPE_3M.ipynb.ipynb",
+    "cell": 22,
+    "sha256": "6ec85f22104d3d8952c0f15998009ef9787bb7db191a860bf704b1b35c7bdba5",
+    "actualsFile": "케미컬 탱커 수주실적(월).csv",
+    "precisionDecimals": 1
+  },
+  "vesselId": "chemical",
+  "vesselName": "케미컬 탱커",
+  "asOfMonth": "2026-09",
+  "unit": "DWT",
+  "horizonMonths": 3,
+  "trainMonths": 48,
+  "model": "Quantile Regression",
+  "actuals": [
+    {
+      "month": "2016-01",
+      "valueTeu": 169000
+    },
+    {
+      "month": "2016-02",
+      "valueTeu": 239000
+    },
+    {
+      "month": "2016-03",
+      "valueTeu": 106000
+    },
+    {
+      "month": "2016-04",
+      "valueTeu": 109000
+    },
+    {
+      "month": "2016-05",
+      "valueTeu": 463000
+    },
+    {
+      "month": "2016-06",
+      "valueTeu": 79600
+    },
+    {
+      "month": "2016-07",
+      "valueTeu": 0
+    },
+    {
+      "month": "2016-08",
+      "valueTeu": 19800
+    },
+    {
+      "month": "2016-09",
+      "valueTeu": 60498
+    },
+    {
+      "month": "2016-10",
+      "valueTeu": 264596
+    },
+    {
+      "month": "2016-11",
+      "valueTeu": 265500
+    },
+    {
+      "month": "2016-12",
+      "valueTeu": 0
+    },
+    {
+      "month": "2017-01",
+      "valueTeu": 199575
+    },
+    {
+      "month": "2017-02",
+      "valueTeu": 188000
+    },
+    {
+      "month": "2017-03",
+      "valueTeu": 225500
+    },
+    {
+      "month": "2017-04",
+      "valueTeu": 224900
+    },
+    {
+      "month": "2017-05",
+      "valueTeu": 294000
+    },
+    {
+      "month": "2017-06",
+      "valueTeu": 276000
+    },
+    {
+      "month": "2017-07",
+      "valueTeu": 472400
+    },
+    {
+      "month": "2017-08",
+      "valueTeu": 15900
+    },
+    {
+      "month": "2017-09",
+      "valueTeu": 117500
+    },
+    {
+      "month": "2017-10",
+      "valueTeu": 0
+    },
+    {
+      "month": "2017-11",
+      "valueTeu": 266000
+    },
+    {
+      "month": "2017-12",
+      "valueTeu": 542000
+    },
+    {
+      "month": "2018-01",
+      "valueTeu": 149999
+    },
+    {
+      "month": "2018-02",
+      "valueTeu": 100000
+    },
+    {
+      "month": "2018-03",
+      "valueTeu": 220000
+    },
+    {
+      "month": "2018-04",
+      "valueTeu": 341997
+    },
+    {
+      "month": "2018-05",
+      "valueTeu": 250000
+    },
+    {
+      "month": "2018-06",
+      "valueTeu": 290000
+    },
+    {
+      "month": "2018-07",
+      "valueTeu": 205500
+    },
+    {
+      "month": "2018-08",
+      "valueTeu": 50000
+    },
+    {
+      "month": "2018-09",
+      "valueTeu": 14620
+    },
+    {
+      "month": "2018-10",
+      "valueTeu": 115000
+    },
+    {
+      "month": "2018-11",
+      "valueTeu": 53800
+    },
+    {
+      "month": "2018-12",
+      "valueTeu": 147390
+    },
+    {
+      "month": "2019-01",
+      "valueTeu": 0
+    },
+    {
+      "month": "2019-02",
+      "valueTeu": 15750
+    },
+    {
+      "month": "2019-03",
+      "valueTeu": 209000
+    },
+    {
+      "month": "2019-04",
+      "valueTeu": 117999
+    },
+    {
+      "month": "2019-05",
+      "valueTeu": 200000
+    },
+    {
+      "month": "2019-06",
+      "valueTeu": 100000
+    },
+    {
+      "month": "2019-07",
+      "valueTeu": 473990
+    },
+    {
+      "month": "2019-08",
+      "valueTeu": 4250
+    },
+    {
+      "month": "2019-09",
+      "valueTeu": 550000
+    },
+    {
+      "month": "2019-10",
+      "valueTeu": 0
+    },
+    {
+      "month": "2019-11",
+      "valueTeu": 129800
+    },
+    {
+      "month": "2019-12",
+      "valueTeu": 27600
+    },
+    {
+      "month": "2020-01",
+      "valueTeu": 287000
+    },
+    {
+      "month": "2020-02",
+      "valueTeu": 150000
+    },
+    {
+      "month": "2020-03",
+      "valueTeu": 38000
+    },
+    {
+      "month": "2020-04",
+      "valueTeu": 50000
+    },
+    {
+      "month": "2020-05",
+      "valueTeu": 107950
+    },
+    {
+      "month": "2020-06",
+      "valueTeu": 100000
+    },
+    {
+      "month": "2020-07",
+      "valueTeu": 200000
+    },
+    {
+      "month": "2020-08",
+      "valueTeu": 734770
+    },
+    {
+      "month": "2020-09",
+      "valueTeu": 158000
+    },
+    {
+      "month": "2020-10",
+      "valueTeu": 300000
+    },
+    {
+      "month": "2020-11",
+      "valueTeu": 101700
+    },
+    {
+      "month": "2020-12",
+      "valueTeu": 24450
+    },
+    {
+      "month": "2021-01",
+      "valueTeu": 178800
+    },
+    {
+      "month": "2021-02",
+      "valueTeu": 412400
+    },
+    {
+      "month": "2021-03",
+      "valueTeu": 357790
+    },
+    {
+      "month": "2021-04",
+      "valueTeu": 172000
+    },
+    {
+      "month": "2021-05",
+      "valueTeu": 723200
+    },
+    {
+      "month": "2021-06",
+      "valueTeu": 1181550
+    },
+    {
+      "month": "2021-07",
+      "valueTeu": 105800
+    },
+    {
+      "month": "2021-08",
+      "valueTeu": 0
+    },
+    {
+      "month": "2021-09",
+      "valueTeu": 8000
+    },
+    {
+      "month": "2021-10",
+      "valueTeu": 102500
+    },
+    {
+      "month": "2021-11",
+      "valueTeu": 18620
+    },
+    {
+      "month": "2021-12",
+      "valueTeu": 0
+    },
+    {
+      "month": "2022-01",
+      "valueTeu": 129049
+    },
+    {
+      "month": "2022-02",
+      "valueTeu": 0
+    },
+    {
+      "month": "2022-03",
+      "valueTeu": 27399
+    },
+    {
+      "month": "2022-04",
+      "valueTeu": 222526
+    },
+    {
+      "month": "2022-05",
+      "valueTeu": 15998
+    },
+    {
+      "month": "2022-06",
+      "valueTeu": 14400
+    },
+    {
+      "month": "2022-07",
+      "valueTeu": 498489
+    },
+    {
+      "month": "2022-08",
+      "valueTeu": 58598
+    },
+    {
+      "month": "2022-09",
+      "valueTeu": 262748
+    },
+    {
+      "month": "2022-10",
+      "valueTeu": 252600
+    },
+    {
+      "month": "2022-11",
+      "valueTeu": 317798
+    },
+    {
+      "month": "2022-12",
+      "valueTeu": 100000
+    },
+    {
+      "month": "2023-01",
+      "valueTeu": 446996
+    },
+    {
+      "month": "2023-02",
+      "valueTeu": 600000
+    },
+    {
+      "month": "2023-03",
+      "valueTeu": 369907
+    },
+    {
+      "month": "2023-04",
+      "valueTeu": 484500
+    },
+    {
+      "month": "2023-05",
+      "valueTeu": 300000
+    },
+    {
+      "month": "2023-06",
+      "valueTeu": 417490
+    },
+    {
+      "month": "2023-07",
+      "valueTeu": 106000
+    },
+    {
+      "month": "2023-08",
+      "valueTeu": 551800
+    },
+    {
+      "month": "2023-09",
+      "valueTeu": 115998
+    },
+    {
+      "month": "2023-10",
+      "valueTeu": 243000
+    },
+    {
+      "month": "2023-11",
+      "valueTeu": 570080
+    },
+    {
+      "month": "2023-12",
+      "valueTeu": 154400
+    },
+    {
+      "month": "2024-01",
+      "valueTeu": 586988
+    },
+    {
+      "month": "2024-02",
+      "valueTeu": 450498
+    },
+    {
+      "month": "2024-03",
+      "valueTeu": 186300
+    },
+    {
+      "month": "2024-04",
+      "valueTeu": 824300
+    },
+    {
+      "month": "2024-05",
+      "valueTeu": 663300
+    },
+    {
+      "month": "2024-06",
+      "valueTeu": 1117100
+    },
+    {
+      "month": "2024-07",
+      "valueTeu": 353500
+    },
+    {
+      "month": "2024-08",
+      "valueTeu": 119000
+    },
+    {
+      "month": "2024-09",
+      "valueTeu": 475000
+    },
+    {
+      "month": "2024-10",
+      "valueTeu": 751600
+    },
+    {
+      "month": "2024-11",
+      "valueTeu": 358496
+    },
+    {
+      "month": "2024-12",
+      "valueTeu": 195600
+    },
+    {
+      "month": "2025-01",
+      "valueTeu": 292100
+    },
+    {
+      "month": "2025-02",
+      "valueTeu": 0
+    },
+    {
+      "month": "2025-03",
+      "valueTeu": 506500
+    },
+    {
+      "month": "2025-04",
+      "valueTeu": 213000
+    },
+    {
+      "month": "2025-05",
+      "valueTeu": 36300
+    },
+    {
+      "month": "2025-06",
+      "valueTeu": 205352
+    },
+    {
+      "month": "2025-07",
+      "valueTeu": 174800
+    },
+    {
+      "month": "2025-08",
+      "valueTeu": 819500
+    },
+    {
+      "month": "2025-09",
+      "valueTeu": 144390
+    },
+    {
+      "month": "2025-10",
+      "valueTeu": 199798
+    },
+    {
+      "month": "2025-11",
+      "valueTeu": 181600
+    },
+    {
+      "month": "2025-12",
+      "valueTeu": 640100
+    },
+    {
+      "month": "2026-01",
+      "valueTeu": 428700
+    },
+    {
+      "month": "2026-02",
+      "valueTeu": 621990
+    },
+    {
+      "month": "2026-03",
+      "valueTeu": 526800
+    },
+    {
+      "month": "2026-04",
+      "valueTeu": 780200
+    },
+    {
+      "month": "2026-05",
+      "valueTeu": 292800
+    },
+    {
+      "month": "2026-06",
+      "valueTeu": 823300
+    },
+    {
+      "month": "2026-07",
+      "valueTeu": 1095191
+    },
+    {
+      "month": "2026-08",
+      "valueTeu": 1051196
+    }
+  ],
+  "points": [
+    {
+      "issuedMonth": "2026-07",
+      "dataCutoffMonth": "2026-04",
+      "targetMonth": "2026-10",
+      "predictionTeu": 194249.2
+    },
+    {
+      "issuedMonth": "2026-08",
+      "dataCutoffMonth": "2026-05",
+      "targetMonth": "2026-11",
+      "predictionTeu": 111690
+    },
+    {
+      "issuedMonth": "2026-09",
+      "dataCutoffMonth": "2026-06",
+      "targetMonth": "2026-12",
+      "predictionTeu": 0
+    }
+  ]
+}

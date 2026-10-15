@@ -1,0 +1,47 @@
+.subscription-shell { --navy:var(--brand-navy-950); --teal:var(--brand-teal-600); min-height:100vh; color:var(--text-primary); background:radial-gradient(circle at 50% 10%,rgba(15,157,138,.1),transparent 28%),var(--surface-canvas); }
+.subscription-nav { display:flex; align-items:center; justify-content:space-between; height:76px; padding:0 max(5vw,calc((100vw - 1280px)/2)); border-bottom:1px solid #dfe6ec; background:rgba(255,255,255,.88); backdrop-filter:blur(16px); }
+.subscription-brand { display:flex; align-items:center; gap:11px; }
+.subscription-brand>span { display:grid; width:40px; height:40px; place-items:center; border-radius:11px; color:#fff; background:var(--navy); }
+.subscription-brand strong { display:block; font-size:17px; letter-spacing:-.03em; }
+.subscription-brand small { display:block; margin-top:3px; color:#778699; font-size:8px; font-weight:750; letter-spacing:.15em; }
+.subscription-user { display:flex; align-items:center; gap:18px; color:#627186; font-size:13px; }
+.subscription-user button { display:flex; align-items:center; gap:6px; padding:9px 12px; border:1px solid #d5dde6; border-radius:8px; color:#536478; background:#fff; font:inherit; font-weight:680; cursor:pointer; }
+.subscription-content { max-width:1280px; margin:0 auto; padding:45px max(5vw,24px) 72px; }
+.subscription-progress { display:flex; align-items:center; justify-content:center; max-width:520px; margin:0 auto 45px; color:#98a4b1; font-size:11px; font-weight:700; }
+.subscription-progress span { display:flex; align-items:center; gap:7px; white-space:nowrap; }
+.subscription-progress i { display:grid; width:25px; height:25px; place-items:center; border:1px solid #d3dce5; border-radius:50%; background:#fff; font-style:normal; }
+.subscription-progress b { flex:1; height:1px; margin:0 13px; background:#dce4eb; }
+.subscription-progress .complete { color:var(--teal); }
+.subscription-progress .complete i { color:#fff; border-color:var(--teal); background:var(--teal); }
+.subscription-progress .active { color:var(--navy); }
+.subscription-progress .active i { color:#fff; border-color:var(--navy); background:var(--navy); box-shadow:0 0 0 4px rgba(7,27,50,.08); }
+.subscription-heading { text-align:center; }
+.subscription-kicker { display:flex; align-items:center; justify-content:center; gap:8px; color:var(--teal); font-size:10px; font-weight:800; letter-spacing:.17em; }
+.subscription-heading h1 { margin:14px 0 12px; color:var(--navy); font-size:clamp(34px,3.4vw,48px); line-height:1.15; letter-spacing:var(--letter-spacing-heading); }
+.subscription-heading p { margin:0; color:var(--text-secondary); font-size:var(--font-size-body); }
+.subscription-price-disclaimer { display:block; margin-top:10px; color:#8996a4; font-size:10px; line-height:1.6; }
+.subscription-plans { display:grid; grid-template-columns:repeat(3,1fr); gap:17px; margin-top:42px; }
+.subscription-plan { position:relative; min-height:390px; padding:29px; overflow:hidden; border:1px solid var(--border-default); border-radius:var(--radius-panel); color:var(--text-primary); background:var(--surface-default); font-family:inherit; text-align:left; cursor:pointer; transition:transform .2s,border-color .2s,box-shadow .2s; }
+.subscription-plan:hover { transform:translateY(-3px); border-color:#8bcfc2; box-shadow:0 18px 45px rgba(7,27,50,.08); }
+.subscription-plan.selected { border:2px solid var(--teal); padding:28px; box-shadow:0 20px 52px rgba(7,130,110,.13); }
+.plan-recommended { position:absolute; top:22px; left:53px; padding:4px 8px; border-radius:999px; color:#536478; background:#edf2f5; font-size:9px; font-weight:780; }
+.plan-current { position:absolute; top:0; right:0; padding:7px 13px; border-radius:0 13px 0 10px; color:#fff; background:var(--teal); font-size:9px; font-weight:780; }
+.plan-radio { position:absolute; top:22px; left:22px; display:grid; width:19px; height:19px; place-items:center; border:1px solid #bdc8d3; border-radius:50%; background:#fff; }
+.subscription-plan.selected .plan-radio { border-color:var(--teal); }
+.subscription-plan.selected .plan-radio i { width:9px; height:9px; border-radius:50%; background:var(--teal); }
+.plan-icon { display:grid; width:43px; height:43px; place-items:center; margin:32px 0 25px; border-radius:10px; color:var(--teal); background:#eaf7f4; }
+.subscription-plan>small { color:var(--teal); font-size:10px; font-weight:780; letter-spacing:.08em; }
+.subscription-plan h2 { margin:7px 0 9px; color:var(--navy); font-size:25px; letter-spacing:-.035em; }
+.plan-display-price { display:block; margin:3px 0 10px; color:var(--teal); font-size:19px; font-weight:800; letter-spacing:-.03em; }
+.plan-display-price span { color:#8793a0; font-size:10px; font-weight:600; letter-spacing:0; }
+.subscription-plan>p { min-height:43px; margin:0; color:#6b7a8d; font-size:12px; line-height:1.65; }
+.subscription-plan ul { display:grid; gap:11px; padding:20px 0 0; margin:20px 0 0; border-top:1px solid #e8edf1; list-style:none; }
+.subscription-plan li { display:flex; align-items:center; gap:8px; color:#506176; font-size:12px; }
+.subscription-plan li svg { color:var(--teal); }
+.subscription-error { max-width:580px; margin:22px auto 0; padding:11px; border-radius:8px; color:#a32121; background:#fff1f1; text-align:center; font-size:12px; }
+.subscription-action { display:flex; align-items:center; justify-content:flex-end; gap:24px; margin-top:30px; }
+.subscription-action p { color:#7a8898; font-size:11px; }
+.subscription-action button { display:flex; align-items:center; justify-content:center; gap:9px; min-width:225px; height:50px; border:0; border-radius:9px; color:#fff; background:var(--navy); font-family:inherit; font-size:13px; font-weight:750; cursor:pointer; box-shadow:0 12px 25px rgba(7,27,50,.16); }
+.subscription-action button:disabled { opacity:.65; cursor:wait; }
+@media(max-width:800px){.subscription-nav{height:66px;padding:0 18px}.subscription-user>span,.subscription-brand small{display:none}.subscription-content{padding:35px 20px 58px}.subscription-progress{margin-bottom:35px}.subscription-progress b{margin:0 7px}.subscription-progress span{font-size:9px}.subscription-plans{grid-template-columns:1fr}.subscription-plan{min-height:auto}.subscription-action{align-items:stretch;flex-direction:column}.subscription-action button{width:100%}}
+.subscription-nav{padding-left:max(32px,calc((100vw - 1360px)/2 + 32px));padding-right:max(32px,calc((100vw - 1360px)/2 + 32px))}@media(max-width:800px){.subscription-nav{padding-right:16px;padding-left:16px}}
