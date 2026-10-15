@@ -17,10 +17,10 @@ import { TANKER_NOTEBOOK_FORECAST } from "../../data/tankerNotebookForecast";
 import { NOTEBOOK_FORECASTS, NOTEBOOK_VESSEL_IDS, isNotebookVessel } from "../../data/notebookForecasts";
 import type { NotebookForecast } from "../../data/notebookForecasts";
 import ReportRegimeCharts from "./ReportRegimeCharts";
-import ContainerForecast, { PortfolioForecast } from "./ContainerForecast";
+import VesselOrderForecast, { PortfolioOrderForecast } from "./OrderForecast";
 import Newsroom from "./Newsroom";
+import DetailsPage from "./DetailsPage";
 import AboutPage from "./AboutPage";
-import CompanyAboutPage from "./CompanyAboutPage";
 import CustomForecast from "./CustomForecast";
 import DashboardOverview from "./DashboardOverview";
 import ShipPulseComparison from "./ShipPulseComparison";
@@ -731,7 +731,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
       {authError && <div role="alert" className="mx-auto max-w-[1360px] px-4 pt-3 text-sm text-red-700 md:px-8">{authError}</div>}
       {csvExportError && <div role="alert" className="mx-auto max-w-[1360px] px-4 pt-3 text-sm text-red-700 md:px-8">{csvExportError}</div>}
 
-      {activePage === "ship-pulse" ? <ShipPulseComparison /> : activePage === "newsroom" ? <Newsroom /> : activePage === "about" ? <CompanyAboutPage /> : activePage === "details" ? <AboutPage onExplore={() => { setActivePage("dashboard"); setActiveSection("dashboard-overview"); window.scrollTo(0, 0); }} onOpenNewsroom={() => { setActivePage("newsroom"); window.scrollTo(0, 0); }} /> : <main className={`dashboard-compact dashboard-layout mx-auto max-w-[1536px] px-3 pt-3 md:px-3 ${activeSection === "dashboard-overview" ? "pb-3" : "pb-0"}`}>
+      {activePage === "ship-pulse" ? <ShipPulseComparison /> : activePage === "newsroom" ? <Newsroom /> : activePage === "about" ? <AboutPage /> : activePage === "details" ? <DetailsPage onExplore={() => { setActivePage("dashboard"); setActiveSection("dashboard-overview"); window.scrollTo(0, 0); }} onOpenNewsroom={() => { setActivePage("newsroom"); window.scrollTo(0, 0); }} /> : <main className={`dashboard-compact dashboard-layout mx-auto max-w-[1536px] px-3 pt-3 md:px-3 ${activeSection === "dashboard-overview" ? "pb-3" : "pb-0"}`}>
         <aside className={`${panelClass} dashboard-sidebar p-3`} aria-label="대시보드 섹션 이동">
           <div className="dashboard-sidebar-heading">
             <span>분석 대시보드</span>
@@ -831,9 +831,9 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
         {hasProfessionalAccess && activeSection === "order-forecast" && <div id="order-forecast" className="dashboard-block analysis-screen dashboard-view dashboard-section-target">
           {!isAllVessels
             ? isNotebookVessel(vessel.id)
-              ? <ContainerForecast darkMode={darkMode} vesselId={vessel.id} />
+              ? <VesselOrderForecast darkMode={darkMode} vesselId={vessel.id} />
               : <MarketAnalysis vessel={vessel} view="forecast" />
-            : <PortfolioForecast darkMode={darkMode} />}
+            : <PortfolioOrderForecast darkMode={darkMode} />}
         </div>}
         {hasEnterpriseAccess && isAllVessels && activeSection === "custom-forecast" && <div id="custom-forecast" className="dashboard-block analysis-screen dashboard-view dashboard-section-target">
           <CustomForecast />

@@ -17,7 +17,7 @@ function compact(value: number, unit: string, language: "ko" | "en" = "ko") {
   return `${number(value, 1)} ${unit}`;
 }
 
-export function PortfolioForecast({ darkMode }: { darkMode: boolean }) {
+export function PortfolioOrderForecast({ darkMode }: { darkMode: boolean }) {
   const { language } = useI18n();
   const forecasts = NOTEBOOK_VESSEL_IDS.map((id) => NOTEBOOK_FORECASTS[id]);
   const text = darkMode ? "#cbd5e1" : "#64748b";
@@ -61,7 +61,7 @@ export function PortfolioForecast({ darkMode }: { darkMode: boolean }) {
   );
 }
 
-export default function ContainerForecast({ darkMode, vesselId }: { darkMode: boolean; vesselId: VesselId }) {
+export default function VesselOrderForecast({ darkMode, vesselId }: { darkMode: boolean; vesselId: VesselId }) {
   const { language } = useI18n();
   if (!isNotebookVessel(vesselId)) return null;
   const forecast = NOTEBOOK_FORECASTS[vesselId];
