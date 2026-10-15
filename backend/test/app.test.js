@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { after, before, test } from "node:test";
-import { createApp } from "../src/app.js";
+import handleVercelRequest, { createApp } from "../src/app.js";
 
 const calls = [];
 const pool = {
@@ -24,6 +24,10 @@ let server;
 let baseUrl;
 const authenticated = { headers: { cookie: "shi_session=test-session" } };
 const exploreAuthenticated = { headers: { cookie: "shi_session=explore-session" } };
+
+test("exports a Vercel-compatible request handler", () => {
+  assert.equal(typeof handleVercelRequest, "function");
+});
 
 before(async () => {
   server = createApp(pool).listen(0);
