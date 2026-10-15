@@ -1,0 +1,24 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/forecast.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "src/app.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/forecast",
+      "dest": "api/forecast.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "src/app.js"
+    }
+  ]
+}
