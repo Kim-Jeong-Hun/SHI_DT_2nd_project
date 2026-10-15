@@ -46,3 +46,14 @@ Airflow 는 WSL 에서 `airflow/install_airflow_wsl.sh` 로 설치하고, DAG �
 관제 탭으로 상태를 보내려면 `AIRFLOW_STATUS_DB_URL` 을 환경 변수로만 넣습니다(저장소에 값 넣지 않음).
 
 Kedro 에는 선박 수주 파이프라인 3개(`ship_orders` · `ship_orders_preprocess` · `ship_orders_track`)만 등록돼 있습니다. 이 저장소는 선박 수주 예측 프로젝트만 다룹니다.
+
+## Ship Pulse 재학습 파이프라인 (`ship_pulse`)
+
+Ship Pulse(shipulse.vercel.app)의 선종별 최종 설정(`frontend/src/data/notebookForecasts.ts`)으로 다시 학습하고 MLflow에 등록한다.
+
+1. 마스터 테이블 5개를 `data/01_raw/ship_pulse/master/`에 둔다(Drive `Ship orders forcasting/data/master`). 다른 곳이면 `SHIP_PULSE_MASTER_DIR`.
+2. `kedro run --pipeline=ship_pulse` — 선종 5개 × (CCF 수준·변화량 시차 → 약한 변수·VIF 10·퍼뮤테이션 Top-N → 롤링 검증 3개월 × 17창 → Test 24개월 → 다음 분기 예측 · 90% 블록 conformal).
+3. 결과: `data/07_model_output/ship_pulse/` — `results.json`, Ship Pulse 형식 `notebook_forecasts.json`, 팀 값 대조 `comparison.json`.
+4. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 모델 `ship_pulse_<선종>`을 등록(alias `production`).
+
+지표는 팀 결정대로 ASE(3개월 누적 오차의 절댓값)를 쓴다. 노트북 원본(`수주예측(선종)_WAPE_3M`)의 세부 변수 가공·튜닝이 없어서 숫자는 팀 값과 다를 수 있고, `comparison.json`에 차이를 남긴다.
