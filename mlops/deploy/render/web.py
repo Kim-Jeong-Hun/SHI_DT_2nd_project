@@ -18,12 +18,15 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
+from custom_forecast import config as custom_forecast_config
+from custom_forecast import run as run_custom_forecast
 from shi_dt.ship import service as SHIP
 
 STATIC = Path(__file__).resolve().parent / "static"
 if not STATIC.exists():   # 로컬 시험: 이미지 밖에서는 serving/static 을 그대로 쓴다
     STATIC = Path(__file__).resolve().parents[2] / "serving" / "static"
 app = FastAPI(title="선(船)견지명 · 선박 수주 예측", docs_url="/docs")
+CUSTOM_FORECAST_ROOT = Path(__file__).resolve().parent / "custom_runtime"
 
 
 def page(name: str) -> HTMLResponse:
@@ -82,6 +85,22 @@ def ship_forecast(ship: str = Query(..., description="선종: 컨테이너선 ·
         raise HTTPException(400, f"선종은 {', '.join(SHIP.SHIPS)} 중 하나여야 합니다")
     except ValueError:
         raise HTTPException(400, "horizon은 1, 3, 6 중 하나여야 합니다")
+
+
+@app.post("/ship/custom-forecast/config")
+def ship_custom_forecast_config(payload: dict):
+    try:
+        return custom_forecast_config(CUSTOM_FORECAST_ROOT, payload.get("vesselId"))
+    except (KeyError, TypeError, ValueError, FileNotFoundError) as error:
+        raise HTTPException(400, str(error)) from error
+
+
+@app.post("/ship/custom-forecast/run")
+def ship_custom_forecast_run(payload: dict):
+    try:
+        return run_custom_forecast(CUSTOM_FORECAST_ROOT, payload)
+    except (KeyError, TypeError, ValueError, FileNotFoundError) as error:
+        raise HTTPException(400, str(error)) from error
 
 
 # ---- MLflow 화면: 메모리(무료 512MB) 때문에 별도 서비스 ship-order-mlflow 가 띄운다 → 그쪽으로 이동 ----

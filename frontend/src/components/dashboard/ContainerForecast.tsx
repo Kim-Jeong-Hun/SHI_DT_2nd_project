@@ -29,6 +29,15 @@ export function PortfolioForecast({ darkMode }: { darkMode: boolean }) {
     xAxis: { type: "value", axisLabel: { color: text, formatter: (value: number) => `${value}%` }, splitLine: { lineStyle: { color: grid, type: "dashed" } } },
     yAxis: { type: "category", inverse: true, data: forecasts.map(({ vesselName }) => vesselName), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: text, fontSize: 12 } },
     series: [{ type: "bar", barWidth: 24, label: { show: true, position: "right", formatter: ({ value }: { value: number }) => `${value > 0 ? "+" : ""}${value.toFixed(1)}%`, color: text, fontWeight: 600 }, data: forecasts.map(({ quarterChange, color }) => ({ value: quarterChange, itemStyle: { color: quarterChange >= 0 ? color : "#f43f5e", borderRadius: quarterChange >= 0 ? [0, 6, 6, 0] : [6, 0, 0, 6] } })) }],
+    media: [{
+      query: { maxWidth: 560 },
+      option: {
+        grid: { left: 72, right: 34, top: 12, bottom: 28 },
+        xAxis: { axisLabel: { fontSize: 9 } },
+        yAxis: { axisLabel: { fontSize: 10 } },
+        series: [{ barWidth: 18, label: { fontSize: 9 } }],
+      },
+    }],
   };
 
   return (
@@ -137,6 +146,15 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         z: 5,
       },
     ],
+    media: [{
+      query: { maxWidth: 560 },
+      option: {
+        grid: { left: 48, right: 12, top: 76, bottom: 38 },
+        legend: { type: "scroll", top: 4, left: 8, right: 8, itemWidth: 16, itemGap: 10, textStyle: { color: text, fontSize: 9 } },
+        xAxis: { axisLabel: { fontSize: 10, margin: 10 } },
+        yAxis: { name: "", axisLabel: { fontSize: 9 }, splitNumber: 3 },
+      },
+    }],
   };
 
   return (
@@ -151,7 +169,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         <span className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-600">{forecast.model}</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
           <p className="text-xs text-slate-500">3분기 누적 전망</p>
           <p className="mt-1 text-xl font-semibold text-slate-900">{compact(forecast.q3, forecast.unit, language)}</p>

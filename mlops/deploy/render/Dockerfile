@@ -14,7 +14,8 @@ COPY pyproject.toml /app/
 COPY conf /app/conf
 COPY src /app/src
 COPY serving/static/ship.html serving/static/ship_console.html serving/static/ship_reel.html serving/static/ship_ops.html serving/static/airflow.html /app/deploy/render/static/
-COPY deploy/render/web.py deploy/render/mlflow_proxy.py deploy/render/start.sh deploy/render/kedro_viz_static.py /app/deploy/render/
+COPY deploy/render/web.py deploy/render/custom_forecast.py deploy/render/mlflow_proxy.py deploy/render/start.sh deploy/render/kedro_viz_static.py /app/deploy/render/
+COPY deploy/render/custom_runtime /app/deploy/render/custom_runtime
 # 팀 파이프라인(ship-order-drive) 중 실행에 필요한 파일만
 COPY deploy/render/team /app/team
 RUN mkdir -p conf/local data/01_raw/ship mlartifacts && kedro run --pipeline=ship_orders \

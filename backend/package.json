@@ -9,7 +9,7 @@
     "import:master": "node --env-file-if-exists=.env scripts/import-master.js",
     "import:clusters": "node --env-file-if-exists=.env scripts/import-clusters.js",
     "news:sync": "node --env-file-if-exists=.env scripts/sync-newsroom.js",
-    "test": "node test/app.test.js && node test/auth.test.js"
+    "test": "node test/app.test.js && node test/auth.test.js && node test/forecastRunner.test.js"
   },
   "dependencies": {
     "cookie": "^2.0.1",
