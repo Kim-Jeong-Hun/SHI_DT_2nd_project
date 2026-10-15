@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Anchor, ArrowLeft, ArrowRight, Boxes, CalendarDays, ExternalLink, ImageOff, Pause, Play, Ship, TrendingUp } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import EChartsReact from "../common/LocalizedECharts";
 
 type NewsCategory = "조선" | "해운" | "물류";
 type NewsStory = {
@@ -43,6 +44,51 @@ const yearlyNewsYears = [2026, 2025, 2024, 2023, 2022];
 const yearlyNewsVessels = ["컨테이너선", "유조선", "벌크선", "가스 운반선", "케미컬 탱커"] as const;
 type YearlyNewsVessel = (typeof yearlyNewsVessels)[number];
 type YearlyNewsItem = { source: string; title: string; month: string; publishedAt: string; articleUrl: string };
+type YearlyOrderPoint = { month: number; value: number };
+type TurningPoint = YearlyOrderPoint & { kind: "고점" | "저점"; score: number };
+type MasterDataResponse = { rows: Array<{ period: string; orderCapacity: string | null }> };
+
+const yearlyVesselMeta: Record<YearlyNewsVessel, { id: string; unit: "DWT" | "TEU" | "CBM"; color: string }> = {
+  컨테이너선: { id: "container", unit: "TEU", color: "#2563eb" },
+  유조선: { id: "tanker", unit: "DWT", color: "#f59e0b" },
+  벌크선: { id: "bulk", unit: "DWT", color: "#64748b" },
+  "가스 운반선": { id: "gas", unit: "CBM", color: "#14b8a6" },
+  "케미컬 탱커": { id: "chemical", unit: "DWT", color: "#8b5cf6" },
+};
+
+const formatCompactOrder = (value: number) => value >= 1_000_000
+  ? `${(value / 1_000_000).toFixed(1)}M`
+  : value >= 1_000 ? `${(value / 1_000).toFixed(0)}K` : value.toFixed(0);
+
+const findMajorTurningPoints = (points: readonly YearlyOrderPoint[]): TurningPoint[] => {
+  const candidates = points.slice(1, -1).map((point, index) => {
+    const previous = points[index];
+    const next = points[index + 2];
+    const incoming = point.value - previous.value;
+    const outgoing = next.value - point.value;
+    const isTurningPoint = incoming !== 0 && outgoing !== 0 && Math.sign(incoming) !== Math.sign(outgoing);
+    return isTurningPoint ? {
+      ...point,
+      kind: incoming > 0 ? "고점" as const : "저점" as const,
+      score: Math.min(Math.abs(incoming), Math.abs(outgoing)),
+    } : null;
+  }).filter((point): point is TurningPoint => point !== null);
+
+  if (candidates.length < 2) {
+    points.slice(1, -1).forEach((point, index) => {
+      if (candidates.some((candidate) => candidate.month === point.month)) return;
+      const previous = points[index];
+      const next = points[index + 2];
+      candidates.push({
+        ...point,
+        kind: point.value >= (previous.value + next.value) / 2 ? "고점" : "저점",
+        score: Math.abs(point.value * 2 - previous.value - next.value),
+      });
+    });
+  }
+
+  return candidates.sort((a, b) => b.score - a.score).slice(0, 2).sort((a, b) => a.month - b.month);
+};
 
 const articleImageUrl = (articleUrl: string) => {
   const query = new URLSearchParams({
@@ -174,10 +220,108 @@ const yearlyNewsArchive: Record<number, Record<YearlyNewsVessel, YearlyNewsItem[
 function YearlyNewsArchive() {
   const [selectedYear, setSelectedYear] = useState(yearlyNewsYears[0]);
   const [selectedVessel, setSelectedVessel] = useState<YearlyNewsVessel>(yearlyNewsVessels[0]);
+  const [ordersResult, setOrdersResult] = useState<{ key: string; points: YearlyOrderPoint[]; error: string }>({ key: "", points: [], error: "" });
+  const vesselMeta = yearlyVesselMeta[selectedVessel];
+  const ordersKey = `${selectedYear}-${vesselMeta.id}`;
+  const orderPoints = ordersResult.key === ordersKey ? ordersResult.points : [];
+  const ordersLoading = ordersResult.key !== ordersKey;
+  const ordersError = ordersResult.key === ordersKey ? ordersResult.error : "";
+  const turningPoints = findMajorTurningPoints(orderPoints);
   const selectedNews = yearlyNewsArchive[selectedYear][selectedVessel].map((news) => ({
     ...news,
     imageUrl: articleImageUrl(news.articleUrl),
   }));
+  const remainingNews = [...selectedNews];
+  const connectedNews = turningPoints.map((turningPoint) => {
+    const closestIndex = remainingNews.reduce((bestIndex, news, index) => {
+      const newsMonth = Number.parseInt(news.month, 10);
+      const bestMonth = Number.parseInt(remainingNews[bestIndex].month, 10);
+      return Math.abs(newsMonth - turningPoint.month) < Math.abs(bestMonth - turningPoint.month) ? index : bestIndex;
+    }, 0);
+    return { ...remainingNews.splice(closestIndex, 1)[0], turningPoint };
+  });
+  const displayedNews = connectedNews.length === selectedNews.length
+    ? connectedNews
+    : selectedNews.map((news) => ({ ...news, turningPoint: null }));
+  const monthlyValues = Array.from({ length: 12 }, (_, index) => orderPoints.find((point) => point.month === index + 1)?.value ?? null);
+  const chartOption = {
+    animationDuration: 500,
+    grid: { left: 66, right: 20, top: 34, bottom: 34 },
+    tooltip: {
+      trigger: "axis",
+      confine: true,
+      backgroundColor: "#102747",
+      borderWidth: 0,
+      textStyle: { color: "#fff", fontSize: 11 },
+      formatter: (params: Array<{ axisValue: string; data: number | null }>) => {
+        const value = params.find((item) => Number.isFinite(Number(item.data)))?.data;
+        return `<b>${selectedYear}년 ${params[0]?.axisValue ?? ""}</b><br/>수주용량&nbsp;&nbsp;<b>${value === null || value === undefined ? "집계 전" : `${Number(value).toLocaleString("ko-KR")} ${vesselMeta.unit}`}</b>`;
+      },
+    },
+    xAxis: {
+      type: "category",
+      data: Array.from({ length: 12 }, (_, index) => `${index + 1}월`),
+      boundaryGap: false,
+      axisTick: { show: false },
+      axisLine: { lineStyle: { color: "#dbe4ef" } },
+      axisLabel: { color: "#718096", fontSize: 10 },
+    },
+    yAxis: {
+      type: "value",
+      min: 0,
+      name: vesselMeta.unit,
+      nameTextStyle: { color: "#94a3b8", fontSize: 10 },
+      axisLabel: { color: "#718096", fontSize: 10, formatter: formatCompactOrder },
+      splitNumber: 4,
+      splitLine: { lineStyle: { color: "#e7edf5", type: "dashed" } },
+    },
+    series: [{
+      name: "월별 수주용량",
+      type: "line",
+      data: monthlyValues,
+      connectNulls: false,
+      smooth: 0.2,
+      symbol: "circle",
+      symbolSize: 5,
+      lineStyle: { color: vesselMeta.color, width: 2.5 },
+      itemStyle: { color: vesselMeta.color, borderColor: "#fff", borderWidth: 2 },
+      areaStyle: { color: `${vesselMeta.color}1f` },
+      markPoint: {
+        symbol: "circle",
+        symbolSize: 15,
+        label: { show: false },
+        data: turningPoints.map((point) => ({
+          name: `${point.month}월 ${point.kind}`,
+          coord: [`${point.month}월`, point.value],
+          value: point.value,
+          itemStyle: { color: point.kind === "고점" ? "#ef4444" : "#2563eb", borderColor: "#fff", borderWidth: 3 },
+        })),
+      },
+    }],
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`/api/v1/master-data?vesselId=${vesselMeta.id}&from=${selectedYear}-01&to=${selectedYear}-12`, { credentials: "same-origin", signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`수주 데이터를 불러오지 못했습니다. (HTTP ${response.status})`);
+        return response.json() as Promise<MasterDataResponse>;
+      })
+      .then((payload) => {
+        const points = payload.rows.flatMap((row) => {
+          const value = row.orderCapacity === null ? Number.NaN : Number(row.orderCapacity);
+          const month = Number(row.period.slice(5, 7));
+          return Number.isFinite(value) && month >= 1 && month <= 12 ? [{ month, value }] : [];
+        }).sort((a, b) => a.month - b.month);
+        setOrdersResult({ key: ordersKey, points, error: "" });
+      })
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setOrdersResult({ key: ordersKey, points: [], error: error instanceof Error ? error.message : "수주 데이터를 불러오지 못했습니다." });
+        }
+      });
+    return () => controller.abort();
+  }, [ordersKey, selectedYear, vesselMeta.id]);
 
   return (
     <section id="yearly-news-panel" role="tabpanel" aria-labelledby="yearly-news-tab" className="mt-6">
@@ -239,24 +383,22 @@ function YearlyNewsArchive() {
               <div><p className="text-[10px] font-semibold tracking-[0.14em] text-slate-400">YEARLY MARKET CURVE</p><h3 className="mt-1 text-base font-bold text-slate-800">{selectedVessel} 연간 지표 흐름</h3></div>
               <span className="text-[11px] text-slate-400">1월 — 12월</span>
             </div>
-            <div className="relative mt-5 h-64 overflow-hidden rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-6" aria-label={`${selectedYear}년 ${selectedVessel} 시장 그래프 자리 표시자`}>
-              <div className="absolute inset-x-5 top-1/4 border-t border-dashed border-slate-200" />
-              <div className="absolute inset-x-5 top-1/2 border-t border-dashed border-slate-200" />
-              <div className="absolute inset-x-5 top-3/4 border-t border-dashed border-slate-200" />
-              <svg className="absolute inset-5 h-[calc(100%-2.5rem)] w-[calc(100%-2.5rem)]" viewBox="0 0 720 210" preserveAspectRatio="none" aria-hidden="true">
-                <path d="M0 150 C80 145 98 92 170 112 S280 168 350 97 S455 34 520 82 S620 152 720 49" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="7 8" className="text-blue-300" />
-                {[{ x: 230, y: 105 }, { x: 520, y: 82 }].slice(0, selectedNews.length).map((point, index) => <circle key={index} cx={point.x} cy={point.y} r="7" fill="white" stroke="currentColor" strokeWidth="3" className="text-blue-600" />)}
-              </svg>
-              <div className="absolute inset-x-5 bottom-4 grid grid-cols-2 gap-3">
-                {selectedNews.map((news) => <span key={news.title} className="rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-center text-[10px] font-semibold text-slate-500 shadow-sm">{news.month} 변곡 시점</span>)}
-              </div>
+            <div className="relative mt-5 min-h-72 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 px-3 pt-3 pb-4" aria-label={`${selectedYear}년 ${selectedVessel} 월별 수주 그래프`}>
+              {ordersLoading ? <div className="grid h-56 place-items-center text-sm text-slate-400">연간 수주 데이터를 불러오는 중입니다.</div>
+                : ordersError ? <div role="alert" className="grid h-56 place-items-center px-6 text-center text-sm text-rose-600">{ordersError}</div>
+                  : orderPoints.length ? <>
+                    <EChartsReact option={chartOption} notMerge lazyUpdate style={{ height: 220, width: "100%" }} />
+                    <div className="grid grid-cols-2 gap-3 px-2">
+                      {turningPoints.map((point) => <span key={point.month} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center text-[10px] font-semibold text-slate-600 shadow-sm"><b className={point.kind === "고점" ? "text-red-500" : "text-blue-600"}>{point.month}월</b> 변곡 시점</span>)}
+                    </div>
+                  </> : <div className="grid h-56 place-items-center text-sm text-slate-400">선택한 기간의 수주 데이터가 없습니다.</div>}
             </div>
           </article>
 
           <aside className="p-5 md:p-7" aria-label={`${selectedYear}년 ${selectedVessel} 변곡점 관련 뉴스`}>
             <div className="flex items-center justify-between"><div><p className="text-[10px] font-semibold tracking-[0.14em] text-slate-400">CONNECTED STORIES</p><h3 className="mt-1 text-base font-bold text-slate-800">{selectedVessel} 변곡점 관련 뉴스</h3></div><span className="text-[11px] text-slate-400">{selectedNews.length}건</span></div>
             <div className="mt-5 grid gap-3">
-              {selectedNews.map((news) => (
+              {displayedNews.map((news) => (
                 <a
                   key={news.title}
                   href={news.articleUrl}
@@ -286,7 +428,7 @@ function YearlyNewsArchive() {
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 to-transparent" />
-                    <span className="absolute bottom-2 left-2 text-[8px] font-bold tracking-[0.12em] text-white/90">{news.month}</span>
+                    <span className="absolute bottom-2 left-2 text-[8px] font-bold tracking-[0.12em] text-white/90">{news.turningPoint ? `${news.turningPoint.month}월 변곡 연결` : news.month}</span>
                   </div>
                   <div className="min-w-0 py-0.5">
                     <div className="flex items-start justify-between gap-2">
@@ -358,7 +500,7 @@ export default function Newsroom() {
       <section aria-labelledby="newsroom-heading">
         <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold tracking-[0.2em] text-blue-700">SHIP SIGNAL · INDUSTRY NEWS</p>
+            <p className="text-xs font-semibold tracking-[0.2em] text-blue-700">SHIPULSE · INDUSTRY NEWS</p>
             <h1 id="newsroom-heading" className="mt-2 text-3xl font-bold tracking-[-0.04em] text-slate-900 md:text-4xl">뉴스룸</h1>
             <p className="mt-2 text-sm text-slate-500">조선·해운·물류 산업의 흐름을 전합니다.</p>
           </div>

@@ -70,7 +70,17 @@ The frontend uses Google OpenID Connect to sign users in. Express verifies the a
 3. Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` in the ignored `backend/.env`. Keep `GOOGLE_REDIRECT_URI=http://localhost:3001/api/auth/google/callback` and `FRONTEND_URL=http://localhost:5173` for local development. The redirect URI must match the Google Cloud setting exactly.
 4. Start the API with `npm run dev` in `backend/` and the frontend with `npm run dev` in `frontend/`. Visit `http://localhost:5173` and choose **Google 계정으로 계속하기**.
 
-The Vite development server proxies `/api` to the Express server. In deployment, route frontend `/api` traffic to Express on the same site, configure both URLs for HTTPS, and register the deployed callback URI in Google Cloud Console. Never commit the client secret.
+The Vite development server proxies `/api` to the Express server. The production frontend uses a Vercel rewrite so browser requests to `https://shipulse.vercel.app/api/*` are forwarded to the backend without changing the browser origin. Configure the backend Vercel project with the following production values:
+
+```text
+DATABASE_URL=<publicly reachable PostgreSQL connection string>
+FRONTEND_URL=https://shipulse.vercel.app
+GOOGLE_CLIENT_ID=<Google OAuth client ID>
+GOOGLE_CLIENT_SECRET=<Google OAuth client secret>
+GOOGLE_REDIRECT_URI=https://shipulse.vercel.app/api/auth/google/callback
+```
+
+Register the same `GOOGLE_REDIRECT_URI` as an authorized redirect URI in Google Cloud Console. A database URL pointing to `localhost` cannot be reached by Vercel. Never commit deployment credentials or the client secret.
 
 Auth endpoints: `GET /api/auth/google` starts login, `GET /api/auth/google/callback` completes it, `GET /api/auth/me` returns the current user, and `POST /api/auth/logout` revokes the session.
 

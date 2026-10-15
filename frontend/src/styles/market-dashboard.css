@@ -275,9 +275,12 @@
 .overview-analysis-grid .overview-panel > header { min-height: 45px; }
 .driver-list { padding: 8px 16px 12px; }
 .driver-row { display: grid; grid-template-columns: 118px 1fr 40px; align-items: center; gap: 7px; min-height: 24px; color: #53667f; font-size: 10px; }
-.overview-core-driver-panel .driver-list { padding: 20px 22px; }
-.overview-core-driver-panel .driver-row { grid-template-columns: minmax(118px, 1fr) minmax(0, 1.6fr) 44px; min-height: 47px; font-size: 11px; }
+.overview-analysis-grid .overview-driver-panel .driver-row { grid-template-columns: minmax(220px, .8fr) minmax(0, 2fr) 44px; min-height: 28px; }
+.overview-core-driver-panel .driver-list { padding: 8px 22px; }
+.overview-core-driver-panel .driver-row { grid-template-columns: minmax(118px, 1fr) minmax(0, 1.6fr) 44px; min-height: 32px; font-size: 11px; }
 .driver-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.overview-analysis-grid .overview-driver-panel .driver-row > span { overflow: visible; line-height: 1.35; text-overflow: clip; text-wrap: pretty; white-space: normal; word-break: keep-all; }
+.overview-core-driver-panel .driver-row > span { display: -webkit-box; max-height: 2.7em; line-height: 1.35; overflow-wrap: normal; text-wrap: pretty; white-space: normal; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .driver-row i { height: 13px; background: #eef3f8; }
 .driver-row i b { display: block; height: 100%; }
 .driver-row strong { color: #2f74de; font-size: 10px; }
@@ -352,6 +355,24 @@
 .market-dashboard.dashboard-dark [class~="text-emerald-600"] { color: #34d399; }
 .market-dashboard.dashboard-dark [class~="text-rose-600"] { color: #fb7185; }
 .market-dashboard.dashboard-dark [class~="text-[#173d70]"] { color: #93c5fd; }
+.market-dashboard.dashboard-dark .overview-panel { border-color: #334155; background: rgba(30,41,59,.97); box-shadow: 0 12px 28px rgba(2,6,23,.24); }
+.market-dashboard.dashboard-dark .overview-panel h3 { color: #f1f5f9; }
+.market-dashboard.dashboard-dark .overview-panel h3 svg { color: #94a3b8; }
+.market-dashboard.dashboard-dark .overview-panel > header > span,
+.market-dashboard.dashboard-dark .overview-panel > header > button { border-color: #475569; color: #cbd5e1; background: #172235; }
+.market-dashboard.dashboard-dark .overview-vessel-select { border-color: #475569; color: #e2e8f0; background: #172235; }
+.market-dashboard.dashboard-dark .overview-timeseries-panel header nav { border-color: #334155; background: #172235; }
+.market-dashboard.dashboard-dark .overview-timeseries-panel header nav button { color: #94a3b8; }
+.market-dashboard.dashboard-dark .overview-timeseries-panel header nav button.is-active { color: #93c5fd; background: #334155; box-shadow: none; }
+.market-dashboard.dashboard-dark .overview-timeseries-panel header nav button:disabled { color: #64748b; }
+.market-dashboard.dashboard-dark .overview-chart-placeholder { color: #94a3b8; }
+.market-dashboard.dashboard-dark .overview-heatmap-legend { color: #cbd5e1; background: #1e293b; }
+.market-dashboard.dashboard-dark .driver-row { color: #cbd5e1; }
+.market-dashboard.dashboard-dark .driver-row i { background: #334155; }
+.market-dashboard.dashboard-dark .driver-row strong { color: #60a5fa; }
+.market-dashboard.dashboard-dark .driver-list > small { color: #94a3b8; }
+.market-dashboard.dashboard-dark #dashboard-action-menu button:hover { color: #f1f5f9; background-color: #334155; }
+.market-dashboard.dashboard-dark #dashboard-action-menu button:hover svg { color: #cbd5e1; }
 .market-dashboard.dashboard-dark .app-brand { color: #f1f5f9; }
 .market-dashboard.dashboard-dark .app-brand-mark { color: #071b32; background: #e2e8f0; box-shadow: none; }
 .market-dashboard.dashboard-dark .app-brand-copy small { color: #94a3b8; }

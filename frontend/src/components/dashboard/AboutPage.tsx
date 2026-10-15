@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   Factory,
   Newspaper,
+  PanelLeftOpen,
   Pause,
   Play,
 } from "lucide-react";
@@ -171,32 +172,51 @@ const frequentlyAskedQuestions = [
 
 function CountUpMetric({ end, suffix, minimumDigits = 1 }: { end: number; suffix?: string; minimumDigits?: number }) {
   const animationFrame = useRef(0);
+  const metricRef = useRef<HTMLElement>(null);
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      animationFrame.current = requestAnimationFrame(() => setValue(end));
-      return () => cancelAnimationFrame(animationFrame.current);
-    }
+    const metric = metricRef.current;
+    if (!metric) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const startedAt = performance.now();
-    const duration = 450;
-    const tick = (now: number) => {
-      const progress = Math.min((now - startedAt) / duration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(end * easedProgress));
-      if (progress < 1) animationFrame.current = requestAnimationFrame(tick);
+    const play = () => {
+      cancelAnimationFrame(animationFrame.current);
+      if (reduceMotion) {
+        setValue(end);
+        return;
+      }
+      setValue(0);
+      const startedAt = performance.now();
+      const duration = 450;
+      const tick = (now: number) => {
+        const progress = Math.min((now - startedAt) / duration, 1);
+        const easedProgress = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(end * easedProgress));
+        if (progress < 1) animationFrame.current = requestAnimationFrame(tick);
+      };
+      animationFrame.current = requestAnimationFrame(tick);
     };
 
-    animationFrame.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(animationFrame.current);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) play();
+      else {
+        cancelAnimationFrame(animationFrame.current);
+        setValue(0);
+      }
+    }, { threshold: 0.35 });
+    observer.observe(metric);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(animationFrame.current);
+    };
   }, [end]);
 
   const formattedValue = value.toLocaleString("ko-KR", { minimumIntegerDigits: minimumDigits });
   const formattedEnd = end.toLocaleString("ko-KR", { minimumIntegerDigits: minimumDigits });
 
   return (
-    <strong aria-label={`${formattedEnd}${suffix ?? ""}`}>
+    <strong ref={metricRef} aria-label={`${formattedEnd}${suffix ?? ""}`}>
       <span className="details-count-number" aria-hidden="true">{formattedValue}</span>
       {suffix && <span className="details-count-unit" aria-hidden="true">{suffix}</span>}
     </strong>
@@ -248,6 +268,7 @@ export default function AboutPage({ onExplore, onOpenNewsroom }: { onExplore: ()
   const [activeStep, setActiveStep] = useState(0);
   const [activeCase, setActiveCase] = useState(0);
   const [isCasePlaying, setIsCasePlaying] = useState(true);
+  const [isNavigationOpen, setIsNavigationOpen] = useState(true);
   const [activeSection, setActiveSection] = useState("details-top");
   const [validationVessel, setValidationVessel] = useState<NotebookVesselId>("tanker");
   const step = analysisSteps[activeStep];
@@ -275,23 +296,32 @@ export default function AboutPage({ onExplore, onOpenNewsroom }: { onExplore: ()
 
   return (
     <main className="details-page">
-      <nav className="details-floating-nav" aria-label="Details 페이지 섹션 이동">
-        {detailNavigation.map((item) => (
-          <a key={item.id} href={`#${item.id}`} aria-current={activeSection === item.id ? "location" : undefined} onClick={(event) => {
-            event.preventDefault();
-            document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth" });
-          }}>
-            <b>{item.label}</b>
-          </a>
-        ))}
-      </nav>
+      {isNavigationOpen ? (
+        <nav className="details-floating-nav" aria-label="Details 페이지 섹션 이동">
+          <button className="details-floating-nav-close" type="button" aria-label="섹션 내비게이션 닫기" onClick={() => setIsNavigationOpen(false)}>
+            <span aria-hidden="true">×</span>
+          </button>
+          {detailNavigation.map((item) => (
+            <a key={item.id} href={`#${item.id}`} aria-current={activeSection === item.id ? "location" : undefined} onClick={(event) => {
+              event.preventDefault();
+              document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth" });
+            }}>
+              <b>{item.label}</b>
+            </a>
+          ))}
+        </nav>
+      ) : (
+        <button className="details-floating-nav-open" type="button" aria-label="섹션 내비게이션 열기" onClick={() => setIsNavigationOpen(true)}>
+          <PanelLeftOpen aria-hidden="true" />
+        </button>
+      )}
 
       <section id="details-top" className="details-hero">
         <img src="/images/about/maritime-panorama.png" alt="항만과 선박이 이어지는 해양 산업 전경" />
         <div className="details-hero-shade" />
         <div className="details-hero-copy">
           <div className="details-hero-message">
-            <p className="details-eyebrow">SHIP SIGNAL · DATA METHODOLOGY</p>
+            <p className="details-eyebrow">SHIPULSE · DATA METHODOLOGY</p>
             <h1>데이터 분석과<br /><em>조선 시장의 미래</em></h1>
             <p>Data Analysis팀이 공유하는 조선/해양/물류 인사이트와 판단 기준</p>
           </div>
@@ -352,7 +382,7 @@ export default function AboutPage({ onExplore, onOpenNewsroom }: { onExplore: ()
         <div className="details-method-heading">
           <p className="details-eyebrow">02 · HOW WE ANALYZE</p>
           <h2><span>분석 속도와</span><br /><span>판단의 일관성을</span><br /><span>높입니다.</span></h2>
-          <p>원본 데이터에서 업무의 신호까지, 각 단계를 선택해 SHIP SIGNAL의 분석 흐름과 효과를 살펴보세요.</p>
+          <p>원본 데이터에서 업무의 신호까지, 각 단계를 선택해 SHIPULSE의 분석 흐름과 효과를 살펴보세요.</p>
           <div className="details-method-tabs" role="tablist" aria-label="데이터 분석 단계">
             {analysisSteps.map((item, index) => (
               <button key={item.number} type="button" role="tab" aria-selected={activeStep === index} aria-controls="details-method-panel" onClick={() => setActiveStep(index)}>

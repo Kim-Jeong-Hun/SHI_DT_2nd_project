@@ -112,7 +112,7 @@ function comboOption(combo: ComboData, darkMode: boolean) {
       { type: "value", min: -0.5, max: combo.quarters.length - 0.5, show: false },
     ],
     yAxis: {
-      type: "value", name: "전체 평균=100", nameTextStyle: { color: style.text },
+      type: "value",
       splitLine: { lineStyle: { color: style.grid } },
       axisLabel: { color: style.text, fontSize: 11 },
     },
@@ -256,7 +256,6 @@ export default function ReportRegimeCharts({ vesselId, vesselLabel, darkMode }: 
       <div id="regime-panel" role="tabpanel" aria-labelledby={`regime-tab-${activeRegime}`}>
         <RegimeRow key={activeRegime} pair={activePair} darkMode={darkMode} />
       </div>
-      <p className="mt-3 text-[11px] text-slate-500">자료: 군집분석 전체과정 보고서 3절 · 원본 분기 수주량과 월별 운임을 평균=100 지수로 표시</p>
     </div>
   );
 }

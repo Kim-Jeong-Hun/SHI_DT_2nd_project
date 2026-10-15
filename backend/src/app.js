@@ -1,8 +1,11 @@
 import express from "express";
+import { fileURLToPath } from "node:url";
+import pg from "pg";
 import { createAuth } from "./auth.js";
 import { getCustomForecastConfig, NOTEBOOK_FORECAST_VESSELS, runCustomForecast } from "./forecastRunner.js";
 
 const PLAN_LEVEL = { explore: 1, professional: 2, enterprise: 3 };
+const SHIP_PULSE_HTML = fileURLToPath(new URL("../private/ship-pulse.html", import.meta.url));
 
 export function createApp(pool, authOptions = {}) {
   const app = express();
@@ -113,6 +116,16 @@ export function createApp(pool, authOptions = {}) {
     }
   });
 
+  app.get("/api/v1/ship-pulse", requirePlan("enterprise"), (_request, response, next) => {
+    response.set({
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    });
+    response.sendFile(SHIP_PULSE_HTML, (error) => {
+      if (error) next(error);
+    });
+  });
+
   app.get("/api/v1/market/orders", async (request, response) => {
     const year = Number(request.query.year);
     if (typeof request.query.year !== "string" || !/^\d{4}$/.test(request.query.year) ||
@@ -182,4 +195,20 @@ export function createApp(pool, authOptions = {}) {
   });
 
   return app;
+}
+
+let vercelApp;
+
+export default function handleVercelRequest(request, response) {
+  if (!vercelApp) {
+    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+    vercelApp = createApp(pool, {
+      frontendUrl: process.env.FRONTEND_URL,
+      googleClientId: process.env.GOOGLE_CLIENT_ID,
+      googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      googleRedirectUri: process.env.GOOGLE_REDIRECT_URI,
+    });
+  }
+
+  return vercelApp(request, response);
 }

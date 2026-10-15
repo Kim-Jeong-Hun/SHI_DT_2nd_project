@@ -86,7 +86,11 @@
 .custom-run-button.is-ready:disabled { opacity:.65; cursor:wait; }
 .custom-run-error { margin:0; padding:11px 13px; border:1px solid #fecdd3; border-radius:9px; background:#fff1f2; color:#be123c; font-size:12px; line-height:1.6; }
 .custom-forecast-preview { position: sticky; top: 96px; overflow: hidden; }
-.custom-preview-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid #edf0f3; color: #506075; font-size: 11px; font-weight: 800; letter-spacing: .13em; }
+.custom-preview-head { display: flex; flex-wrap:wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 17px 18px; border-bottom: 1px solid #edf0f3; color: #506075; font-size: 11px; font-weight: 800; letter-spacing: .13em; }
+.custom-preview-save-actions { display:flex; justify-content:center; padding:14px 18px 0; }
+.custom-save-button { display:inline-flex; min-width:180px; height:40px; align-items:center; justify-content:center; gap:7px; padding:0 16px; border:0; border-radius:8px; background:#176f9b; color:#fff; font:inherit; font-size:12px; font-weight:750; cursor:pointer; box-shadow:0 5px 14px #176f9b26; transition:background .16s,transform .16s; }
+.custom-save-button:hover { background:#125f86; transform:translateY(-1px); }
+.custom-save-button:focus-visible { outline:3px solid #176f9b26; outline-offset:2px; }
 .custom-preview-waiting { padding: 6px 8px; border-radius: 999px; background: #fff7e7; color: #a4782b; font-size: 9px; letter-spacing: .08em; }
 .custom-preview-waiting.is-complete { background:#eaf8f3; color:#137563; }
 .custom-result-chart { height:258px; margin:12px 12px 0; }

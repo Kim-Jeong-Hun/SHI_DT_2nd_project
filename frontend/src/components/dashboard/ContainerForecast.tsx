@@ -1,5 +1,5 @@
 import EChartsReact from "../common/LocalizedECharts";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import type { VesselId } from "../../data/mockMarket";
 import { NOTEBOOK_FORECASTS, isNotebookVessel } from "../../data/notebookForecasts";
 import { NOTEBOOK_VESSEL_IDS } from "../../data/notebookForecasts";
@@ -48,7 +48,6 @@ export function PortfolioForecast({ darkMode }: { darkMode: boolean }) {
         ))}
       </div>
       <div className="min-h-[280px] flex-1 rounded-xl border border-slate-100 bg-white p-2"><EChartsReact option={option} notMerge style={{ height: "100%", minHeight: 280, width: "100%" }} /></div>
-      <p className="flex gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-800"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />각 선종은 DWT·TEU·CBM처럼 단위가 다르므로 용량을 직접 합산하지 않습니다. 증감률 역시 모델 전망의 방향 신호로 해석해야 합니다.</p>
     </section>
   );
 }
@@ -63,9 +62,19 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
   const months = forecast.monthly.map(({ month }) => `${Number(month.slice(5))}월`);
   const monthlyValues = forecast.monthly.map(({ value }) => value / 10_000);
   const currentMonthIndex = forecast.monthly.findIndex(({ month }) => month === "2026-10");
-  const uncertainty = forecast.conformalRadius90 / 10_000;
-  const confidenceLower = monthlyValues.map((value) => Math.max(0, value - uncertainty));
-  const confidenceBand = monthlyValues.map((value, index) => value + uncertainty - confidenceLower[index]);
+  const intervals = new Map(forecast.predictionIntervals95.map((interval) => [interval.month, interval]));
+  const confidenceLower = monthlyValues.map((value, index) => {
+    if (index < currentMonthIndex) return null;
+    if (index === currentMonthIndex) return value;
+    const interval = intervals.get(forecast.monthly[index].month);
+    return interval ? interval.lower / 10_000 : null;
+  });
+  const confidenceBand = monthlyValues.map((_value, index) => {
+    if (index < currentMonthIndex) return null;
+    if (index === currentMonthIndex) return 0;
+    const interval = intervals.get(forecast.monthly[index].month);
+    return interval ? (interval.upper - interval.lower) / 10_000 : null;
+  });
   const highIndex = monthlyValues.indexOf(Math.max(...monthlyValues));
   const lowIndex = monthlyValues.indexOf(Math.min(...monthlyValues));
   const materialSwing = (monthlyValues[highIndex] - monthlyValues[lowIndex]) / Math.max(monthlyValues[lowIndex], 1) >= 0.25;
@@ -76,7 +85,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
   const option = {
     animationDuration: 850,
     grid: { left: 70, right: 30, top: 58, bottom: 45 },
-    legend: { top: 8, left: 56, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: text, fontSize: 10 }, data: ["7~10월 추정", "11~12월 전망", "90% 예측구간"] },
+    legend: { top: 8, left: "center", itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: text, fontSize: 10 }, data: ["7~10월 추정", "11~12월 전망", "95% 예측구간"] },
     tooltip: {
       trigger: "axis", confine: true, axisPointer: { type: "line", lineStyle: { color: "#94a3b8", type: "dashed" } },
       backgroundColor: darkMode ? "#0f172a" : "#fff", borderColor: grid,
@@ -86,11 +95,10 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         const point = forecast.monthly[index];
         const previous = forecast.monthly[index - 1];
         const change = previous ? (point.value / previous.value - 1) * 100 : undefined;
-        const lower = Math.max(0, point.value - forecast.conformalRadius90);
-        const upper = point.value + forecast.conformalRadius90;
+        const interval = intervals.get(point.month);
         const pointLabel = index === highIndex ? `<b style="color:#ef4444">예상 고점</b><br/>` : index === lowIndex ? `<b style="color:#2563eb">예상 저점</b><br/>` : "";
         const status = index === currentMonthIndex ? "현재월 추정" : index > currentMonthIndex ? "잔여 전망" : `${index < 3 ? "3분기" : "4분기"} 전망`;
-        return `${pointLabel}<b>${point.month}</b> · ${status}<br/>월별 전망&nbsp;&nbsp;<b>${number(point.value, 1)} ${forecast.unit}</b>${change === undefined ? "" : `<br/>전월 대비&nbsp;&nbsp;<b style="color:${change >= 0 ? "#16a34a" : "#e11d48"}">${change > 0 ? "+" : ""}${change.toFixed(1)}%</b>`}<br/><span style="color:#64748b">90% 범위&nbsp;&nbsp;${number(lower, 1)}–${number(upper, 1)} ${forecast.unit}</span>`;
+        return `${pointLabel}<b>${point.month}</b> · ${status}<br/>월별 전망&nbsp;&nbsp;<b>${number(point.value, 1)} ${forecast.unit}</b>${change === undefined ? "" : `<br/>전월 대비&nbsp;&nbsp;<b style="color:${change >= 0 ? "#16a34a" : "#e11d48"}">${change > 0 ? "+" : ""}${change.toFixed(1)}%</b>`}${interval ? `<br/><span style="color:#64748b">95% 범위&nbsp;&nbsp;${number(interval.lower, 1)}–${number(interval.upper, 1)} ${forecast.unit} · n=${interval.calibrationSize}</span>` : ""}`;
       },
     },
     xAxis: {
@@ -106,7 +114,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
     },
     series: [
       { name: "예측구간 하한", type: "line", stack: "quarter-confidence", symbol: "none", data: confidenceLower, lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, tooltip: { show: false }, silent: true, z: 1 },
-      { name: "90% 예측구간", type: "line", stack: "quarter-confidence", symbol: "none", data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .65 }, areaStyle: { color: "rgba(59,130,246,.2)" }, tooltip: { show: false }, silent: true, z: 1 },
+      { name: "95% 예측구간", type: "line", stack: "quarter-confidence", symbol: "none", data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .65 }, areaStyle: { color: "rgba(59,130,246,.2)" }, tooltip: { show: false }, silent: true, z: 1 },
       {
         name: "7~10월 추정", type: "line", smooth: 0.24, symbol: "none",
         data: monthlyValues.map((value, index) => index <= currentMonthIndex ? value : null),
@@ -189,10 +197,6 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         </div>
       </div>
 
-      <div className="grid gap-2 text-[11px] leading-5 text-slate-500 md:grid-cols-2">
-        <p className="flex gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />{forecast.strategy} · {forecast.featureCount}개 특성 · 검증 QAE {compact(forecast.validationMae, forecast.unit, language)}</p>
-        <p className="flex gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />Test 상대오차 {forecast.testRelativeError.toFixed(1)}%. 예측 동인은 인과관계가 아니며, 의사결정 전 최신 시장정보와 함께 검토해야 합니다.</p>
-      </div>
     </section>
   );
 }

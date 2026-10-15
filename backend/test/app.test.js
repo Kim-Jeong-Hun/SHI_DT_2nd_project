@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { after, before, test } from "node:test";
-import { createApp } from "../src/app.js";
+import handleVercelRequest, { createApp } from "../src/app.js";
 
 const calls = [];
 const pool = {
@@ -24,6 +24,10 @@ let server;
 let baseUrl;
 const authenticated = { headers: { cookie: "shi_session=test-session" } };
 const exploreAuthenticated = { headers: { cookie: "shi_session=explore-session" } };
+
+test("exports a Vercel-compatible request handler", () => {
+  assert.equal(typeof handleVercelRequest, "function");
+});
 
 before(async () => {
   server = createApp(pool).listen(0);
@@ -77,8 +81,18 @@ test("custom forecast accepts only supported vessel types", async () => {
 test("plan-restricted APIs reject insufficient subscriptions", async () => {
   const masterData = await fetch(`${baseUrl}/api/v1/master-data?vesselId=container`, exploreAuthenticated);
   const customForecast = await fetch(`${baseUrl}/api/v1/custom-forecast/config?vesselId=container`, exploreAuthenticated);
+  const shipPulse = await fetch(`${baseUrl}/api/v1/ship-pulse`, exploreAuthenticated);
   assert.equal(masterData.status, 403);
   assert.equal(customForecast.status, 403);
+  assert.equal(shipPulse.status, 403);
+});
+
+test("ShipPulse HTML is available to Enterprise subscriptions", async () => {
+  const response = await fetch(`${baseUrl}/api/v1/ship-pulse`, authenticated);
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type"), /^text\/html/);
+  assert.equal(response.headers.get("cache-control"), "private, no-store");
+  assert.match(await response.text(), /수주용량과 CSV 지표 보기/);
 });
 
 test("unconfigured Google login returns to the login screen", async () => {

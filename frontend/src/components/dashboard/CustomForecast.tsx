@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import EChartsReact from "../common/LocalizedECharts";
 import type { EChartsType } from "echarts";
-import { AlertCircle, BookOpen, CheckCircle2, DatabaseZap, LoaderCircle, Play, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { AlertCircle, BookOpen, CheckCircle2, DatabaseZap, Download, LoaderCircle, Play, RotateCcw, SlidersHorizontal } from "lucide-react";
 import "../../styles/custom-forecast.css";
 import DataDictionary from "./DataDictionary";
 
@@ -36,6 +36,96 @@ const pipelineByVessel: Record<VesselId, Pick<ScenarioConfig, "vessel" | "unit" 
   chemical: { vessel: "케미컬 탱커", unit: "DWT", model: "XGBoost", strategy: "Adaptive 24·36·48개월 · Uniform · VIF 10", leadMonths: 6, featureCount: 16 },
 };
 const formatted = (value: number, digits = 1) => value.toLocaleString("ko-KR", { maximumFractionDigits: digits });
+const escapeHtml = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+})[character] ?? character);
+
+function reportChart(result: ScenarioResult) {
+  const width = 920;
+  const height = 340;
+  const padding = { top: 32, right: 34, bottom: 54, left: 86 };
+  const months = [...new Set([...result.actuals.map((item) => item.month), ...result.forecasts.map((item) => item.month)])].sort();
+  const actualByMonth = new Map(result.actuals.map((item) => [item.month, item.value]));
+  const forecastByMonth = new Map(result.forecasts.map((item) => [item.month, item]));
+  const lastActual = result.actuals.at(-1);
+  const values = [
+    ...result.actuals.map((item) => item.value),
+    ...result.forecasts.flatMap((item) => [item.baseline, item.scenario]),
+  ];
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  const margin = Math.max((rawMax - rawMin) * 0.12, rawMax * 0.04, 1);
+  const min = Math.max(0, rawMin - margin);
+  const max = rawMax + margin;
+  const plotWidth = width - padding.left - padding.right;
+  const plotHeight = height - padding.top - padding.bottom;
+  const x = (index: number) => padding.left + (months.length === 1 ? plotWidth / 2 : index / (months.length - 1) * plotWidth);
+  const y = (value: number) => padding.top + (max - value) / Math.max(max - min, 1) * plotHeight;
+  const pathFor = (valueAt: (month: string) => number | undefined) => {
+    let drawing = false;
+    return months.map((item, index) => {
+      const value = valueAt(item);
+      if (value === undefined) { drawing = false; return ""; }
+      const command = drawing ? "L" : "M";
+      drawing = true;
+      return `${command}${x(index).toFixed(1)},${y(value).toFixed(1)}`;
+    }).filter(Boolean).join(" ");
+  };
+  const forecastValue = (month: string, key: "baseline" | "scenario") => forecastByMonth.get(month)?.[key]
+    ?? (month === lastActual?.month ? lastActual.value : undefined);
+  const grid = Array.from({ length: 5 }, (_, index) => {
+    const ratio = index / 4;
+    const lineY = padding.top + ratio * plotHeight;
+    const label = max - ratio * (max - min);
+    return `<line x1="${padding.left}" y1="${lineY}" x2="${width - padding.right}" y2="${lineY}" stroke="#e2e8f0" stroke-dasharray="4 5"/><text x="${padding.left - 12}" y="${lineY + 4}" text-anchor="end">${escapeHtml(formatted(label, 0))}</text>`;
+  }).join("");
+  const labels = months.map((item, index) => `<text x="${x(index)}" y="${height - 22}" text-anchor="middle">${escapeHtml(item)}</text>`).join("");
+  const affected = new Set(result.affectedForecasts.map((item) => item.month));
+  const points = result.forecasts.map((item) => {
+    const index = months.indexOf(item.month);
+    return `<circle cx="${x(index)}" cy="${y(item.scenario)}" r="${affected.has(item.month) ? 5 : 3.5}" fill="#176f9b" stroke="#fff" stroke-width="2"/>`;
+  }).join("");
+
+  return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(result.vessel)} 기준 전망과 수정 전망 비교" xmlns="http://www.w3.org/2000/svg">
+    <style>text{fill:#64748b;font:11px Arial,sans-serif}</style>
+    ${grid}${labels}
+    <path d="${pathFor((item) => actualByMonth.get(item))}" fill="none" stroke="#0f6f98" stroke-width="3"/>
+    <path d="${pathFor((item) => forecastValue(item, "baseline"))}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="8 6"/>
+    <path d="${pathFor((item) => forecastValue(item, "scenario"))}" fill="none" stroke="#176f9b" stroke-width="3.5"/>
+    ${points}
+    <text x="${padding.left}" y="18" fill="#475569">수주용량 (${escapeHtml(result.unit)})</text>
+  </svg>`;
+}
+
+function createForecastReport(result: ScenarioResult, config: ScenarioConfig, observationMonth: string, inputs: Record<string, string>) {
+  const primary = result.affectedForecasts.reduce<ScenarioResult["forecasts"][number] | undefined>((best, item) => !best || Math.abs(item.change) > Math.abs(best.change) ? item : best, undefined);
+  const primaryChange = primary?.change ?? 0;
+  const changeRate = primary?.baseline ? primaryChange / primary.baseline * 100 : 0;
+  const directionClass = primaryChange > 0 ? "up" : primaryChange < 0 ? "down" : "flat";
+  const generatedAt = new Date().toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" });
+  const forecastRows = result.forecasts.map((item) => `<tr><td>${escapeHtml(item.month)}</td><td>${escapeHtml(formatted(item.baseline))} ${escapeHtml(result.unit)}</td><td>${escapeHtml(formatted(item.scenario))} ${escapeHtml(result.unit)}</td><td class="${item.change > 0 ? "up" : item.change < 0 ? "down" : "flat"}">${item.change > 0 ? "+" : ""}${escapeHtml(formatted(item.change))}</td><td>${item.affected ? "반영" : "변동 없음"}</td></tr>`).join("");
+  const inputRows = config.inputSources.map((item) => {
+    const known = item.observations[observationMonth] as number | undefined;
+    const supplied = inputs[item.id];
+    const value = known ?? (supplied === undefined || supplied.trim() === "" ? "-" : Number(supplied));
+    return `<tr><td>${escapeHtml(item.label)}</td><td>${escapeHtml(value === "-" ? value : formatted(value))}</td><td>${escapeHtml(item.unit)}</td><td>${known === undefined ? "사용자 입력" : "기존 데이터"}</td></tr>`;
+  }).join("");
+
+  return `<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SHIPULSE · ${escapeHtml(result.vessel)} 사용자 지정 예측</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#17243a;font-family:Arial,"Noto Sans KR",sans-serif}main{width:min(1100px,calc(100% - 32px));margin:36px auto}.report{overflow:hidden;border:1px solid #dce3ea;border-radius:20px;background:#fff;box-shadow:0 18px 50px #17243a12}.hero{padding:34px 38px;background:#102b4e;color:#fff}.brand{font-size:12px;font-weight:800;letter-spacing:.18em;color:#7dd3fc}.hero h1{margin:12px 0 6px;font-size:30px}.hero p{margin:0;color:#bfdbfe}.meta,.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e2e8f0}.meta div,.metrics div{padding:18px 20px;background:#fff}.meta span,.metrics span{display:block;color:#64748b;font-size:11px}.meta b,.metrics b{display:block;margin-top:7px;font-size:15px}.metrics b{font-size:21px}.up{color:#dc2626!important}.down{color:#2563eb!important}.flat{color:#64748b!important}.section{padding:28px 38px;border-top:1px solid #e8edf2}.section h2{margin:0 0 16px;font-size:18px}.legend{display:flex;gap:18px;margin:0 0 12px;color:#64748b;font-size:12px}.legend i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}.chart{width:100%;overflow:auto;border:1px solid #edf1f5;border-radius:14px;padding:10px}.chart svg{display:block;min-width:760px;width:100%;height:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:12px 10px;border-bottom:1px solid #e8edf2;text-align:left}th{background:#f8fafc;color:#64748b}.note{padding:18px 38px;background:#f8fafc;color:#64748b;font-size:11px;line-height:1.7}@media(max-width:720px){.meta,.metrics{grid-template-columns:repeat(2,1fr)}.hero,.section{padding:24px}.hero h1{font-size:24px}}@media print{body{background:#fff}main{width:100%;margin:0}.report{border:0;box-shadow:none}.section{break-inside:avoid}}
+</style></head><body><main><article class="report">
+<header class="hero"><div class="brand">SHIPULSE · CUSTOM FORECAST</div><h1>${escapeHtml(result.vessel)} 사용자 지정 예측 결과</h1><p>${escapeHtml(observationMonth)} 시장 정보를 반영한 수주용량 전망 보고서</p></header>
+<section class="meta"><div><span>저장 시각</span><b>${escapeHtml(generatedAt)}</b></div><div><span>예측 단위</span><b>${escapeHtml(result.unit)}</b></div><div><span>모델</span><b>${escapeHtml(result.model)}</b></div><div><span>반영 규칙</span><b>관측월 → D+${escapeHtml(result.leadMonths)}</b></div></section>
+<section class="metrics"><div><span>전망 변화</span><b class="${directionClass}">${primary?.change && primary.change > 0 ? "+" : ""}${escapeHtml(formatted(primary?.change ?? 0))} · ${changeRate > 0 ? "+" : ""}${escapeHtml(changeRate.toFixed(1))}%</b></div><div><span>기준 전망</span><b>${escapeHtml(formatted(primary?.baseline ?? 0))} ${escapeHtml(result.unit)}</b></div><div><span>수정 전망</span><b class="${directionClass}">${escapeHtml(formatted(primary?.scenario ?? 0))} ${escapeHtml(result.unit)}</b></div><div><span>가장 큰 변경점</span><b>${escapeHtml(primary?.month ?? "-")}</b></div></section>
+<section class="section"><h2>전망 비교</h2><div class="legend"><span><i style="background:#0f6f98"></i>실제 데이터</span><span><i style="background:#94a3b8"></i>기준 전망</span><span><i style="background:#176f9b"></i>새 정보 반영 전망</span></div><div class="chart">${reportChart(result)}</div></section>
+<section class="section"><h2>월별 예측 결과</h2><table><thead><tr><th>예측월</th><th>기준 전망</th><th>수정 전망</th><th>변화량</th><th>반영 여부</th></tr></thead><tbody>${forecastRows}</tbody></table></section>
+<section class="section"><h2>${escapeHtml(observationMonth)} 입력 정보</h2><table><thead><tr><th>지표</th><th>값</th><th>단위</th><th>출처</th></tr></thead><tbody>${inputRows}</tbody></table></section>
+<section class="section"><h2>분석 조건</h2><p>${escapeHtml(result.assumption)}</p><p>${escapeHtml(result.strategy)}</p></section>
+<footer class="note">본 결과는 과거 데이터와 검증된 모델을 기반으로 한 의사결정 보조 정보입니다. 계약, 투자, 생산 또는 조달 판단에는 최신 시장 정보와 현업 검토를 함께 반영해야 합니다.</footer>
+</article></main></body></html>`;
+}
 
 function ForecastWorkspace() {
   const [vesselId, setVesselId] = useState<VesselId>("container");
@@ -143,6 +233,18 @@ function ForecastWorkspace() {
   const primary = result?.affectedForecasts.reduce((best, item) => Math.abs(item.change) > Math.abs(best.change) ? item : best, result.affectedForecasts[0]);
   const changeRate = primary && primary.baseline ? primary.change / primary.baseline * 100 : 0;
   const changeClass = primary ? primary.change > 0 ? "is-up" : primary.change < 0 ? "is-down" : "is-flat" : "";
+  const saveForecastResult = () => {
+    if (!result || !config) return;
+    const report = createForecastReport(result, config, month, values);
+    const url = URL.createObjectURL(new Blob(["\uFEFF", report], { type: "text/html;charset=utf-8" }));
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `ship-signal_custom-forecast_${vesselId}_${month}_${new Date().toISOString().slice(0, 10)}.html`;
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  };
 
   return <section className="custom-forecast-page" aria-labelledby="custom-forecast-title">
     <header className="custom-forecast-header"><div><div className="custom-forecast-kicker"><DatabaseZap size={15} /> SCENARIO UPDATE</div><h1 id="custom-forecast-title">사용자 지정 예측</h1><p>선택한 월의 시장 정보가 완성되면, 검증이 끝난 최종 모델이 수주 전망을 다시 계산합니다.</p></div><span className="custom-forecast-status is-connected"><i /> 최종 모델 연결</span></header>
@@ -179,6 +281,7 @@ function ForecastWorkspace() {
 
       <aside className="custom-forecast-preview custom-regression-preview custom-scenario-preview" aria-busy={running}>
         <div className="custom-preview-head"><span>FORECAST REVISION</span><span className={`custom-preview-waiting ${result ? "is-complete" : ""}`}>{running ? "UPDATING" : result ? "UPDATED" : "READY"}</span></div>
+        {result && <div className="custom-preview-save-actions"><button type="button" className="custom-save-button" onClick={saveForecastResult}><Download size={15} />결과 HTML 저장</button></div>}
         {result && chartOption && primary ? <div className="custom-scenario-result"><div className="custom-scenario-metrics"><div className={changeClass}><span>전망 변화</span><b>{primary.change > 0 ? "+" : ""}{formatted(primary.change)} · {changeRate > 0 ? "+" : ""}{changeRate.toFixed(1)}%</b></div><div><span>기준 전망</span><b>{formatted(primary.baseline)} {result.unit}</b></div><div className={changeClass}><span>수정 전망</span><b>{formatted(primary.scenario)} {result.unit}</b></div><div><span>가장 큰 변경점</span><b>{primary.month}</b></div></div><div className="custom-regression-chart custom-scenario-chart"><EChartsReact option={chartOption} onEvents={chartEvents} notMerge style={{ width: "100%", height: "100%" }} /></div></div> : <div className="custom-preview-chart"><div className="custom-chart-grid"><i /><i /><i /><i /></div><div className="custom-chart-placeholder"><span /><span /><span /><span /><span /><span /><span /></div><div className="custom-chart-legend"><span><i />기준 전망</span><span><i />수정 전망</span></div></div>}
         <div className="custom-preview-empty"><strong>{running ? "완성된 월별 정보로 전망을 다시 계산하고 있습니다." : result ? `${result.vessel} 전망 업데이트 완료` : loading ? "최종 모델을 불러오고 있습니다." : inputComplete ? "월별 입력 정보가 완성되었습니다." : `${month || "선택한 월"}의 비어 있는 정보 ${missingSources.length - completedInputs}개를 입력하세요.`}</strong>{!result && <p>모든 필수 원천지표가 확보된 뒤에만 기준 전망과 수정 전망을 비교합니다.</p>}</div>
         <dl className="custom-config-summary"><div><dt>선종</dt><dd>{pipeline.vessel}</dd></div><div><dt>예측 대상</dt><dd>수주용량 ({pipeline.unit})</dd></div><div><dt>반영 규칙</dt><dd>관측월 → 파생 피처 → D+{pipeline.leadMonths}</dd></div><div><dt>모델</dt><dd>{pipeline.model}</dd></div></dl>
