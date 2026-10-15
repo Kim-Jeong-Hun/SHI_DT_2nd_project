@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowDown, ArrowRight, BarChart3, Database, Radar, Ship, X } from "lucide-react";
+import { ArrowDown, BarChart3, Database, Radar, Ship, X } from "lucide-react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import "../../styles/company-about-page.css";
@@ -35,22 +35,76 @@ const milestones = [
 
 function createRegionLabel(text: string) {
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 64;
+  canvas.width = 320;
+  canvas.height = 80;
   const context = canvas.getContext("2d");
   if (context) {
-    context.font = "700 22px Arial";
+    context.beginPath();
+    context.roundRect(8, 8, 304, 64, 18);
+    context.fillStyle = "rgba(7, 27, 50, .92)";
+    context.fill();
+    context.lineWidth = 2;
+    context.strokeStyle = "rgba(255, 176, 32, .9)";
+    context.stroke();
+    context.font = "800 22px Arial";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillStyle = "rgba(231, 251, 247, .96)";
-    context.fillText(text, 128, 32);
+    context.fillStyle = "#ffffff";
+    context.fillText(text, 160, 40);
   }
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: true, depthWrite: false });
   const sprite = new THREE.Sprite(material);
-  sprite.scale.set(.5, .125, 1);
+  sprite.scale.set(.64, .16, 1);
   return sprite;
+}
+
+function createRegionFlag() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 96;
+  canvas.height = 128;
+  const context = canvas.getContext("2d");
+  if (context) {
+    context.lineCap = "round";
+    context.lineJoin = "round";
+    context.strokeStyle = "#102a43";
+    context.lineWidth = 7;
+    context.beginPath();
+    context.moveTo(26, 112);
+    context.lineTo(26, 18);
+    context.stroke();
+    context.fillStyle = "#ffffff";
+    context.beginPath();
+    context.moveTo(30, 22);
+    context.lineTo(80, 36);
+    context.lineTo(30, 56);
+    context.closePath();
+    context.fill();
+    context.lineWidth = 5;
+    context.stroke();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.SpriteMaterial({ map: texture, color: 0xffb020, transparent: true, depthTest: true, depthWrite: false });
+  const sprite = new THREE.Sprite(material);
+  sprite.scale.set(.09, .12, 1);
+  return sprite;
+}
+
+function createRegionConnection(start: (typeof regions)[number], end: (typeof regions)[number]) {
+  const radius = 1.048;
+  const startPosition = regionPosition(start.latitude, start.longitude, radius).normalize();
+  const endPosition = regionPosition(end.latitude, end.longitude, radius).normalize();
+  const points = Array.from({ length: 65 }, (_, index) => startPosition.clone()
+    .lerp(endPosition, index / 64)
+    .normalize()
+    .multiplyScalar(radius));
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.LineDashedMaterial({ color: 0xfacc15, dashSize: .035, gapSize: .025, transparent: true, opacity: .92, depthTest: true, depthWrite: false });
+  const line = new THREE.Line(geometry, material);
+  line.computeLineDistances();
+  return line;
 }
 function regionPosition(latitude: number, longitude: number, radius: number) {
   const lat = THREE.MathUtils.degToRad(latitude);
@@ -65,12 +119,12 @@ function regionPosition(latitude: number, longitude: number, radius: number) {
 
 function InteractiveGlobe({ activeRegion, onSelect }: { activeRegion: number | null; onSelect: (index: number) => void }) {
   const mountRef = useRef<HTMLDivElement>(null);
-  const markerRefs = useRef<any[]>([]);
+  const markerRefs = useRef<ReturnType<typeof createRegionFlag>[]>([]);
 
   useEffect(() => {
     markerRefs.current.forEach((marker, index) => {
       const material = marker.material;
-      material.color.set(index === activeRegion ? "#52e3c5" : "#f4fffd");
+      material.color.set(index === activeRegion ? "#ff4d6d" : "#ffb020");
     });
   }, [activeRegion]);
 
@@ -123,14 +177,21 @@ function InteractiveGlobe({ activeRegion, onSelect }: { activeRegion: number | n
     );
     globe.add(atmosphere);
 
-    const markerGeometry = new THREE.SphereGeometry(.052, 24, 24);
+    regions.forEach((region, index) => {
+      globe.add(createRegionConnection(region, regions[(index + 1) % regions.length]));
+    });
+
+    const labels: ReturnType<typeof createRegionLabel>[] = [];
     const markers = regions.map((region, index) => {
-      const marker = new THREE.Mesh(markerGeometry, new THREE.MeshBasicMaterial({ color: 0xf4fffd }));
-      marker.position.copy(regionPosition(region.latitude, region.longitude, 1.035));
-      marker.userData.regionIndex = index;
-      marker.add(createRegionLabel(region.name));
-      marker.children[0].position.set(0, .12, 0);
-      globe.add(marker);
+      const markerGroup = new THREE.Group();
+      markerGroup.position.copy(regionPosition(region.latitude, region.longitude, 1.035));
+      const marker = createRegionFlag();
+      const label = createRegionLabel(region.name);
+      label.userData.regionIndex = index;
+      label.position.set(0, .17, 0);
+      labels.push(label);
+      markerGroup.add(marker, label);
+      globe.add(markerGroup);
       return marker;
     });
     markerRefs.current = markers;
@@ -149,7 +210,7 @@ function InteractiveGlobe({ activeRegion, onSelect }: { activeRegion: number | n
       pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
       pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObjects([earth, ...markers], false)[0];
+      const hit = raycaster.intersectObjects([earth, ...labels], false)[0];
       if (hit?.object.userData.regionIndex !== undefined) onSelect(hit.object.userData.regionIndex as number);
     };
     const handlePointerCancel = () => mount.classList.remove("is-dragging");
@@ -180,7 +241,7 @@ function InteractiveGlobe({ activeRegion, onSelect }: { activeRegion: number | n
       renderer.domElement.removeEventListener("pointercancel", handlePointerCancel);
       controls.dispose();
       scene.traverse((object: any) => {
-        if (object instanceof THREE.Mesh) {
+        if (object instanceof THREE.Mesh || object instanceof THREE.Line) {
           object.geometry.dispose();
           const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach((material: any) => material.dispose());
@@ -199,7 +260,6 @@ function InteractiveGlobe({ activeRegion, onSelect }: { activeRegion: number | n
   return (
     <div className="company-about-map" aria-label="드래그해서 회전할 수 있는 3D 지구 기반 글로벌 시장 범위">
       <div ref={mountRef} className="company-about-globe-canvas" />
-      <p className="company-about-globe-help">DRAG TO EXPLORE · SELECT A MARKER</p>
     </div>
   );
 }
@@ -245,7 +305,7 @@ export default function CompanyAboutPage() {
         <img src="/images/about/about-hero-v2.png" alt="새벽 항만에서 운항을 준비하는 컨테이너선과 상선들" />
         <div className="company-about-shade" />
         <div className="company-about-hero-copy">
-          <p>ABOUT SHIP SIGNAL</p>
+          <p>ABOUT SHIPULSE</p>
           <h1>시장의 신호를 읽고,<br /><em>내일의 기준</em>을 만듭니다.</h1>
           <span>조선·해운 산업의 복잡한 데이터를 더 명확한 판단으로 연결합니다.</span>
           <div className="company-about-hero-facts" aria-label="서비스 핵심 범위">
@@ -264,7 +324,7 @@ export default function CompanyAboutPage() {
       <section id="company-intro" className="company-about-intro company-about-section">
         <div className="company-about-heading" data-reveal><p>01 · WHO WE ARE</p><h2>복잡한 시장을<br />한눈에 보이게</h2></div>
         <div className="company-about-intro-body" data-reveal>
-          <p className="company-about-lead">SHIP SIGNAL은 조선·해운 시장의 수주, 운임, 거시 지표와 산업 정보를 연결하는 시장 인텔리전스 서비스입니다.</p>
+          <p className="company-about-lead">SHIPULSE는 조선·해운 시장의 수주, 운임, 거시 지표와 산업 정보를 연결하는 시장 인텔리전스 서비스입니다.</p>
           <p>전체 시장을 살펴본 뒤 관심 선종으로 내려가고, 주요 변수와 예측 범위를 확인해 시나리오를 비교하는 과정을 하나의 분석 흐름으로 제공합니다.</p>
           <div className="company-about-capabilities">
             {[
@@ -295,6 +355,7 @@ export default function CompanyAboutPage() {
       <section id="company-network" className="company-about-network company-about-section">
         <div className="company-about-heading" data-reveal><p>03 · MARKET COVERAGE</p><h2><span>세계의 흐름을</span><br /><span>하나의 시장으로</span></h2><span>지역별 교역과 산업 신호를 선종별 수주 전망의 맥락으로 연결합니다.</span></div>
         <div className="company-about-network-stage" data-reveal>
+          <p className="company-about-globe-help">※ DRAG TO EXPLORE · SELECT A LABEL</p>
           <InteractiveGlobe activeRegion={activeRegion} onSelect={setActiveRegion} />
           {activeRegion !== null && <article key={activeRegion} className="company-about-region-card"><button type="button" className="company-about-region-close" onClick={() => setActiveRegion(null)} aria-label="지역 시장 신호 닫기"><X aria-hidden="true" /></button><span>0{activeRegion + 1} / 03</span><h3>{regions[activeRegion].title}</h3><p>{regions[activeRegion].text}</p><small>지역 신호는 선종별 수주·운임·거시 지표와 함께 해석합니다.</small></article>}
           <div className="company-about-coverage-strip" aria-label="시장 분석 범위">
@@ -327,9 +388,9 @@ export default function CompanyAboutPage() {
       <section id="company-milestones" className="company-about-milestones company-about-section">
         <div className="company-about-heading company-about-heading-light" data-reveal><p>06 · PRODUCT PRINCIPLES</p><h2>좋은 판단을 만드는<br />네 가지 원칙</h2><span>정보의 양보다 이해와 실행의 품질을 높이는 경험을 설계합니다.</span></div>
         <div className="company-about-milestone-list">
-          {milestones.map((item, index) => <article key={item.phase} data-reveal style={{ "--delay": `${index * 100}ms` } as CSSProperties}><span>{item.phase}</span><h3>{item.title}</h3><p>{item.text}</p><ArrowRight aria-hidden="true" /></article>)}
+          {milestones.map((item, index) => <article key={item.phase} data-reveal style={{ "--delay": `${index * 100}ms` } as CSSProperties}><span>{item.phase}</span><h3>{item.title}</h3><p>{item.text}</p></article>)}
         </div>
-        <div className="company-about-closing" data-reveal><span>SHIP SIGNAL</span><p>시장에 더 가까이,<br />미래에 한 걸음 먼저.</p></div>
+        <div className="company-about-closing" data-reveal><span>SHIPULSE</span><p>시장에 더 가까이,<br />미래에 한 걸음 먼저.</p></div>
       </section>
     </main>
   );

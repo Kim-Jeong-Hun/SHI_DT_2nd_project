@@ -570,7 +570,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
     }
   };
 
-  if (showPlanComparison) return <SubscriptionPage user={user} mode="change" onBack={() => setShowPlanComparison(false)} onSubscribed={(updatedUser) => { onUserUpdated(updatedUser); setActiveSection("dashboard-overview"); setShowPlanComparison(false); }} onLogout={onLogout} />;
+  if (showPlanComparison) return <SubscriptionPage user={user} mode="change" onBack={() => setShowPlanComparison(false)} onSubscribed={(updatedUser) => { onUserUpdated(updatedUser); setVesselId("all"); setActivePage("dashboard"); setActiveSection("dashboard-overview"); setShowMyPage(false); setShowPlanComparison(false); window.scrollTo(0, 0); }} onLogout={onLogout} />;
   if (showMyPage) return <MyPage user={user} darkMode={darkMode} onBack={() => { setShowMyPage(false); if ((activeSection === "custom-forecast" && !hasEnterpriseAccess) || (activeSection !== "dashboard-overview" && !hasProfessionalAccess)) setActiveSection("dashboard-overview"); }} onChangePlan={() => setShowPlanComparison(true)} onUserUpdated={onUserUpdated} onLogout={onLogout} />;
 
   return (
@@ -767,7 +767,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
           <a className="dashboard-sidebar-promo" href="https://www.joongang.co.kr/article/25183169" target="_blank" rel="noopener noreferrer" aria-label="데이터로 보는 조선업 다음 10년 칼럼 열기"><strong>데이터로 보는<br />조선업 다음 10년</strong><span>더 넓은 기회를 만나보세요.</span><i><ChevronDown className="-rotate-90" size={16} /></i></a>
         </aside>
         <div className={`dashboard-main-content ${activeSection === "order-forecast" || activeSection === "custom-forecast" || activeSection === "freight-analysis" ? "is-analysis-view" : ""}`}>
-        {activeSection === "dashboard-overview" && (isAllVessels ? <DashboardOverview /> : isNotebookVessel(vessel.id) ? <DashboardOverview key={vessel.id} vesselId={vessel.id} /> : <section id="dashboard-overview" className="overview-screen dashboard-view dashboard-section-target">
+        {activeSection === "dashboard-overview" && (isAllVessels ? <DashboardOverview darkMode={darkMode} /> : isNotebookVessel(vessel.id) ? <DashboardOverview key={vessel.id} vesselId={vessel.id} darkMode={darkMode} /> : <section id="dashboard-overview" className="overview-screen dashboard-view dashboard-section-target">
         <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
           <LayoutDashboard className="h-3.5 w-3.5" />시장 모니터링 <span className="text-slate-300">/</span> <span className="font-medium text-slate-700">{vessel.label}</span>
         </div>

@@ -1,5 +1,5 @@
 import EChartsReact from "../common/LocalizedECharts";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Info } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import type { VesselId } from "../../data/mockMarket";
 import { NOTEBOOK_FORECASTS, isNotebookVessel } from "../../data/notebookForecasts";
 import { NOTEBOOK_VESSEL_IDS } from "../../data/notebookForecasts";
@@ -48,7 +48,6 @@ export function PortfolioForecast({ darkMode }: { darkMode: boolean }) {
         ))}
       </div>
       <div className="min-h-[280px] flex-1 rounded-xl border border-slate-100 bg-white p-2"><EChartsReact option={option} notMerge style={{ height: "100%", minHeight: 280, width: "100%" }} /></div>
-      <p className="flex gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-800"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />각 선종은 DWT·TEU·CBM처럼 단위가 다르므로 용량을 직접 합산하지 않습니다. 증감률 역시 모델 전망의 방향 신호로 해석해야 합니다.</p>
     </section>
   );
 }
@@ -86,7 +85,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
   const option = {
     animationDuration: 850,
     grid: { left: 70, right: 30, top: 58, bottom: 45 },
-    legend: { top: 8, left: 56, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: text, fontSize: 10 }, data: ["7~10월 추정", "11~12월 전망", "95% 예측구간"] },
+    legend: { top: 8, left: "center", itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: text, fontSize: 10 }, data: ["7~10월 추정", "11~12월 전망", "95% 예측구간"] },
     tooltip: {
       trigger: "axis", confine: true, axisPointer: { type: "line", lineStyle: { color: "#94a3b8", type: "dashed" } },
       backgroundColor: darkMode ? "#0f172a" : "#fff", borderColor: grid,
@@ -198,10 +197,6 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         </div>
       </div>
 
-      <div className="grid gap-2 text-[11px] leading-5 text-slate-500 md:grid-cols-2">
-        <p className="flex gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2"><Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />{forecast.strategy} · {forecast.featureCount}개 특성 · 검증 QAE {compact(forecast.validationMae, forecast.unit, language)}</p>
-        <p className="flex gap-2 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-amber-800"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />Test 상대오차 {forecast.testRelativeError.toFixed(1)}%. 예측 동인은 인과관계가 아니며, 의사결정 전 최신 시장정보와 함께 검토해야 합니다.</p>
-      </div>
     </section>
   );
 }

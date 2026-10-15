@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import EChartsReact from "../common/LocalizedECharts";
 import { Activity, CircleHelp, Pause, Play } from "lucide-react";
-import { NOTEBOOK_FORECASTS, NOTEBOOK_VESSEL_IDS, PORTFOLIO_CONFORMAL_90 } from "../../data/notebookForecasts";
+import { NOTEBOOK_FORECASTS, NOTEBOOK_VESSEL_IDS, PORTFOLIO_INTERVAL_95 } from "../../data/notebookForecasts";
 import type { ForecastDriver, NotebookForecast, NotebookVesselId } from "../../data/notebookForecasts";
 import { useI18n } from "../../i18n";
 
@@ -101,17 +101,17 @@ const COMMON_DRIVERS: readonly ForecastDriver[] = COMMON_DRIVER_GROUPS.map((grou
     .filter((driver) => group.matches.some((keyword) => driver.label.includes(keyword)))
     .reduce((subtotal, driver) => subtotal + driver.share, 0), 0) / NOTEBOOK_VESSEL_IDS.length,
 })).filter((driver) => driver.share > 0).sort((a, b) => b.share - a.share);
-const quarterBoundaryLines = (months: readonly string[]) => months.flatMap((month, index) => {
+const quarterBoundaryLines = (months: readonly string[], darkMode = false) => months.flatMap((month, index) => {
   const monthNumber = Number(month.slice(5, 7));
   if (index === 0 || ![1, 4, 7, 10].includes(monthNumber)) return [];
   const quarter = Math.floor((monthNumber - 1) / 3) + 1;
   return [{
     xAxis: month,
-    label: { show: true, formatter: `${month.slice(0, 4)} Q${quarter}`, position: "insideEndTop", color: "#8796a9", fontSize: 9, padding: [0, 0, 4, 0] },
-    lineStyle: { color: "#cbd5e1", width: 1, type: "dashed", opacity: 0.9 },
+    label: { show: true, formatter: `${month.slice(0, 4)} Q${quarter}`, position: "insideEndTop", color: darkMode ? "#94a3b8" : "#8796a9", fontSize: 9, padding: [0, 0, 4, 0] },
+    lineStyle: { color: darkMode ? "#475569" : "#cbd5e1", width: 1, type: "dashed", opacity: 0.9 },
   }];
 });
-const confidenceTooltip = (lower: number, upper: number, unit = "", calibrationSize?: number, title = "90% 예측구간", detail?: string) => {
+const confidenceTooltip = (lower: number, upper: number, unit = "", calibrationSize?: number, title = "95% 예측구간", detail?: string) => {
   const format = (value: number) => value.toLocaleString("ko-KR", { maximumFractionDigits: 1 });
   return `<div style="margin-top:9px;padding:9px 10px;border:1px solid rgba(147,197,253,.55);border-radius:8px;background:rgba(59,130,246,.22)">
     <div style="margin-bottom:2px;color:#dbeafe;font-size:11px;font-weight:700;letter-spacing:.02em">${title}</div>
@@ -124,7 +124,7 @@ const confidenceTooltip = (lower: number, upper: number, unit = "", calibrationS
   </div>`;
 };
 
-const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals, loading }: { forecast: NotebookForecast; actuals: ActualPoint[]; loading: boolean }) {
+const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals, loading, darkMode }: { forecast: NotebookForecast; actuals: ActualPoint[]; loading: boolean; darkMode: boolean }) {
   const current = currentPoint(forecast);
   const future = futurePoints(forecast);
   const projected = [...(current ? [current] : []), ...future];
@@ -141,24 +141,27 @@ const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals,
   const forecastStartPoint = [...actuals, ...projected].find((point) => point.month === FORECAST_MARKER_MONTH);
   const intervalLabel = "95% 예측구간";
   const intervals = new Map(forecast.predictionIntervals95.map((interval) => [interval.month, interval]));
-  const confidenceAnchor = [...actuals.slice(0, -1).map(() => null), lastActual, ...pendingMonths.map(() => null)];
+  const confidenceAnchor = [...actuals.map(() => null), ...pendingMonths.map(() => null)];
   const confidenceLower = [
     ...confidenceAnchor,
-    ...projected.map((item) => intervals.get(item.month)?.lower ?? null),
+    ...(current ? [current.value] : []),
+    ...future.map((item) => intervals.get(item.month)?.lower ?? null),
   ];
   const confidenceBand = [
-    ...actuals.slice(0, -1).map(() => null),
-    lastActual === null ? null : 0,
-    ...pendingMonths.map(() => null),
-    ...projected.map((item) => {
+    ...confidenceAnchor,
+    ...(current ? [0] : []),
+    ...future.map((item) => {
       const interval = intervals.get(item.month);
       return interval ? interval.upper - interval.lower : null;
     }),
   ];
+  const chartTheme = darkMode
+    ? { text: "#cbd5e1", muted: "#94a3b8", axis: "#475569", grid: "#334155", actual: "#93c5fd", pointBorder: "#1e293b" }
+    : { text: "#64748b", muted: "#718096", axis: "#dbe4ef", grid: "#e7edf5", actual: "#102e58", pointBorder: "#fff" };
   const option = {
     animationDuration: 650,
     grid: { left: 68, right: 28, top: 52, bottom: 42 },
-    legend: { top: 5, left: 55, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: "#64748b", fontSize: 10 }, data: ["실적", "현재월 추정", "11~12월 전망", intervalLabel] },
+    legend: { top: 5, left: 55, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: chartTheme.text, fontSize: 10 }, data: ["실적", "현재월 추정", "11~12월 전망", intervalLabel] },
     tooltip: {
       trigger: "axis", confine: true, axisPointer: { type: "line", lineStyle: { color: "#8aa4c1", type: "dashed" } }, backgroundColor: "#102747", borderWidth: 0, padding: [12, 14], textStyle: { color: "#fff", fontSize: 12 }, extraCssText: "box-shadow:0 12px 30px rgba(15,34,58,.24);border-radius:10px;",
       formatter: (params: Array<{ axisValue: string; seriesName: string; data: number | null; color: string }>) => {
@@ -178,21 +181,21 @@ const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals,
           const change = previous ? (predicted.value - previous) / previous * 100 : undefined;
           lines.push(`${month === CURRENT_MONTH ? "현재월 추정" : "잔여 전망"}&nbsp;&nbsp;<b>${predicted.value.toLocaleString("ko-KR", { maximumFractionDigits: 1 })} ${forecast.unit}</b>${change === undefined ? "" : ` <span style="color:${change >= 0 ? "#86efac" : "#fda4af"}">(${signed(change)})</span>`}`);
           const interval = intervals.get(month);
-          if (interval) lines.push(confidenceTooltip(interval.lower, interval.upper, forecast.unit, interval.calibrationSize, intervalLabel,
+          if (interval && month !== CURRENT_MONTH) lines.push(confidenceTooltip(interval.lower, interval.upper, forecast.unit, interval.calibrationSize, intervalLabel,
             `인접 3개월 Validation 원잔차 · n=${interval.calibrationSize}`));
         }
         if (month === PENDING_MONTH) lines.push("수주 실적 집계 대기");
         return lines.join("<br/>");
       },
     },
-    xAxis: { type: "category", data: months, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: "#dbe4ef" } }, axisLabel: { color: "#718096", fontSize: 10, margin: 12, interval: 0, hideOverlap: false, formatter: (value: string, index: number) => index % 3 === 0 ? value.replace("-", ".") : "" } },
-    yAxis: { type: "value", scale: true, name: `수주용량 (${forecast.unit})`, nameGap: 15, nameTextStyle: { color: "#64748b", align: "right", fontSize: 10 }, axisLabel: { color: "#718096", fontSize: 10, formatter: formatCompact }, splitNumber: 4, splitLine: { lineStyle: { color: "#e7edf5", type: "dashed" } } },
+    xAxis: { type: "category", data: months, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: chartTheme.axis } }, axisLabel: { color: chartTheme.muted, fontSize: 10, margin: 12, interval: 0, hideOverlap: false, formatter: (value: string, index: number) => index % 3 === 0 ? value.replace("-", ".") : "" } },
+    yAxis: { type: "value", scale: true, max: ({ max, min }: { max: number; min: number }) => max + Math.max((max - min) * 0.2, Math.abs(max) * 0.08), name: `수주용량 (${forecast.unit})`, nameGap: 15, nameTextStyle: { color: chartTheme.text, align: "right", fontSize: 10 }, axisLabel: { color: chartTheme.muted, fontSize: 10, formatter: formatCompact }, splitNumber: 4, splitLine: { lineStyle: { color: chartTheme.grid, type: "dashed" } } },
     series: [
-      { name: "실적", type: "line", symbol: "none", smooth: 0.18, data: actualData, lineStyle: { color: "#102e58", width: 2.4 }, emphasis: { focus: "series" }, z: 4 },
-      { name: "현재월 추정", type: "line", symbol: "none", connectNulls: true, data: currentEstimateData, lineStyle: { color: "#f59e0b", width: 2.4 }, markPoint: { silent: true, label: { show: false }, data: forecastStartPoint ? [{ coord: [forecastStartPoint.month, forecastStartPoint.value], symbol: "circle", symbolSize: 9, itemStyle: { color: "#f59e0b", borderColor: "#fff", borderWidth: 2 } }] : [] }, z: 6 },
+      { name: "실적", type: "line", symbol: "none", smooth: 0.18, data: actualData, lineStyle: { color: chartTheme.actual, width: 2.4 }, emphasis: { focus: "series" }, z: 4 },
+      { name: "현재월 추정", type: "line", symbol: "none", connectNulls: true, data: currentEstimateData, lineStyle: { color: "#f59e0b", width: 2.4 }, markPoint: { silent: true, label: { show: false }, data: forecastStartPoint ? [{ coord: [forecastStartPoint.month, forecastStartPoint.value], symbol: "circle", symbolSize: 9, itemStyle: { color: "#f59e0b", borderColor: chartTheme.pointBorder, borderWidth: 2 } }] : [] }, z: 6 },
       { name: "신뢰 범위 하한", type: "line", stack: "confidence", symbol: "none", smooth: 0.2, connectNulls: true, data: confidenceLower, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .8 }, areaStyle: { opacity: 0 }, tooltip: { show: false }, silent: true, z: 1 },
       { name: intervalLabel, type: "line", stack: "confidence", symbol: "none", smooth: 0.2, connectNulls: true, data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .8 }, areaStyle: { color: "rgba(59,130,246,.23)" }, tooltip: { show: false }, silent: true, z: 1 },
-      { name: "11~12월 전망", type: "line", symbol: "none", smooth: 0.2, connectNulls: false, data: forecastData, lineStyle: { color: "#2476ed", width: 2.6, type: "dashed" }, emphasis: { focus: "series" }, markArea: { silent: true, itemStyle: { color: "rgba(59,130,246,.035)" }, data: [[{ xAxis: FORECAST_MARKER_MONTH }, { xAxis: FORECAST_END_MONTH }]] }, markPoint: { silent: true, label: { show: false }, data: turningMarkers }, markLine: { symbol: "none", silent: true, data: [...quarterBoundaryLines(months), { xAxis: FORECAST_MARKER_MONTH, label: { show: true, formatter: "미래 전망 시작", color: "#fff", backgroundColor: "#2878ed", borderRadius: 4, padding: [4, 7] }, lineStyle: { color: "#2878ed", type: "dashed" } }] }, z: 5 },
+      { name: "11~12월 전망", type: "line", symbol: "none", smooth: 0.2, connectNulls: false, data: forecastData, lineStyle: { color: "#2476ed", width: 2.6, type: "dashed" }, emphasis: { focus: "series" }, markArea: { silent: true, itemStyle: { color: "rgba(59,130,246,.035)" }, data: [[{ xAxis: FORECAST_MARKER_MONTH }, { xAxis: FORECAST_END_MONTH }]] }, markPoint: { silent: true, label: { show: false }, data: turningMarkers }, markLine: { animation: false, symbol: "none", silent: true, data: [...quarterBoundaryLines(months, darkMode), { xAxis: FORECAST_MARKER_MONTH, label: { show: true, formatter: "미래 전망 시작", color: "#fff", backgroundColor: "#2878ed", borderRadius: 4, padding: [4, 7] }, lineStyle: { color: "#2878ed", type: "dashed" } }] }, z: 5 },
     ],
   };
   return <div className="overview-chart-body">{loading ? <div className="overview-chart-placeholder">수주 데이터를 불러오는 중입니다.</div> : actuals.length ? <EChartsReact option={option} notMerge lazyUpdate /> : <div className="overview-chart-placeholder">연결된 수주 데이터가 없습니다.</div>}</div>;
@@ -225,8 +228,8 @@ const PortfolioForecastTimeseries = memo(function PortfolioForecastTimeseries({ 
     return {
       month,
       value,
-      lower: Math.max(0, value - PORTFOLIO_CONFORMAL_90.radius),
-      upper: value + PORTFOLIO_CONFORMAL_90.radius,
+      lower: Math.max(0, value - PORTFOLIO_INTERVAL_95.radius),
+      upper: value + PORTFOLIO_INTERVAL_95.radius,
     };
   };
   const projectedMonths = [CURRENT_MONTH, ...futurePoints(forecasts[0]).map((point) => point.month)];
@@ -244,12 +247,12 @@ const PortfolioForecastTimeseries = memo(function PortfolioForecastTimeseries({ 
   const forecastData = [...historyPadding, ...(currentIndex ? [currentIndex.value] : []), ...forecastIndexes.map((point) => point.value)];
   const turningMarkers = turningPointMarkers([...actualIndexes, ...projectedIndexes]);
   const forecastStartPoint = [...actualIndexes, ...projectedIndexes].find((point) => point.month === FORECAST_MARKER_MONTH);
-  const confidenceLower = [...historyPadding, ...projectedIndexes.map((point) => point.lower)];
-  const confidenceBand = [...historyPadding, ...projectedIndexes.map((point) => point.upper - point.lower)];
+  const confidenceLower = [...historyPadding, ...(currentIndex ? [currentIndex.value] : []), ...forecastIndexes.map((point) => point.lower)];
+  const confidenceBand = [...historyPadding, ...(currentIndex ? [0] : []), ...forecastIndexes.map((point) => point.upper - point.lower)];
   const option = {
     animationDuration: 650,
     grid: { left: 68, right: 28, top: 52, bottom: 42 },
-    legend: { top: 5, left: 55, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: "#64748b", fontSize: 10 }, data: ["종합 실적지수", "종합 현재월 추정", "종합 11~12월 전망", "90% 예측구간"] },
+    legend: { top: 5, left: 55, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: "#64748b", fontSize: 10 }, data: ["종합 실적지수", "종합 현재월 추정", "종합 11~12월 전망", "95% 예측구간"] },
     tooltip: {
       trigger: "axis", confine: true, axisPointer: { type: "line", lineStyle: { color: "#8aa4c1", type: "dashed" } }, backgroundColor: "#102747", borderWidth: 0, padding: [12, 14], textStyle: { color: "#fff", fontSize: 12 }, extraCssText: "box-shadow:0 12px 30px rgba(15,34,58,.24);border-radius:10px;",
       formatter: (params: Array<{ axisValue: string }>) => {
@@ -258,19 +261,20 @@ const PortfolioForecastTimeseries = memo(function PortfolioForecastTimeseries({ 
         const predicted = projectedIndexes.find((point) => point.month === month);
         const lines = [...turningPointTooltip(turningMarkers, month), `<b>${month}</b>`];
         if (actual) lines.push(`종합 실적지수&nbsp;&nbsp;<b>${actual.value.toFixed(1)}</b>`);
-        if (predicted) lines.push(`${month === CURRENT_MONTH ? "종합 현재월 추정" : "종합 잔여 전망"}&nbsp;&nbsp;<b>${predicted.value.toFixed(1)}</b>${confidenceTooltip(predicted.lower, predicted.upper, "", PORTFOLIO_CONFORMAL_90.calibrationSize)}`);
+        if (predicted) lines.push(`${month === CURRENT_MONTH ? "종합 현재월 추정" : "종합 잔여 전망"}&nbsp;&nbsp;<b>${predicted.value.toFixed(1)}</b>${month === CURRENT_MONTH ? "" : confidenceTooltip(predicted.lower, predicted.upper, "", PORTFOLIO_INTERVAL_95.calibrationSize, "95% 예측구간")}`);
         if (month === PENDING_MONTH) lines.push("수주 실적 집계 대기");
         return lines.join("<br/>");
       },
     },
     xAxis: { type: "category", data: months, boundaryGap: false, axisTick: { show: false }, axisLine: { lineStyle: { color: "#dbe4ef" } }, axisLabel: { color: "#718096", fontSize: 10, margin: 12, interval: 0, hideOverlap: false, formatter: (value: string, index: number) => index % 3 === 0 ? value.replace("-", ".") : "" } },
-    yAxis: { type: "value", scale: true, name: "종합 수주지수", nameGap: 15, nameTextStyle: { color: "#64748b", align: "right", fontSize: 10 }, axisLabel: { color: "#718096", fontSize: 10, formatter: (value: number) => value.toFixed(0) }, splitNumber: 4, splitLine: { lineStyle: { color: "#e7edf5", type: "dashed" } } },
+    yAxis: { type: "value", scale: true, max: 210, interval: 30, name: "종합 수주지수", nameGap: 15, nameTextStyle: { color: "#64748b", align: "right", fontSize: 10 }, axisLabel: { color: "#718096", fontSize: 10, formatter: (value: number) => value.toFixed(0) }, splitNumber: 4, splitLine: { lineStyle: { color: "#e7edf5", type: "dashed" } } },
     series: [
       { name: "종합 실적지수", type: "line", symbol: "none", smooth: 0.18, data: actualData, lineStyle: { color: "#102e58", width: 2.4 }, emphasis: { focus: "series" }, z: 4 },
       { name: "종합 현재월 추정", type: "line", symbol: "none", connectNulls: true, data: currentEstimateData, lineStyle: { color: "#f59e0b", width: 2.4 }, markPoint: { silent: true, label: { show: false }, data: forecastStartPoint ? [{ coord: [forecastStartPoint.month, forecastStartPoint.value], symbol: "circle", symbolSize: 9, itemStyle: { color: "#f59e0b", borderColor: "#fff", borderWidth: 2 } }] : [] }, z: 6 },
       { name: "신뢰 범위 하한", type: "line", stack: "portfolio-confidence", symbol: "none", smooth: 0.2, data: confidenceLower, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .8 }, areaStyle: { opacity: 0 }, tooltip: { show: false }, silent: true, z: 1 },
-      { name: "90% 예측구간", type: "line", stack: "portfolio-confidence", symbol: "none", smooth: 0.2, data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .8 }, areaStyle: { color: "rgba(59,130,246,.23)" }, tooltip: { show: false }, silent: true, z: 1 },
-      { name: "종합 11~12월 전망", type: "line", symbol: "none", smooth: 0.2, data: forecastData, lineStyle: { color: "#2476ed", width: 2.6, type: "dashed" }, markArea: { silent: true, itemStyle: { color: "rgba(59,130,246,.035)" }, data: [[{ xAxis: FORECAST_MARKER_MONTH }, { xAxis: FORECAST_END_MONTH }]] }, markPoint: { silent: true, label: { show: false }, data: turningMarkers }, markLine: { symbol: "none", silent: true, data: [{ yAxis: 100, label: { formatter: "최근 12개월 평균", color: "#64748b" }, lineStyle: { color: "#94a3b8", type: "dotted" } }, ...quarterBoundaryLines(months), { xAxis: FORECAST_MARKER_MONTH, label: { show: true, formatter: "미래 전망 시작", color: "#fff", backgroundColor: "#2878ed", borderRadius: 4, padding: [4, 7] }, lineStyle: { color: "#2878ed", type: "dashed" } }] }, z: 5 },
+      { name: "95% 예측구간", type: "line", stack: "portfolio-confidence", symbol: "none", smooth: 0.2, data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .8 }, areaStyle: { color: "rgba(59,130,246,.23)" }, tooltip: { show: false }, silent: true, z: 1 },
+      { name: "종합 11~12월 전망", type: "line", symbol: "none", smooth: 0.2, data: forecastData, lineStyle: { color: "#2476ed", width: 2.6, type: "dashed" }, markArea: { silent: true, itemStyle: { color: "rgba(59,130,246,.035)" }, data: [[{ xAxis: FORECAST_MARKER_MONTH }, { xAxis: FORECAST_END_MONTH }]] }, markPoint: { silent: true, label: { show: false }, data: turningMarkers }, z: 5 },
+      { name: "기간 구분선", type: "line", animation: false, symbol: "none", data: months.map(() => null), lineStyle: { opacity: 0 }, tooltip: { show: false }, silent: true, markLine: { animation: false, symbol: "none", silent: true, data: [{ yAxis: 100, label: { show: false }, lineStyle: { color: "#94a3b8", type: "dotted" } }, ...quarterBoundaryLines(months), { xAxis: FORECAST_MARKER_MONTH, label: { show: true, formatter: "미래 전망 시작", color: "#fff", backgroundColor: "#2878ed", borderRadius: 4, padding: [4, 7] }, lineStyle: { color: "#2878ed", type: "dashed" } }] }, z: 7 },
     ],
   };
   return <div className="overview-chart-body">{loading ? <div className="overview-chart-placeholder">전체 선종 수주 데이터를 불러오는 중입니다.</div> : actualIndexes.length && forecastIndexes.length ? <EChartsReact option={option} notMerge lazyUpdate /> : <div className="overview-chart-placeholder">종합지수를 계산할 수주 데이터가 부족합니다.</div>}</div>;
@@ -309,7 +313,7 @@ function DriverBars({ source, limit = 5 }: { source: readonly ForecastDriver[]; 
   </div>)}</div>;
 }
 
-export default function DashboardOverview({ vesselId }: { vesselId?: NotebookVesselId }) {
+export default function DashboardOverview({ vesselId, darkMode }: { vesselId?: NotebookVesselId; darkMode: boolean }) {
   const { language, t } = useI18n();
   const portfolio = vesselId === undefined;
   const [selectedId, setSelectedId] = useState<NotebookVesselId>(vesselId ?? "tanker");
@@ -334,6 +338,19 @@ export default function DashboardOverview({ vesselId }: { vesselId?: NotebookVes
   const strongestChange = forecasts.reduce((strongest, item) => Math.abs(periodChange(item)) > Math.abs(periodChange(strongest)) ? item : strongest);
   const strongestMomentum = forecasts.reduce((best, item) => periodChange(item) > periodChange(best) ? item : best);
   const weakestMomentum = forecasts.reduce((weakest, item) => periodChange(item) < periodChange(weakest) ? item : weakest);
+  const risingVesselCount = forecasts.filter((item) => item.quarterChange > 0).length;
+  const fallingVesselCount = forecasts.filter((item) => item.quarterChange < 0).length;
+  const peakMonthCounts = forecasts.reduce<Record<string, number>>((counts, item) => {
+    const month = periodPeak(item).month.slice(5);
+    counts[month] = (counts[month] ?? 0) + 1;
+    return counts;
+  }, {});
+  const peakConcentration = Math.max(...Object.values(peakMonthCounts));
+  const peakConcentrationMonths = Object.entries(peakMonthCounts)
+    .filter(([, count]) => count === peakConcentration)
+    .map(([month]) => `${Number(month)}월`);
+  const peakConcentrationLabel = peakConcentrationMonths.join("·");
+  const peakConcentratedVesselCount = peakConcentration * peakConcentrationMonths.length;
   const q4Points = outlookPoints(forecast);
   const q4Total = forecast.q4;
   const q4MonthlyAverage = q4Total / Math.max(q4Points.length, 1);
@@ -484,8 +501,13 @@ export default function DashboardOverview({ vesselId }: { vesselId?: NotebookVes
         </div>
       </div>
       <div className="overview-brief-metrics" aria-label="4분기 전망 요약">
-        <div><span>4분기 누적 전망</span><strong>{formatCapacity(q4Total, forecast.unit)}</strong><small>{forecast.vesselName}</small></div>
-        <div><span>4분기 월평균 전망</span><strong>{formatCapacity(q4MonthlyAverage, forecast.unit)}</strong><small>{forecast.vesselName}</small></div>
+        {portfolio ? <>
+          <div><span>전분기 대비 수주 방향</span><strong>상승 {risingVesselCount} · 하락 {fallingVesselCount}</strong><small>5개 선종 공통 비교</small></div>
+          <div><span>예상 고점 집중 시기</span><strong>{peakConcentrationLabel}</strong><small>{peakConcentratedVesselCount}개 선종 집중</small></div>
+        </> : <>
+          <div><span>4분기 누적 전망</span><strong>{formatCapacity(q4Total, forecast.unit)}</strong><small>{forecast.vesselName}</small></div>
+          <div><span>4분기 월평균 전망</span><strong>{formatCapacity(q4MonthlyAverage, forecast.unit)}</strong><small>{forecast.vesselName}</small></div>
+        </>}
       </div>
       <div className="overview-brief-controls" aria-label="시장 인사이트 전환">
         <div role="group" aria-label="시장 인사이트 선택">
@@ -500,7 +522,7 @@ export default function DashboardOverview({ vesselId }: { vesselId?: NotebookVes
     <div className="overview-core-grid">
       <section className="overview-panel overview-timeseries-panel">
         <header><div><h3>{portfolio ? "선종별 실적 및 연말까지 수주 전망" : `${forecast.vesselName} 실적 및 연말까지 수주 전망`}</h3></div>{portfolio ? <nav><button type="button" className={chartId === "aggregate" ? "is-active" : ""} onClick={() => setChartId("aggregate")}>전체 종합</button>{forecasts.map((item) => <button key={item.vesselId} type="button" className={chartId === item.vesselId ? "is-active" : ""} onClick={() => { setChartId(item.vesselId); setSelectedId(item.vesselId); setSelectedDriverId(item.vesselId); }}>{item.vesselName}</button>)}</nav> : <span>{forecast.unit}</span>}</header>
-        {portfolio && chartId === "aggregate" ? <PortfolioForecastTimeseries forecasts={forecasts} actualsByVessel={actualsByVessel} loading={loading} /> : <ForecastTimeseries forecast={chartForecast ?? forecast} actuals={actuals} loading={loading} />}
+        {portfolio && chartId === "aggregate" ? <PortfolioForecastTimeseries forecasts={forecasts} actualsByVessel={actualsByVessel} loading={loading} /> : <ForecastTimeseries forecast={chartForecast ?? forecast} actuals={actuals} loading={loading} darkMode={darkMode} />}
       </section>
       {portfolio ? <section className="overview-panel overview-heatmap-panel">
         <header><h3>선종별 7~12월 월별 수주 전망 <CircleHelp size={14} /></h3></header>

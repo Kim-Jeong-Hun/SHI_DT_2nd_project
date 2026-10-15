@@ -10,7 +10,7 @@ interface DashboardState {
 
 /** UI preferences only; market datasets are intentionally NOT kept in Zustand. */
 export const useDashboardStore = create<DashboardState>((set) => ({
-  vesselId: "container",
+  vesselId: "all",
   darkMode: false,
   setVesselId: (vesselId) => set({ vesselId }),
   setDarkMode: (darkMode) => set({ darkMode }),

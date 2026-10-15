@@ -37,11 +37,9 @@ export interface NotebookForecast {
   action: string;
 }
 
-// 90% three-month block-conformal radius: group the saved rolling-origin
-// Validation and Test absolute errors into non-overlapping three-month blocks,
-// take each block maximum, then select ceil((n + 1) × 0.9)-th ordered score.
-// The portfolio radius retains its existing 39-common-month calibration.
-export const PORTFOLIO_CONFORMAL_90 = { radius: 31.6614139278166, calibrationSize: 39 } as const;
+// 95% portfolio radius: expand the saved 90% common-month calibration radius
+// by the 95%/90% two-sided normal-quantile ratio while retaining n=39.
+export const PORTFOLIO_INTERVAL_95 = { radius: 37.7269016411794, calibrationSize: 39 } as const;
 
 export const NOTEBOOK_FORECASTS: Record<NotebookVesselId, NotebookForecast> = {
   tanker: {

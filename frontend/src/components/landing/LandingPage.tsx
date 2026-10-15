@@ -33,7 +33,6 @@ const forecasts = [
 function ForecastCountUp({ end, unit, delay }: { end: number; unit: string; delay: number }) {
   const numberRef = useRef<HTMLElement>(null);
   const [value, setValue] = useState(0);
-  const [isMasked, setIsMasked] = useState(false);
 
   useEffect(() => {
     const number = numberRef.current;
@@ -47,7 +46,7 @@ function ForecastCountUp({ end, unit, delay }: { end: number; unit: string; dela
       hasStarted = true;
 
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        setIsMasked(true);
+        setValue(end);
         return;
       }
 
@@ -55,13 +54,9 @@ function ForecastCountUp({ end, unit, delay }: { end: number; unit: string; dela
         const startedAt = performance.now();
         const duration = 2600;
         const tick = (now: number) => {
-          const progress = Math.min((now - startedAt) / duration, 1);
-          if (progress >= 0.9) {
-            setIsMasked(true);
-            return;
-          }
-          const easedProgress = 1 - Math.pow(1 - progress, 3);
-          setValue(Math.round(end * easedProgress * 10) / 10);
+          const cycleProgress = Math.max(0, ((now - startedAt) % duration) / duration);
+          const oscillatingProgress = 1 - Math.abs(2 * cycleProgress - 1);
+          setValue(Math.round(end * oscillatingProgress * 10) / 10);
           animationFrame = requestAnimationFrame(tick);
         };
         animationFrame = requestAnimationFrame(tick);
@@ -84,11 +79,10 @@ function ForecastCountUp({ end, unit, delay }: { end: number; unit: string; dela
   }, [delay, end]);
 
   const formattedValue = value.toLocaleString("ko-KR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const maskedValue = end.toLocaleString("ko-KR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).replace(/\d/g, "?");
 
   return (
-    <strong ref={numberRef} aria-label={`${unit} 예측값 비공개`}>
-      <span className="strip-value-number">{isMasked ? maskedValue : formattedValue}</span><span className="strip-value-scale">만</span> <small>{unit}</small>
+    <strong ref={numberRef} aria-label={`${unit} 예측 스냅샷 애니메이션`}>
+      <span className="strip-value-number">{formattedValue}</span><span className="strip-value-scale">만</span> <small>{unit}</small>
     </strong>
   );
 }
@@ -408,7 +402,7 @@ export default function LandingPage({ error, onRetry, onAuthenticated }: Landing
           <a href={authHref}>내 대시보드 시작하기 <ArrowRight size={17} /></a>
         </div>
         <figure className="product-dashboard-preview">
-          <div className="product-dashboard-frame" role="img" aria-label="SHIP SIGNAL 실제 대시보드 구성을 재현한 샘플 데이터 목업">
+          <div className="product-dashboard-frame" role="img" aria-label="SHIPULSE 실제 대시보드 구성을 재현한 샘플 데이터 목업">
             <header className="product-mock-header">
               <div className="product-mock-brand"><i>船</i><span><b>선(船)견지명</b><small>ORDER MARKET INTELLIGENCE</small></span></div>
               <nav><strong>종합 분석</strong><span>컨테이너선</span><span>유조선</span><span>벌크선</span><span>가스 운반선</span></nav>

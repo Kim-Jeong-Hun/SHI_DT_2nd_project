@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import MarketDashboard from "./components/dashboard/MarketDashboard";
 import LandingPage from "./components/landing/LandingPage";
 import SubscriptionPage from "./components/subscription/SubscriptionPage";
+import { useDashboardStore } from "./store/useDashboardStore";
 
 export type AuthUser = {
   id: string;
@@ -27,6 +28,10 @@ export default function App() {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(initialAuthError);
+  const enterDashboard = (nextUser: AuthUser) => {
+    useDashboardStore.getState().setVesselId("all");
+    setUser(nextUser);
+  };
 
   const loadUser = async (signal?: AbortSignal) => {
     try {
@@ -35,7 +40,7 @@ export default function App() {
         setUser(null);
       } else if (response.ok) {
         const data: { user: AuthUser } = await response.json();
-        setUser(data.user);
+        enterDashboard(data.user);
         setError("");
       } else {
         throw new Error("인증 서버에 연결하지 못했습니다.");
@@ -74,8 +79,8 @@ export default function App() {
   };
 
   if (loading) return <div className="grid min-h-screen place-items-center bg-[#f5f7fb] text-slate-600">로그인 상태 확인 중...</div>;
-  if (user && user.subscriptionStatus !== "Y") return <SubscriptionPage user={user} onSubscribed={setUser} onLogout={logout} />;
+  if (user && user.subscriptionStatus !== "Y") return <SubscriptionPage user={user} onSubscribed={enterDashboard} onLogout={logout} />;
   if (user) return <MarketDashboard user={user} onUserUpdated={setUser} onLogout={logout} authError={error} />;
 
-  return <LandingPage error={error} onRetry={() => { setLoading(true); void loadUser(); }} onAuthenticated={setUser} />;
+  return <LandingPage error={error} onRetry={() => { setLoading(true); void loadUser(); }} onAuthenticated={enterDashboard} />;
 }
