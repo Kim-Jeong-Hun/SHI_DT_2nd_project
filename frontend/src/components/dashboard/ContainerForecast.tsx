@@ -63,9 +63,19 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
   const months = forecast.monthly.map(({ month }) => `${Number(month.slice(5))}월`);
   const monthlyValues = forecast.monthly.map(({ value }) => value / 10_000);
   const currentMonthIndex = forecast.monthly.findIndex(({ month }) => month === "2026-10");
-  const uncertainty = forecast.conformalRadius90 / 10_000;
-  const confidenceLower = monthlyValues.map((value) => Math.max(0, value - uncertainty));
-  const confidenceBand = monthlyValues.map((value, index) => value + uncertainty - confidenceLower[index]);
+  const intervals = new Map(forecast.predictionIntervals95.map((interval) => [interval.month, interval]));
+  const confidenceLower = monthlyValues.map((value, index) => {
+    if (index < currentMonthIndex) return null;
+    if (index === currentMonthIndex) return value;
+    const interval = intervals.get(forecast.monthly[index].month);
+    return interval ? interval.lower / 10_000 : null;
+  });
+  const confidenceBand = monthlyValues.map((_value, index) => {
+    if (index < currentMonthIndex) return null;
+    if (index === currentMonthIndex) return 0;
+    const interval = intervals.get(forecast.monthly[index].month);
+    return interval ? (interval.upper - interval.lower) / 10_000 : null;
+  });
   const highIndex = monthlyValues.indexOf(Math.max(...monthlyValues));
   const lowIndex = monthlyValues.indexOf(Math.min(...monthlyValues));
   const materialSwing = (monthlyValues[highIndex] - monthlyValues[lowIndex]) / Math.max(monthlyValues[lowIndex], 1) >= 0.25;
@@ -76,7 +86,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
   const option = {
     animationDuration: 850,
     grid: { left: 70, right: 30, top: 58, bottom: 45 },
-    legend: { top: 8, left: 56, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: text, fontSize: 10 }, data: ["7~10월 추정", "11~12월 전망", "90% 예측구간"] },
+    legend: { top: 8, left: 56, itemWidth: 22, itemHeight: 4, itemGap: 18, textStyle: { color: text, fontSize: 10 }, data: ["7~10월 추정", "11~12월 전망", "95% 예측구간"] },
     tooltip: {
       trigger: "axis", confine: true, axisPointer: { type: "line", lineStyle: { color: "#94a3b8", type: "dashed" } },
       backgroundColor: darkMode ? "#0f172a" : "#fff", borderColor: grid,
@@ -86,11 +96,10 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         const point = forecast.monthly[index];
         const previous = forecast.monthly[index - 1];
         const change = previous ? (point.value / previous.value - 1) * 100 : undefined;
-        const lower = Math.max(0, point.value - forecast.conformalRadius90);
-        const upper = point.value + forecast.conformalRadius90;
+        const interval = intervals.get(point.month);
         const pointLabel = index === highIndex ? `<b style="color:#ef4444">예상 고점</b><br/>` : index === lowIndex ? `<b style="color:#2563eb">예상 저점</b><br/>` : "";
         const status = index === currentMonthIndex ? "현재월 추정" : index > currentMonthIndex ? "잔여 전망" : `${index < 3 ? "3분기" : "4분기"} 전망`;
-        return `${pointLabel}<b>${point.month}</b> · ${status}<br/>월별 전망&nbsp;&nbsp;<b>${number(point.value, 1)} ${forecast.unit}</b>${change === undefined ? "" : `<br/>전월 대비&nbsp;&nbsp;<b style="color:${change >= 0 ? "#16a34a" : "#e11d48"}">${change > 0 ? "+" : ""}${change.toFixed(1)}%</b>`}<br/><span style="color:#64748b">90% 범위&nbsp;&nbsp;${number(lower, 1)}–${number(upper, 1)} ${forecast.unit}</span>`;
+        return `${pointLabel}<b>${point.month}</b> · ${status}<br/>월별 전망&nbsp;&nbsp;<b>${number(point.value, 1)} ${forecast.unit}</b>${change === undefined ? "" : `<br/>전월 대비&nbsp;&nbsp;<b style="color:${change >= 0 ? "#16a34a" : "#e11d48"}">${change > 0 ? "+" : ""}${change.toFixed(1)}%</b>`}${interval ? `<br/><span style="color:#64748b">95% 범위&nbsp;&nbsp;${number(interval.lower, 1)}–${number(interval.upper, 1)} ${forecast.unit} · n=${interval.calibrationSize}</span>` : ""}`;
       },
     },
     xAxis: {
@@ -106,7 +115,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
     },
     series: [
       { name: "예측구간 하한", type: "line", stack: "quarter-confidence", symbol: "none", data: confidenceLower, lineStyle: { opacity: 0 }, areaStyle: { opacity: 0 }, tooltip: { show: false }, silent: true, z: 1 },
-      { name: "90% 예측구간", type: "line", stack: "quarter-confidence", symbol: "none", data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .65 }, areaStyle: { color: "rgba(59,130,246,.2)" }, tooltip: { show: false }, silent: true, z: 1 },
+      { name: "95% 예측구간", type: "line", stack: "quarter-confidence", symbol: "none", data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .65 }, areaStyle: { color: "rgba(59,130,246,.2)" }, tooltip: { show: false }, silent: true, z: 1 },
       {
         name: "7~10월 추정", type: "line", smooth: 0.24, symbol: "none",
         data: monthlyValues.map((value, index) => index <= currentMonthIndex ? value : null),
