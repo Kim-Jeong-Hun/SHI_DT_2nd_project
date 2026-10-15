@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import EChartsReact from "../common/LocalizedECharts";
-import { Activity, CircleHelp, Pause, Play } from "lucide-react";
+import { Activity, Pause, Play } from "lucide-react";
 import { NOTEBOOK_FORECASTS, NOTEBOOK_VESSEL_IDS, PORTFOLIO_INTERVAL_95 } from "../../data/notebookForecasts";
 import type { ForecastDriver, NotebookForecast, NotebookVesselId } from "../../data/notebookForecasts";
 import { useI18n } from "../../i18n";
@@ -553,7 +553,7 @@ export default function DashboardOverview({ vesselId, darkMode }: { vesselId?: N
         {portfolio && chartId === "aggregate" ? <PortfolioForecastTimeseries forecasts={forecasts} actualsByVessel={actualsByVessel} loading={loading} /> : <ForecastTimeseries forecast={chartForecast ?? forecast} actuals={actuals} loading={loading} darkMode={darkMode} />}
       </section>
       {portfolio ? <section className="overview-panel overview-heatmap-panel">
-        <header><h3>선종별 7~12월 월별 수주 전망 <CircleHelp size={14} /></h3></header>
+        <header><h3>선종별 7~12월 월별 수주 전망</h3></header>
         <ForecastHeatmap forecasts={forecasts} onSelect={selectHeatmapVessel} />
       </section> : <section className="overview-panel overview-driver-panel overview-core-driver-panel"><header><h3>수주 전망 주요 기여 변수</h3><span>{forecast.vesselName}</span></header><DriverBars source={forecast.drivers} limit={8} /></section>}
     </div>
