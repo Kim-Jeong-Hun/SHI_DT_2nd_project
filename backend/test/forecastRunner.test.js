@@ -31,12 +31,12 @@ after(() => {
 test("uses the shared forecast service when a local project is unavailable", async () => {
   const result = await runCustomForecast({ vesselId: "bulk", observationMonth: "2026-07", values: {} });
   assert.deepEqual(result, { ok: true, vesselId: "bulk" });
-  assert.equal(requests.at(-1).url, "https://forecast.example.test/ship/custom-forecast/run");
+  assert.equal(requests.at(-1).url, "https://forecast.example.test/api/forecast?action=run");
   assert.equal(requests.at(-1).options.method, "POST");
 });
 
 test("loads portable forecast configuration from the shared service", async () => {
   const result = await getCustomForecastConfig("container");
   assert.deepEqual(result, { ok: true, vesselId: "container" });
-  assert.equal(requests.at(-1).url, "https://forecast.example.test/ship/custom-forecast/config");
+  assert.equal(requests.at(-1).url, "https://forecast.example.test/api/forecast?action=config");
 });
