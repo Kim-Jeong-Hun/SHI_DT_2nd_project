@@ -197,6 +197,15 @@ const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals,
       { name: intervalLabel, type: "line", stack: "confidence", symbol: "none", smooth: 0.2, connectNulls: true, data: confidenceBand, lineStyle: { color: "#93c5fd", width: 1, type: "dashed", opacity: .8 }, areaStyle: { color: "rgba(59,130,246,.23)" }, tooltip: { show: false }, silent: true, z: 1 },
       { name: "11~12월 전망", type: "line", symbol: "none", smooth: 0.2, connectNulls: false, data: forecastData, lineStyle: { color: "#2476ed", width: 2.6, type: "dashed" }, emphasis: { focus: "series" }, markArea: { silent: true, itemStyle: { color: "rgba(59,130,246,.035)" }, data: [[{ xAxis: FORECAST_MARKER_MONTH }, { xAxis: FORECAST_END_MONTH }]] }, markPoint: { silent: true, label: { show: false }, data: turningMarkers }, markLine: { animation: false, symbol: "none", silent: true, data: [...quarterBoundaryLines(months, darkMode), { xAxis: FORECAST_MARKER_MONTH, label: { show: true, formatter: "미래 전망 시작", color: "#fff", backgroundColor: "#2878ed", borderRadius: 4, padding: [4, 7] }, lineStyle: { color: "#2878ed", type: "dashed" } }] }, z: 5 },
     ],
+    media: [{
+      query: { maxWidth: 560 },
+      option: {
+        grid: { left: 50, right: 12, top: 76, bottom: 38 },
+        legend: { type: "scroll", top: 4, left: 8, right: 8, itemWidth: 16, itemGap: 10, textStyle: { color: chartTheme.text, fontSize: 9 } },
+        xAxis: { axisLabel: { fontSize: 9, margin: 10 } },
+        yAxis: { name: "", axisLabel: { fontSize: 9 }, splitNumber: 3 },
+      },
+    }],
   };
   return <div className="overview-chart-body">{loading ? <div className="overview-chart-placeholder">수주 데이터를 불러오는 중입니다.</div> : actuals.length ? <EChartsReact option={option} notMerge lazyUpdate /> : <div className="overview-chart-placeholder">연결된 수주 데이터가 없습니다.</div>}</div>;
 });
@@ -276,6 +285,15 @@ const PortfolioForecastTimeseries = memo(function PortfolioForecastTimeseries({ 
       { name: "종합 11~12월 전망", type: "line", symbol: "none", smooth: 0.2, data: forecastData, lineStyle: { color: "#2476ed", width: 2.6, type: "dashed" }, markArea: { silent: true, itemStyle: { color: "rgba(59,130,246,.035)" }, data: [[{ xAxis: FORECAST_MARKER_MONTH }, { xAxis: FORECAST_END_MONTH }]] }, markPoint: { silent: true, label: { show: false }, data: turningMarkers }, z: 5 },
       { name: "기간 구분선", type: "line", animation: false, symbol: "none", data: months.map(() => null), lineStyle: { opacity: 0 }, tooltip: { show: false }, silent: true, markLine: { animation: false, symbol: "none", silent: true, data: [{ yAxis: 100, label: { show: false }, lineStyle: { color: "#94a3b8", type: "dotted" } }, ...quarterBoundaryLines(months), { xAxis: FORECAST_MARKER_MONTH, label: { show: true, formatter: "미래 전망 시작", color: "#fff", backgroundColor: "#2878ed", borderRadius: 4, padding: [4, 7] }, lineStyle: { color: "#2878ed", type: "dashed" } }] }, z: 7 },
     ],
+    media: [{
+      query: { maxWidth: 560 },
+      option: {
+        grid: { left: 46, right: 12, top: 76, bottom: 38 },
+        legend: { type: "scroll", top: 4, left: 8, right: 8, itemWidth: 16, itemGap: 10, textStyle: { color: "#64748b", fontSize: 9 } },
+        xAxis: { axisLabel: { fontSize: 9, margin: 10 } },
+        yAxis: { name: "", axisLabel: { fontSize: 9 }, splitNumber: 3 },
+      },
+    }],
   };
   return <div className="overview-chart-body">{loading ? <div className="overview-chart-placeholder">전체 선종 수주 데이터를 불러오는 중입니다.</div> : actualIndexes.length && forecastIndexes.length ? <EChartsReact option={option} notMerge lazyUpdate /> : <div className="overview-chart-placeholder">종합지수를 계산할 수주 데이터가 부족합니다.</div>}</div>;
 });
@@ -302,6 +320,15 @@ const ForecastHeatmap = memo(function ForecastHeatmap({ forecasts, onSelect }: {
     yAxis: { type: "category", inverse: true, data: forecasts.map((item) => item.vesselName), axisLine: { show: false }, axisTick: { show: false }, axisLabel: { color: "#31465f", fontSize: 12, fontWeight: 700 } },
     visualMap: { show: false, min: 0, max: 1, dimension: 2, inRange: { color: palette } },
     series: [{ type: "heatmap", data: values, label: { show: true, fontSize: 11, fontWeight: 750, formatter: (params: { value: [number, number, number, number] }) => formatCompact(params.value[3]) }, itemStyle: { borderColor: "#fff", borderWidth: 4, borderRadius: 4 }, emphasis: { itemStyle: { shadowBlur: 8, shadowColor: "rgba(15,38,70,.18)" } } }],
+    media: [{
+      query: { maxWidth: 560 },
+      option: {
+        grid: { left: forecasts.length > 1 ? 62 : 50, right: 4, top: 25, bottom: 4 },
+        xAxis: { axisLabel: { fontSize: 10 } },
+        yAxis: { axisLabel: { fontSize: 10 } },
+        series: [{ label: { fontSize: 9 }, itemStyle: { borderWidth: 2 } }],
+      },
+    }],
   };
   return <div className="overview-heatmap-body"><EChartsReact option={option} notMerge lazyUpdate onEvents={{ click: (params: { value?: [number, number, number, number] }) => { const item = params.value ? forecasts[params.value[1]] : undefined; if (item && onSelect) onSelect(item.vesselId); } }} /><div className="overview-heatmap-legend"><span>선종별 최소</span><i /><b /><span>선종별 최대</span></div></div>;
 });

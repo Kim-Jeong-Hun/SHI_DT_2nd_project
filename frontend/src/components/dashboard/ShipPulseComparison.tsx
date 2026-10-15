@@ -2,8 +2,8 @@ import { BarChart3, ShieldCheck } from "lucide-react";
 
 export default function ShipPulseComparison() {
   return (
-    <main className="mx-auto w-full max-w-[1536px] px-3 py-4 md:px-5 md:py-5">
-      <section className="mb-4 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200/85 bg-white px-5 py-4 shadow-[0_4px_24px_rgba(21,44,79,0.035)] md:px-6">
+    <main className="mx-auto w-full max-w-[1536px] px-2 py-3 sm:px-3 sm:py-4 md:px-5 md:py-5">
+      <section className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/85 bg-white px-4 py-4 shadow-[0_4px_24px_rgba(21,44,79,0.035)] sm:mb-4 sm:gap-4 sm:px-5 md:px-6">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700">
             <BarChart3 className="h-5 w-5" />
@@ -24,7 +24,7 @@ export default function ShipPulseComparison() {
           title="ShipPulse 지표 비교"
           src="/api/v1/ship-pulse"
           sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"
-          className="h-[calc(100vh-190px)] min-h-[760px] w-full border-0 bg-slate-50"
+          className="h-[calc(100svh-150px)] min-h-[560px] w-full border-0 bg-slate-50 sm:h-[calc(100svh-175px)] sm:min-h-[640px] md:h-[calc(100vh-190px)] md:min-h-[760px]"
         />
       </section>
     </main>
