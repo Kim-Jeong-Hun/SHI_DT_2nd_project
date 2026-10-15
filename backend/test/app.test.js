@@ -78,11 +78,11 @@ test("custom forecast accepts only supported vessel types", async () => {
   assert.match((await response.json()).error, /container/);
 });
 
-test("plan-restricted APIs reject insufficient subscriptions", async () => {
+test("Explore can read vessel actuals while higher-tier APIs remain restricted", async () => {
   const masterData = await fetch(`${baseUrl}/api/v1/master-data?vesselId=container`, exploreAuthenticated);
   const customForecast = await fetch(`${baseUrl}/api/v1/custom-forecast/config?vesselId=container`, exploreAuthenticated);
   const shipPulse = await fetch(`${baseUrl}/api/v1/ship-pulse`, exploreAuthenticated);
-  assert.equal(masterData.status, 403);
+  assert.equal(masterData.status, 200);
   assert.equal(customForecast.status, 403);
   assert.equal(shipPulse.status, 403);
 });

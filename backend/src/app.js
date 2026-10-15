@@ -46,7 +46,7 @@ export function createApp(pool, authOptions = {}) {
     }
   });
 
-  app.get("/api/v1/master-data", requirePlan("professional"), async (request, response) => {
+  app.get("/api/v1/master-data", requirePlan("explore"), async (request, response) => {
     const { vesselId, from, to } = request.query;
     const validMonth = (value) => typeof value === "string" && /^20\d{2}-(0[1-9]|1[0-2])$/.test(value);
     if (typeof vesselId !== "string" || !["chemical", "gas", "bulk", "tanker", "container"].includes(vesselId) ||

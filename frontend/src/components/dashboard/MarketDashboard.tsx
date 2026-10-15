@@ -571,7 +571,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
   };
 
   if (showPlanComparison) return <SubscriptionPage user={user} mode="change" onBack={() => setShowPlanComparison(false)} onSubscribed={(updatedUser) => { onUserUpdated(updatedUser); setVesselId("all"); setActivePage("dashboard"); setActiveSection("dashboard-overview"); setShowMyPage(false); setShowPlanComparison(false); window.scrollTo(0, 0); }} onLogout={onLogout} />;
-  if (showMyPage) return <MyPage user={user} darkMode={darkMode} onBack={() => { setShowMyPage(false); if ((activeSection === "custom-forecast" && !hasEnterpriseAccess) || (activeSection !== "dashboard-overview" && !hasProfessionalAccess)) setActiveSection("dashboard-overview"); }} onChangePlan={() => setShowPlanComparison(true)} onUserUpdated={onUserUpdated} onLogout={onLogout} />;
+  if (showMyPage) return <MyPage user={user} darkMode={darkMode} onBack={() => { setShowMyPage(false); if ((activeSection === "custom-forecast" && !hasEnterpriseAccess) || (!["dashboard-overview", "order-forecast"].includes(activeSection) && !hasProfessionalAccess)) setActiveSection("dashboard-overview"); }} onChangePlan={() => setShowPlanComparison(true)} onUserUpdated={onUserUpdated} onLogout={onLogout} />;
 
   return (
     <div className={`market-dashboard min-h-screen bg-[#f5f7fb] text-slate-900 ${darkMode ? "dashboard-dark dark" : ""}`}>
@@ -738,7 +738,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
           </div>
           <nav className="dashboard-section-nav" aria-label="대시보드 섹션">
             {dashboardSections.filter(({ id }) => !(isAllVessels && id === "freight-analysis") && (isAllVessels || (id !== "monthly-heatmap" && id !== "custom-forecast"))).map(({ id, label, icon: Icon }) => {
-              const locked = id === "custom-forecast" ? !hasEnterpriseAccess : id !== "dashboard-overview" && !hasProfessionalAccess;
+              const locked = id === "custom-forecast" ? !hasEnterpriseAccess : !["dashboard-overview", "order-forecast"].includes(id) && !hasProfessionalAccess;
               return <button
                 key={id}
                 type="button"
@@ -828,7 +828,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
           {bulkMetrics ? <BulkInsightPanel vessel={vessel} /> : <NotebookInsightPanel forecast={notebookForecast} />}
         </div>
         </section>)}
-        {hasProfessionalAccess && activeSection === "order-forecast" && <div id="order-forecast" className="dashboard-block analysis-screen dashboard-view dashboard-section-target">
+        {activeSection === "order-forecast" && <div id="order-forecast" className="dashboard-block analysis-screen dashboard-view dashboard-section-target">
           {!isAllVessels
             ? isNotebookVessel(vessel.id)
               ? <VesselOrderForecast darkMode={darkMode} vesselId={vessel.id} />

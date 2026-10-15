@@ -25,7 +25,7 @@ const plans: Array<{
     label: "시장 탐색",
     description: "핵심 시장 흐름을 가볍게 확인하는 시작 플랜",
     icon: BarChart3,
-    benefits: ["시장 개요 대시보드", "5개 선종 통합 보기", "월간 시장 지표"],
+    benefits: ["시장 개요 대시보드", "5개 선종 통합 보기", "선종별 실적 및 연말까지 수주 전망", "분기 수주 전망"],
   },
   {
     id: "professional",
