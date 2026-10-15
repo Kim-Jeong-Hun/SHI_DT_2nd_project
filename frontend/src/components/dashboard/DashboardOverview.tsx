@@ -139,19 +139,20 @@ const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals,
   const forecastData = [...historyPadding, ...(current ? [current.value] : []), ...future.map((item) => item.value)];
   const turningMarkers = turningPointMarkers([...actuals, ...projected]);
   const forecastStartPoint = [...actuals, ...projected].find((point) => point.month === FORECAST_MARKER_MONTH);
-  const intervalLabel = "90% 예측구간";
-  const uncertainty = forecast.conformalRadius90;
+  const intervalLabel = "95% 예측구간";
+  const intervals = new Map(forecast.predictionIntervals95.map((interval) => [interval.month, interval]));
   const confidenceAnchor = [...actuals.slice(0, -1).map(() => null), lastActual, ...pendingMonths.map(() => null)];
   const confidenceLower = [
     ...confidenceAnchor,
-    ...projected.map((item) => Math.max(0, item.value - uncertainty)),
+    ...projected.map((item) => intervals.get(item.month)?.lower ?? null),
   ];
   const confidenceBand = [
     ...actuals.slice(0, -1).map(() => null),
     lastActual === null ? null : 0,
     ...pendingMonths.map(() => null),
     ...projected.map((item) => {
-      return item.value + uncertainty - Math.max(0, item.value - uncertainty);
+      const interval = intervals.get(item.month);
+      return interval ? interval.upper - interval.lower : null;
     }),
   ];
   const option = {
@@ -175,11 +176,10 @@ const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals,
           const index = projected.indexOf(predicted);
           const previous = index > 0 ? projected[index - 1].value : undefined;
           const change = previous ? (predicted.value - previous) / previous * 100 : undefined;
-          const lower = Math.max(0, predicted.value - uncertainty);
-          const upper = predicted.value + uncertainty;
           lines.push(`${month === CURRENT_MONTH ? "현재월 추정" : "잔여 전망"}&nbsp;&nbsp;<b>${predicted.value.toLocaleString("ko-KR", { maximumFractionDigits: 1 })} ${forecast.unit}</b>${change === undefined ? "" : ` <span style="color:${change >= 0 ? "#86efac" : "#fda4af"}">(${signed(change)})</span>`}`);
-          lines.push(confidenceTooltip(lower, upper, forecast.unit, forecast.conformalCalibrationSize, intervalLabel,
-            `과거 3개월 블록 최대 절대오차 · block-conformal · n=${forecast.conformalCalibrationSize}`));
+          const interval = intervals.get(month);
+          if (interval) lines.push(confidenceTooltip(interval.lower, interval.upper, forecast.unit, interval.calibrationSize, intervalLabel,
+            `인접 3개월 Validation 원잔차 · n=${interval.calibrationSize}`));
         }
         if (month === PENDING_MONTH) lines.push("수주 실적 집계 대기");
         return lines.join("<br/>");
@@ -302,8 +302,8 @@ const ForecastHeatmap = memo(function ForecastHeatmap({ forecasts, onSelect }: {
   return <div className="overview-heatmap-body"><EChartsReact option={option} notMerge lazyUpdate onEvents={{ click: (params: { value?: [number, number, number, number] }) => { const item = params.value ? forecasts[params.value[1]] : undefined; if (item && onSelect) onSelect(item.vesselId); } }} /><div className="overview-heatmap-legend"><span>선종별 최소</span><i /><b /><span>선종별 최대</span></div></div>;
 });
 
-function DriverBars({ source }: { source: readonly ForecastDriver[] }) {
-  const drivers = source.slice(0, 5);
+function DriverBars({ source, limit = 5 }: { source: readonly ForecastDriver[]; limit?: number }) {
+  const drivers = source.slice(0, limit);
   return <div className="driver-list">{drivers.map((driver, index) => <div className="driver-row" key={driver.label}>
     <span>{driver.label}</span><i><b style={{ width: `${Math.max(18, driver.share / drivers[0].share * 100)}%`, background: index === 0 ? "#176ed1" : "#4b91e8" }} /></i><strong>{driver.share.toFixed(2)}%</strong>
   </div>)}</div>;
@@ -342,8 +342,9 @@ export default function DashboardOverview({ vesselId }: { vesselId?: NotebookVes
   const forecastStart = q4Points[0];
   const forecastEnd = q4Points.at(-1) ?? forecastStart;
   const forecastEndChange = (forecastEnd.value / Math.max(forecastStart.value, 1) - 1) * 100;
-  const possibleLow = Math.max(0, Math.min(...q4Points.map((point) => point.value - forecast.conformalRadius90)));
-  const possibleHigh = Math.max(...q4Points.map((point) => point.value + forecast.conformalRadius90));
+  const q4Intervals = forecast.predictionIntervals95.filter((interval) => interval.month >= "2026-10");
+  const possibleLow = Math.min(...q4Intervals.map((interval) => interval.lower));
+  const possibleHigh = Math.max(...q4Intervals.map((interval) => interval.upper));
   const koreanMarketBriefs = portfolio ? [
     {
       headline: <>4분기 월간 변화가 가장 큰 선종은 <em>{strongestChange.vesselName} {signed(periodChange(strongestChange))}</em>입니다.</>,
@@ -504,7 +505,7 @@ export default function DashboardOverview({ vesselId }: { vesselId?: NotebookVes
       {portfolio ? <section className="overview-panel overview-heatmap-panel">
         <header><h3>선종별 7~12월 월별 수주 전망 <CircleHelp size={14} /></h3></header>
         <ForecastHeatmap forecasts={forecasts} onSelect={selectHeatmapVessel} />
-      </section> : <section className="overview-panel overview-driver-panel overview-core-driver-panel"><header><h3>수주 전망 주요 기여 변수</h3><span>{forecast.vesselName}</span></header><DriverBars source={forecast.drivers} /></section>}
+      </section> : <section className="overview-panel overview-driver-panel overview-core-driver-panel"><header><h3>수주 전망 주요 기여 변수</h3><span>{forecast.vesselName}</span></header><DriverBars source={forecast.drivers} limit={8} /></section>}
     </div>
 
     {portfolio && <div className="overview-analysis-grid">
