@@ -87,6 +87,20 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
   const highIndex = monthlyValues.indexOf(Math.max(...monthlyValues));
   const lowIndex = monthlyValues.indexOf(Math.min(...monthlyValues));
   const materialSwing = (monthlyValues[highIndex] - monthlyValues[lowIndex]) / Math.max(monthlyValues[lowIndex], 1) >= 0.25;
+  const currentTurningPoint = materialSwing
+    ? currentMonthIndex === highIndex ? { name: "예상 고점", color: "#ef4444" }
+      : currentMonthIndex === lowIndex ? { name: "예상 저점", color: "#2563eb" }
+        : null
+    : null;
+  const currentPointColor = currentTurningPoint ? {
+    type: "linear", x: 0, y: 0, x2: 1, y2: 0,
+    colorStops: [
+      { offset: 0, color: currentTurningPoint.color },
+      { offset: 0.5, color: currentTurningPoint.color },
+      { offset: 0.5, color: "#f59e0b" },
+      { offset: 1, color: "#f59e0b" },
+    ],
+  } : "#f59e0b";
   const turningPoints = materialSwing ? [
     { coord: [months[highIndex], monthlyValues[highIndex]], name: "예상 고점", symbol: "circle", symbolSize: 11, itemStyle: { color: "#ef4444", borderColor: "#fff", borderWidth: 2 } },
     { coord: [months[lowIndex], monthlyValues[lowIndex]], name: "예상 저점", symbol: "circle", symbolSize: 11, itemStyle: { color: "#2563eb", borderColor: "#fff", borderWidth: 2 } },
@@ -105,7 +119,12 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         const previous = forecast.monthly[index - 1];
         const change = previous ? (point.value / previous.value - 1) * 100 : undefined;
         const interval = intervals.get(point.month);
-        const pointLabel = index === highIndex ? `<b style="color:#ef4444">예상 고점</b><br/>` : index === lowIndex ? `<b style="color:#2563eb">예상 저점</b><br/>` : "";
+        const pointLabels = [
+          index === highIndex && materialSwing ? `<b style="color:#ef4444">예상 고점</b>` : "",
+          index === lowIndex && materialSwing ? `<b style="color:#2563eb">예상 저점</b>` : "",
+          index === currentMonthIndex ? `<b style="color:#f59e0b">현재월 추정</b>` : "",
+        ].filter(Boolean).join(" · ");
+        const pointLabel = pointLabels ? `${pointLabels}<br/>` : "";
         const status = index === currentMonthIndex ? "현재월 추정" : index > currentMonthIndex ? "잔여 전망" : `${index < 3 ? "3분기" : "4분기"} 전망`;
         return `${pointLabel}<b>${point.month}</b> · ${status}<br/>월별 전망&nbsp;&nbsp;<b>${number(point.value, 1)} ${forecast.unit}</b>${change === undefined ? "" : `<br/>전월 대비&nbsp;&nbsp;<b style="color:${change >= 0 ? "#16a34a" : "#e11d48"}">${change > 0 ? "+" : ""}${change.toFixed(1)}%</b>`}${interval ? `<br/><span style="color:#64748b">95% 범위&nbsp;&nbsp;${number(interval.lower, 1)}–${number(interval.upper, 1)} ${forecast.unit} · n=${interval.calibrationSize}</span>` : ""}`;
       },
@@ -134,7 +153,7 @@ export default function ContainerForecast({ darkMode, vesselId }: { darkMode: bo
         ] },
         markPoint: { silent: true, label: { show: false }, data: [
           ...turningPoints,
-          { coord: [months[currentMonthIndex], monthlyValues[currentMonthIndex]], name: "현재월 추정", symbol: "circle", symbolSize: 10, itemStyle: { color: "#f59e0b", borderColor: "#fff", borderWidth: 2 } },
+          { coord: [months[currentMonthIndex], monthlyValues[currentMonthIndex]], name: currentTurningPoint ? `현재월 추정 · ${currentTurningPoint.name}` : "현재월 추정", symbol: "circle", symbolSize: 11, itemStyle: { color: currentPointColor, borderColor: "#fff", borderWidth: 2 } },
         ] },
         markLine: { symbol: "none", silent: true, data: [{ xAxis: "10월", label: { formatter: "현재월", color: text, position: "insideEndTop" }, lineStyle: { color: "#f59e0b", width: 1.2, type: "dashed" } }] },
         z: 4,
