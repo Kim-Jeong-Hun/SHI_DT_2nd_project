@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const defaultForecastServiceUrl = "https://ship-order-forecast.onrender.com";
+const defaultForecastServiceUrl = "https://shipulse-backend.vercel.app";
 export const NOTEBOOK_FORECAST_VESSELS = new Set(["container", "tanker", "bulk", "gas", "chemical"]);
 const configCache = new Map();
 
@@ -29,7 +29,7 @@ async function callLocalForecastRunner(action, payload, projectRoot) {
 
 async function callForecastService(action, payload) {
   const baseUrl = (process.env.FORECAST_SERVICE_URL || defaultForecastServiceUrl).replace(/\/$/, "");
-  const response = await fetch(`${baseUrl}/ship/custom-forecast/${action}`, {
+  const response = await fetch(`${baseUrl}/api/forecast?action=${action}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
