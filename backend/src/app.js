@@ -1,8 +1,10 @@
 import express from "express";
+import { fileURLToPath } from "node:url";
 import { createAuth } from "./auth.js";
 import { getCustomForecastConfig, NOTEBOOK_FORECAST_VESSELS, runCustomForecast } from "./forecastRunner.js";
 
 const PLAN_LEVEL = { explore: 1, professional: 2, enterprise: 3 };
+const SHIP_PULSE_HTML = fileURLToPath(new URL("../private/ship-pulse.html", import.meta.url));
 
 export function createApp(pool, authOptions = {}) {
   const app = express();
@@ -111,6 +113,16 @@ export function createApp(pool, authOptions = {}) {
       console.error("Notebook forecast failed", error);
       response.status(500).json({ error: error.message || "시나리오 예측 실행에 실패했습니다." });
     }
+  });
+
+  app.get("/api/v1/ship-pulse", requirePlan("enterprise"), (_request, response, next) => {
+    response.set({
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+    });
+    response.sendFile(SHIP_PULSE_HTML, (error) => {
+      if (error) next(error);
+    });
   });
 
   app.get("/api/v1/market/orders", async (request, response) => {

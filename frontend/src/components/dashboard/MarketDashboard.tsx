@@ -23,6 +23,7 @@ import AboutPage from "./AboutPage";
 import CompanyAboutPage from "./CompanyAboutPage";
 import CustomForecast from "./CustomForecast";
 import DashboardOverview from "./DashboardOverview";
+import ShipPulseComparison from "./ShipPulseComparison";
 import TankerNotebookTimeseries from "./TankerNotebookTimeseries";
 import { useDashboardStore } from "../../store/useDashboardStore";
 import "../../styles/market-dashboard.css";
@@ -537,7 +538,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
   const [showPlanComparison, setShowPlanComparison] = useState(false);
   const [csvExporting, setCsvExporting] = useState(false);
   const [csvExportError, setCsvExportError] = useState("");
-  const [activePage, setActivePage] = useState<"dashboard" | "newsroom" | "about" | "details">("dashboard");
+  const [activePage, setActivePage] = useState<"dashboard" | "newsroom" | "about" | "details" | "ship-pulse">("dashboard");
   const [activeSection, setActiveSection] = useState<string>(dashboardSections[0].id);
   const isAllVessels = vesselId === "all";
   const currentPlanLevel = planLevel[user.subscriptionPlan ?? ""] ?? 0;
@@ -611,28 +612,40 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showMoreMenu ? "rotate-180" : ""}`} />
                   </Button>
                   {showMoreMenu && (
-                    <div id="dashboard-more-menu" className="fixed top-32 right-4 z-30 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl lg:absolute lg:top-12 lg:-right-20" onKeyDown={(event) => {
+                    <div id="dashboard-more-menu" className="fixed top-32 right-4 z-30 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl lg:absolute lg:top-12 lg:-right-20" onKeyDown={(event) => {
                       if (event.key === "Escape") setShowMoreMenu(false);
                     }}>
                       {([
+                        { page: "ship-pulse" as const, label: "ShipPulse 지표 비교", icon: BarChart3, enterpriseOnly: true },
                         { page: "newsroom" as const, label: "뉴스룸", icon: Newspaper },
                         { page: "details" as const, label: "Details", icon: FileText },
                         { page: "about" as const, label: "About Us", icon: Info },
-                      ]).map(({ page, label, icon: Icon }) => (
+                      ]).map(({ page, label, icon: Icon, enterpriseOnly = false }) => {
+                        const locked = enterpriseOnly && !hasEnterpriseAccess;
+                        return (
                         <button
                           key={page}
                           type="button"
                           aria-current={activePage === page ? "page" : undefined}
+                          aria-label={locked ? `${label} · Enterprise 플랜 필요` : label}
                           className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm font-semibold transition-colors ${activePage === page ? "bg-blue-50 text-blue-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"}`}
                           onClick={() => {
+                            if (locked) {
+                              setShowMoreMenu(false);
+                              setShowPlanComparison(true);
+                              return;
+                            }
                             setActivePage(page);
                             setShowMoreMenu(false);
                             window.scrollTo(0, 0);
                           }}
                         >
-                          <Icon className="h-4 w-4" />{label}
+                          <Icon className="h-4 w-4" />
+                          {page === "ship-pulse" ? <span className="leading-5"><span className="block">ShipPulse</span><span className="block">지표 비교</span></span> : label}
+                          {locked && <Lock className="ml-auto h-3.5 w-3.5 text-slate-400" />}
                         </button>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </nav>
@@ -718,7 +731,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
       {authError && <div role="alert" className="mx-auto max-w-[1360px] px-4 pt-3 text-sm text-red-700 md:px-8">{authError}</div>}
       {csvExportError && <div role="alert" className="mx-auto max-w-[1360px] px-4 pt-3 text-sm text-red-700 md:px-8">{csvExportError}</div>}
 
-      {activePage === "newsroom" ? <Newsroom /> : activePage === "about" ? <CompanyAboutPage /> : activePage === "details" ? <AboutPage onExplore={() => { setActivePage("dashboard"); setActiveSection("dashboard-overview"); window.scrollTo(0, 0); }} onOpenNewsroom={() => { setActivePage("newsroom"); window.scrollTo(0, 0); }} /> : <main className={`dashboard-compact dashboard-layout mx-auto max-w-[1536px] px-3 pt-3 md:px-3 ${activeSection === "dashboard-overview" ? "pb-3" : "pb-0"}`}>
+      {activePage === "ship-pulse" ? <ShipPulseComparison /> : activePage === "newsroom" ? <Newsroom /> : activePage === "about" ? <CompanyAboutPage /> : activePage === "details" ? <AboutPage onExplore={() => { setActivePage("dashboard"); setActiveSection("dashboard-overview"); window.scrollTo(0, 0); }} onOpenNewsroom={() => { setActivePage("newsroom"); window.scrollTo(0, 0); }} /> : <main className={`dashboard-compact dashboard-layout mx-auto max-w-[1536px] px-3 pt-3 md:px-3 ${activeSection === "dashboard-overview" ? "pb-3" : "pb-0"}`}>
         <aside className={`${panelClass} dashboard-sidebar p-3`} aria-label="대시보드 섹션 이동">
           <div className="dashboard-sidebar-heading">
             <span>분석 대시보드</span>
