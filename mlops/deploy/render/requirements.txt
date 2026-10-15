@@ -1,0 +1,7 @@
+# Render 이미지 의존성 — 로컬·도커 앱과 같은 고정 버전(requirements.txt) + 서빙 프록시 · 팀 파이프라인 추가분
+-r ../../requirements.txt
+httpx==0.28.1
+xlrd==2.0.2
+pypdf==6.1.1
+xgboost==3.1.1
+kedro-viz==12.5.0   # 빌드 때 kedro viz build 로 파이프라인 화면을 정적 생성 (/kedro)

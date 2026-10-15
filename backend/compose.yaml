@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in backend/.env}
+      POSTGRES_DB: shi_market
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/001_create_market_tables.sql:/docker-entrypoint-initdb.d/001_create_market_tables.sql:ro
+      - ./sql/002_create_vessel_master_tables.sql:/docker-entrypoint-initdb.d/002_create_vessel_master_tables.sql:ro
+      - ./sql/003_create_cluster_result_tables.sql:/docker-entrypoint-initdb.d/003_create_cluster_result_tables.sql:ro
+      - ./sql/004_create_auth_tables.sql:/docker-entrypoint-initdb.d/004_create_auth_tables.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d shi_market"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:

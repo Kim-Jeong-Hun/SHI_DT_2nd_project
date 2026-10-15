@@ -1,0 +1,12 @@
+# 비밀값 — 저장소에 넣지 않음
+.env
+# 데이터·산출물 — 원본은 팀 구글 드라이브, 실행하면 여기 생성됨
+data/**
+!data/**/.gitkeep
+deploy/render/team/data/
+deploy/render/team/reports/*
+!deploy/render/team/reports/.gitkeep
+mlruns/
+mlartifacts/
+__pycache__/
+*.pyc

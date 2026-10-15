@@ -16,3 +16,9 @@
 ```powershell
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
+
+## 구성
+
+- `mlops/`: 선박 수주 예측 운영 파이프라인 (Kedro · MLflow · Airflow)
+- `frontend/`: React 대시보드. 현재는 가상 데이터를 표시합니다.
+- `backend/`: Express API와 PostgreSQL 스키마. 로컬 PostgreSQL 또는 Supabase PostgreSQL에 연결할 수 있습니다. 설치와 실행 방법은 [backend/README.md](backend/README.md)를 참고하세요.
