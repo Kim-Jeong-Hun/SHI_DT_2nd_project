@@ -155,9 +155,20 @@
   .custom-config-actions button, .custom-save-button { width: 100%; justify-content: center; }
 }
 
+@media (max-width: 640px) {
+  .custom-help-copy { right:0; left:auto; width:min(220px,calc(100vw - 48px)); transform:translateY(-4px); }
+  .custom-help-tip:hover .custom-help-copy, .custom-help-tip:focus .custom-help-copy { transform:translateY(0); }
+  .custom-monthly-label { position:relative; }
+  .custom-label-help-tip { position:static; }
+  .custom-label-help-tip .custom-help-copy { top:calc(100% + 8px); right:auto; left:0; width:min(180px,calc(100vw - 48px)); transform:translateY(-4px); }
+  .custom-label-help-tip:hover .custom-help-copy, .custom-label-help-tip:focus .custom-help-copy { transform:translateY(0); }
+}
+
 @media (max-width: 420px) {
   .custom-feature-grid, .custom-parameter-grid { grid-template-columns: 1fr; }
   .custom-scenario-metrics { grid-template-columns: 1fr; }
+  .custom-monthly-input { align-items:stretch; flex-direction:column; gap:8px; }
+  .custom-monthly-input input { width:100%; }
 }
 
 /* Custom forecast dark theme */

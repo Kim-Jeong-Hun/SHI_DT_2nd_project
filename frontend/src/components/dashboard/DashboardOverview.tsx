@@ -203,7 +203,7 @@ const ForecastTimeseries = memo(function ForecastTimeseries({ forecast, actuals,
       option: {
         grid: { left: 50, right: 12, top: 76, bottom: 38 },
         legend: { type: "scroll", top: 4, left: 8, right: 8, itemWidth: 16, itemGap: 10, textStyle: { color: chartTheme.text, fontSize: 9 } },
-        xAxis: { axisLabel: { fontSize: 9, margin: 10 } },
+        xAxis: { axisLabel: { fontSize: 9, margin: 10, formatter: (value: string, index: number) => index % 6 === 0 ? value.replace("-", ".") : "" } },
         yAxis: { name: "", axisLabel: { fontSize: 9 }, splitNumber: 3 },
       },
     }],
@@ -291,7 +291,7 @@ const PortfolioForecastTimeseries = memo(function PortfolioForecastTimeseries({ 
       option: {
         grid: { left: 46, right: 12, top: 76, bottom: 38 },
         legend: { type: "scroll", top: 4, left: 8, right: 8, itemWidth: 16, itemGap: 10, textStyle: { color: "#64748b", fontSize: 9 } },
-        xAxis: { axisLabel: { fontSize: 9, margin: 10 } },
+        xAxis: { axisLabel: { fontSize: 9, margin: 10, formatter: (value: string, index: number) => index % 6 === 0 ? value.replace("-", ".") : "" } },
         yAxis: { name: "", axisLabel: { fontSize: 9 }, splitNumber: 3 },
       },
     }],

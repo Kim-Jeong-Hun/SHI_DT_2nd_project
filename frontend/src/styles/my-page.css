@@ -28,3 +28,5 @@
 .mypage-dark .mypage-plan-manage{border-color:#334155}.mypage-dark .mypage-plan-manage p{color:#8796a9}
 .mypage-dark .mypage-preference-list label>i{background:#475569}
 .mypage-dark .mypage-security{color:#8796a9}
+
+@media(max-width:420px){.mypage-nav{gap:8px;padding-right:12px;padding-left:12px}.mypage-nav>div{gap:5px}.mypage-nav [aria-label="언어 설정"]{flex-shrink:0}.mypage-nav [aria-label="언어 설정"] button{padding:6px 7px}.mypage-back{width:44px;height:44px;justify-content:center;padding:9px;font-size:0}.mypage-layout{padding-right:12px;padding-left:12px}.mypage-sidebar{padding:22px 16px}.mypage-card{padding:19px 15px}.mypage-preference-list label{gap:14px}}

@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import EChartsReact from "../common/LocalizedECharts";
 import {
   Activity, ArrowDownRight, ArrowUpRight, BarChart3,
   ChevronDown, Download, FileText, Globe2, Info, LayoutDashboard, Lock, Moon, Newspaper, Settings2, Ship, SlidersHorizontal,
-  TrendingDown, TrendingUp, UserRound, X,
+  LogOut, TrendingDown, TrendingUp, UserRound, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -540,11 +540,16 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
   const [csvExportError, setCsvExportError] = useState("");
   const [activePage, setActivePage] = useState<"dashboard" | "newsroom" | "about" | "details" | "ship-pulse">("dashboard");
   const [activeSection, setActiveSection] = useState<string>(dashboardSections[0].id);
+  const activeVesselTabRef = useRef<HTMLButtonElement>(null);
   const isAllVessels = vesselId === "all";
   const currentPlanLevel = planLevel[user.subscriptionPlan ?? ""] ?? 0;
   const hasProfessionalAccess = currentPlanLevel >= planLevel.professional;
   const hasEnterpriseAccess = currentPlanLevel >= planLevel.enterprise;
   const vessel = isAllVessels ? ALL_VESSELS : VESSELS.find((item) => item.id === vesselId) ?? VESSELS[0];
+  useEffect(() => {
+    if (!window.matchMedia("(max-width: 1023px)").matches) return;
+    activeVesselTabRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  }, [vesselId]);
   const selectVessel = (id: typeof vesselId) => {
     setVesselId(id);
     setActivePage("dashboard");
@@ -576,27 +581,29 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
   return (
     <div className={`market-dashboard min-h-screen bg-[#f5f7fb] text-slate-900 ${darkMode ? "dashboard-dark dark" : ""}`}>
       <header className="sticky top-0 z-20 border-b border-slate-200/90 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-[1536px] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 md:px-5 lg:flex-nowrap lg:py-0">
+        <div className="mx-auto flex w-full max-w-[1536px] flex-wrap items-center gap-x-2 gap-y-2 px-3 py-2.5 sm:gap-x-4 sm:px-4 md:px-5 lg:flex-nowrap lg:gap-x-6 lg:py-0">
           <div className="flex shrink-0 items-center lg:h-[70px]"><AppBrand onClick={() => { setActivePage("dashboard"); setActiveSection("dashboard-overview"); window.scrollTo(0, 0); }} /></div>
 
-          <div className="order-3 flex w-full min-w-0 flex-1 items-center lg:order-2">
-            <div className="min-w-0 flex-1 overflow-x-auto lg:overflow-visible">
-              <div className="relative flex w-max items-center lg:mx-auto">
-                <nav aria-label="선종별 모니터 전환" className="flex gap-1">
+          <div className="order-3 flex basis-full min-w-0 items-center lg:order-2 lg:basis-auto lg:flex-1">
+            <div className="dashboard-vessel-scroll min-w-0 flex-1 overflow-x-auto lg:overflow-visible">
+              <nav aria-label="선종별 모니터 전환" className="flex w-max gap-1 lg:mx-auto">
                   <button
                     type="button" onClick={() => selectVessel("all")}
+                    ref={isAllVessels ? activeVesselTabRef : undefined}
                     className={`whitespace-nowrap border-b-[3px] px-3 py-[18px] text-[13px] font-semibold transition-colors lg:px-4 ${isAllVessels ? "border-blue-600 text-[#173d70]" : "border-transparent text-slate-500 hover:text-slate-900"}`}
                     aria-current={isAllVessels ? "page" : undefined}
                   >종합 분석</button>
                   {VESSELS.map((item) => (
                     <button
                       type="button" key={item.id} onClick={() => selectVessel(item.id)}
+                      ref={vesselId === item.id ? activeVesselTabRef : undefined}
                       className={`whitespace-nowrap border-b-[3px] px-3 py-[18px] text-[13px] font-semibold transition-colors lg:px-4 ${vesselId === item.id ? "border-blue-600 text-[#173d70]" : "border-transparent text-slate-500 hover:text-slate-900"}`}
                       aria-current={vesselId === item.id ? "page" : undefined}
                     >{item.label}</button>
                   ))}
-                </nav>
-                <nav aria-label="보조 콘텐츠" className="relative ml-8 shrink-0 lg:absolute lg:top-1/2 lg:left-full lg:-translate-y-1/2" onBlur={(event) => {
+              </nav>
+            </div>
+                <nav aria-label="보조 콘텐츠" className="relative ml-2 shrink-0 lg:ml-8" onBlur={(event) => {
                   if (!event.currentTarget.contains(event.relatedTarget as Node)) setShowMoreMenu(false);
                 }}>
                   <Button
@@ -606,13 +613,13 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
                     aria-expanded={showMoreMenu}
                     aria-controls="dashboard-more-menu"
                     onClick={() => setShowMoreMenu((current) => !current)}
-                    className={`gap-1.5 shadow-sm ${activePage !== "dashboard" ? "border-blue-200 bg-blue-50 text-blue-700" : showMoreMenu ? "border-slate-300 bg-slate-200 text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" : "border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"}`}
+                    className={`min-h-11 gap-1.5 shadow-sm ${activePage !== "dashboard" ? "border-blue-200 bg-blue-50 text-blue-700" : showMoreMenu ? "border-slate-300 bg-slate-200 text-slate-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100" : "border-slate-300 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"}`}
                   >
                     더보기
                     <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showMoreMenu ? "rotate-180" : ""}`} />
                   </Button>
                   {showMoreMenu && (
-                    <div id="dashboard-more-menu" className="fixed top-32 right-4 z-30 w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl lg:absolute lg:top-12 lg:-right-20" onKeyDown={(event) => {
+                    <div id="dashboard-more-menu" className="fixed top-28 right-3 z-30 w-56 max-w-[calc(100vw-24px)] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl lg:absolute lg:top-12 lg:right-0" onKeyDown={(event) => {
                       if (event.key === "Escape") setShowMoreMenu(false);
                     }}>
                       {([
@@ -649,9 +656,6 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
                     </div>
                   )}
                 </nav>
-              </div>
-            </div>
-            <div className="hidden w-[85px] shrink-0 lg:block" aria-hidden="true" />
           </div>
 
           <div className="order-2 ml-auto flex shrink-0 items-center gap-2 lg:order-3">
@@ -660,7 +664,7 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 border-slate-200 text-slate-600"
+                className="min-h-11 gap-2 border-slate-200 text-slate-600"
                 aria-expanded={showActionMenu}
                 aria-controls="dashboard-action-menu"
                 onClick={() => {
@@ -720,10 +724,13 @@ export default function MarketDashboard({ user, onUserUpdated, onLogout, authErr
                   <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100" onClick={() => { setShowActionMenu(false); setShowMyPage(true); }}>
                     <UserRound className="h-4 w-4 text-slate-500" />마이페이지
                   </button>
+                  <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-slate-700 hover:bg-slate-100 sm:hidden" onClick={onLogout}>
+                    <LogOut className="h-4 w-4 text-slate-500" />로그아웃
+                  </button>
                 </div>
               )}
             </div>
-            <Button variant="outline" size="sm" className="border-slate-200 text-slate-600" onClick={onLogout}>로그아웃</Button>
+            <Button variant="outline" size="sm" className="hidden border-slate-200 text-slate-600 sm:inline-flex" onClick={onLogout}>로그아웃</Button>
           </div>
         </div>
       </header>
