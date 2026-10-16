@@ -45,7 +45,8 @@ docker exec shi-app kedro run --pipeline=ship_orders
 Airflow 는 WSL 에서 `airflow/install_airflow_wsl.sh` 로 설치하고, DAG 가 이 폴더를 찾도록 `SHI_PROJECT_DIR` 을 이 `mlops` 폴더 경로로 지정합니다.
 관제 탭으로 상태를 보내려면 `AIRFLOW_STATUS_DB_URL` 을 환경 변수로만 넣습니다(저장소에 값 넣지 않음).
 
-Kedro 에는 선박 수주 파이프라인 3개(`ship_orders` · `ship_orders_preprocess` · `ship_orders_track`)만 등록돼 있습니다. 이 저장소는 선박 수주 예측 프로젝트만 다룹니다.
+Kedro 에는 선박 수주 파이프라인 5개(`ship_orders` · `ship_orders_preprocess` · `ship_orders_track` · `ship_pulse` · `ship_pulse_track`)가 등록돼 있습니다. 이 저장소는 선박 수주 예측 프로젝트만 다룹니다.
+분석 코드(`scripts/` · `src/`)는 저장소 루트에 있어 따로 지정하지 않아도 찾습니다. Drive 사본을 쓰려면 `SHIP_ORDERS_REPO` 로 지정합니다.
 
 ## Ship Pulse 재학습 파이프라인 (`ship_pulse`)
 
@@ -57,3 +58,10 @@ Ship Pulse(shipulse.vercel.app)의 선종별 최종 설정(`frontend/src/data/no
 4. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 모델 `ship_pulse_<선종>`을 등록(alias `production`).
 
 지표는 팀 결정대로 ASE(3개월 누적 오차의 절댓값)를 쓴다. 노트북 원본(`수주예측(선종)_WAPE_3M`)의 세부 변수 가공·튜닝이 없어서 숫자는 팀 값과 다를 수 있고, `comparison.json`에 차이를 남긴다.
+
+### Docker 없이 로컬에서 Airflow → Kedro → MLflow 확인 (`shi_ship_pulse_local`)
+
+1. 마스터 테이블 5개를 `mlops/data/01_raw/ship_pulse/master/`에 둔다.
+2. WSL Airflow 환경에서 `SHI_PROJECT_DIR=/mnt/c/.../SHI_DT_2nd_project/mlops`, `AIRFLOW__CORE__DAGS_FOLDER=$SHI_PROJECT_DIR/airflow/dags` 로 맞춘다.
+3. `airflow dags test shi_ship_pulse_local` — 마스터 확인 → `kedro run --pipeline=ship_pulse`(Windows Python) → 결과 점검 → MLflow 등록 확인 → 배포용 결과 복사.
+4. MLflow 화면: `mlflow ui --backend-store-uri sqlite:///data/09_tracking/mlflow.db --port 5001` (mlops 폴더에서). Kedro 구조: `kedro viz run --pipeline=ship_pulse`.

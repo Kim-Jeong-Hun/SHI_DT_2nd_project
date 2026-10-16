@@ -194,7 +194,8 @@ def _fit_predict(kind, X, y, ts, te, months):
         return None, None
     est = make_model(kind).fit(X[m], y[m])
     Xq = X.loc[months]
-    return est, np.clip(est.predict(Xq), 0, None)
+    cap = 3 * float(y[m].max())                                   # 학습 최댓값의 3배를 넘는 예측은 외삽 폭주로 보고 자른다
+    return est, np.clip(est.predict(Xq), 0, cap)
 
 
 def _train_len(vid, X, y, vs, first):
@@ -346,7 +347,7 @@ def track_mlflow(_export=None) -> dict:
     from mlflow import MlflowClient
 
     raw = (OUT / "results.json").read_bytes()
-    digest = hashlib.sha256(raw).hexdigest()[:16]
+    digest = hashlib.sha256(raw + b"track-v2").hexdigest()[:16]   # 기록 형식이 바뀌면 다시 기록
     full = json.loads(raw.decode("utf-8"))
     mlflow.set_tracking_uri(uri)
     exp = mlflow.set_experiment(os.environ.get("MLFLOW_SHIP_PULSE_EXPERIMENT", "ship_pulse"))
@@ -356,6 +357,10 @@ def track_mlflow(_export=None) -> dict:
     with mlflow.start_run(run_name="Ship Pulse 운영 재학습") as parent:
         mlflow.set_tags({"results_sha": digest, "pipeline": "ship_pulse", "reference": SP.REFERENCE["source"]})
         mlflow.log_dict(json.loads((OUT / "comparison.json").read_text(encoding="utf-8")), "comparison.json")
+        mlflow.log_artifact(str(OUT / "notebook_forecasts.json"))   # 서비스(Ship Pulse) 형식 결과
+        mlflow.log_params({"vessels": ",".join(full), "horizon": SP.HORIZON, "val_months": SP.VAL_MONTHS, "test": "~".join(SP.TEST)})
+        # 상위 실행에도 선종별 핵심 지표를 모아 둔다(목록에서 바로 비교)
+        mlflow.log_metrics({f"{vid}.{k}": float(x) for vid, v in full.items() for k, x in (("val_ase", v["validation"]["metrics"]["ase"]), ("test_ase", v["test"]["metrics"]["ase"]), ("q4", v["forecast"]["q4"])) if x == x})
         for vid, v in full.items():
             with mlflow.start_run(run_name=v["vesselName"], nested=True):
                 mlflow.set_tags({"pipeline": "ship_pulse", "vessel": vid})
@@ -379,5 +384,6 @@ def track_mlflow(_export=None) -> dict:
                     client.set_registered_model_alias(f"ship_pulse_{vid}", "production", info.registered_model_version)
                 except Exception:
                     pass
+                mlflow.log_metrics({k: float(x) for k, x in m.items() if isinstance(x, (int, float)) and x == x and k.startswith(("val_ase", "test_ase", "test_mae", "q4"))}, model_id=info.model_id)   # 모델 화면의 Model metrics
                 registered.append(f"ship_pulse_{vid} v{info.registered_model_version}")
     return {"mlflow": "logged", "run_id": parent.info.run_id, "registered": registered}

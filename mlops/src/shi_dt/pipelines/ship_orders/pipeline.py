@@ -18,7 +18,9 @@ from pathlib import Path
 from kedro.pipeline import Pipeline, node
 
 ROOT = Path(os.environ.get("SHI_PROJECT_DIR", Path(__file__).resolve().parents[4]))
-REPO = Path(os.environ.get("SHIP_ORDERS_REPO", ROOT.parent / "ship-order-drive"))
+# 팀 저장소에서는 분석 코드가 저장소 루트(scripts · src)에 있다 — 없으면 예전처럼 Drive 사본(ship-order-drive)
+_ROOT_REPO = ROOT.parent if (ROOT.parent / "scripts" / "분석" / "2026_독립검증.py").exists() else ROOT.parent / "ship-order-drive"
+REPO = Path(os.environ.get("SHIP_ORDERS_REPO", _ROOT_REPO))
 OUT = ROOT / "data" / "01_raw" / "ship"
 _T0 = time.perf_counter()   # 프로세스 시작 기준 소요 시간(run_meta)
 
