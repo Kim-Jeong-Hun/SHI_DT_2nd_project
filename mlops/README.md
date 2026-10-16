@@ -57,9 +57,13 @@ Kedro 에는 선박 수주 파이프라인 5개(`ship_orders` · `ship_orders_pr
    - `retrained_forecasts.json`: 이 파이프라인이 재학습해 만든 전망(공식 출력)
    - `dashboard_reference.json`: 대시보드 기준값 사본(`frontend/src/data/notebookForecasts.ts` → `reference.json`, 비교용 입력 · 모델 출력 아님)
    - `comparison.json`: 둘의 월별 차이(%) · `results.json`: 선종별 상세(Test 표 · 지표)
-3. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 서비스 최종 모델을 `ship_pulse_<선종>`으로 등록(alias `production`). 모델 로깅 · 등록 · alias 가 하나라도 실패하면 작업이 실패한다. `scripts/mlflow_registry_check.py` 는 5개 모델과 alias 를 확인해 없으면 종료 코드 1.
+3. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 서비스 최종 모델을 `ship_pulse_<선종>`으로 등록(alias `production`).
+   - 등록 모델 버전마다 결과 지문 `results_sha`(results.json 기준)와 `parent_run_id` 태그를 남긴다.
+   - 다섯 모델이 모두 등록된 뒤에만 alias 를 한꺼번에 옮긴다. 중간에 실패하면 `production` 은 예전 모델 그대로이고 작업은 실패한다(실행은 FAILED).
+   - 같은 결과로 다시 돌리면, `FINISHED` 실행이 있고 다섯 alias 가 모두 지금 지문의 모델을 가리킬 때만 건너뛴다. 아니면(실패한 실행 · 빠진 alias · 다른 결과의 alias) 처음부터 다시 등록해 복구한다.
+   - `scripts/mlflow_registry_check.py` 는 다섯 alias 가 있고 지금 results.json 지문의 모델인지 확인해, 아니면 종료 코드 1.
 4. 재학습 값은 대시보드 값과 다르다(대시보드 값을 복사하지 않는다). 차이는 `comparison.json` 에서 본다. 가스 운반선 VECM 은 statsmodels 가 있어야 노트북과 같은 경로로 계산된다(없으면 런타임 대체 경로).
-5. 테스트: `python -m pytest tests -q` (mlops 폴더) — 시점 누수(기준월 뒤 목표값을 바꿔도 예측 불변), 선종 5개 출력, 재학습/기준 출력 분리, MLflow 등록 · alias 실패. PR 마다 GitHub Actions `MLOps tests` 가 돌린다.
+5. 테스트: `python -m pytest tests -q` (mlops 폴더) — 시점 누수(기준월 뒤 목표값을 바꿔도 예측 불변), 선종 5개 출력, 재학습/기준 출력 분리, MLflow 등록 · alias 실패, 같은 결과 재시도 복구, 예전 결과 alias 로 통과하지 않음. PR 마다 GitHub Actions `MLOps tests` 가 돌린다.
 
 ### Docker 없이 로컬에서 Airflow → Kedro → MLflow 확인 (`shi_ship_pulse_local`)
 
