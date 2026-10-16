@@ -50,18 +50,16 @@ Kedro 에는 선박 수주 파이프라인 5개(`ship_orders` · `ship_orders_pr
 
 ## Ship Pulse 재학습 파이프라인 (`ship_pulse`)
 
-Ship Pulse(shipulse.vercel.app)의 선종별 최종 설정(`frontend/src/data/notebookForecasts.ts`)으로 다시 학습하고 MLflow에 등록한다.
+기준은 서비스(대시보드)다. 서비스 런타임 `deploy/render/custom_forecast.py` · `custom_runtime/`(최종 변수 · 모형 · 학습 창 · 최신 마스터)을 **고치지 않고 그대로 불러** 같은 모델로 재학습한다.
 
-1. 마스터 테이블 5개를 `data/01_raw/ship_pulse/master/`에 둔다(Drive `Ship orders forcasting/data/master`). 다른 곳이면 `SHIP_PULSE_MASTER_DIR`.
-2. `kedro run --pipeline=ship_pulse` — 선종 5개 × (CCF 수준·변화량 시차 → 약한 변수·VIF 10·퍼뮤테이션 Top-N → 롤링 검증 3개월 × 17창 → Test 24개월 → 다음 분기 예측 · 90% 블록 conformal).
-3. 결과: `data/07_model_output/ship_pulse/` — `results.json`, Ship Pulse 형식 `notebook_forecasts.json`, 팀 값 대조 `comparison.json`.
-4. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 모델 `ship_pulse_<선종>`을 등록(alias `production`).
-
-지표는 팀 결정대로 ASE(3개월 누적 오차의 절댓값)를 쓴다. 노트북 원본(`수주예측(선종)_WAPE_3M`)의 세부 변수 가공·튜닝이 없어서 숫자는 팀 값과 다를 수 있고, `comparison.json`에 차이를 남긴다.
+1. `kedro run --pipeline=ship_pulse` — 선종 5개 × (서비스 런타임 데이터 → Test 24개월 평가(ASE) → 7~12월 재예측 · 최종 모델 저장). 각 기준월에서 그 뒤 2개월까지 공표된 자료만 쓴다(수주정보시차 2개월).
+2. 결과: `data/07_model_output/ship_pulse/` — `notebook_forecasts.json`(공식 출력 = `frontend/src/data/notebookForecasts.ts` 값 그대로), `comparison.json`(대시보드 vs 재학습, 월별 차이 %), `results.json`.
+3. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 서비스 최종 모델을 `ship_pulse_<선종>`으로 등록(alias `production`).
+4. 재현 정도: 벌크선 · 가스 운반선은 7~12월 6개월, 케미컬 탱커는 4분기(10~12월)가 대시보드 값과 같다. 컨테이너선 · 유조선은 차이가 있다 — 대시보드는 컨테이너선 · 케미컬을 Adaptive(창 길이를 바꿔 가며)로 만들었는데 런타임은 고정 창이고, 유조선은 원인 확인 중이다. 가스 운반선 VECM 은 statsmodels 가 있어야 대시보드와 같은 값이 나온다(없으면 런타임 대체 경로).
 
 ### Docker 없이 로컬에서 Airflow → Kedro → MLflow 확인 (`shi_ship_pulse_local`)
 
-1. 마스터 테이블 5개를 `mlops/data/01_raw/ship_pulse/master/`에 둔다.
+1. 서비스 런타임(`deploy/render/custom_runtime/data/master`)의 마스터 5개를 그대로 쓴다(따로 둘 필요 없음).
 2. WSL Airflow 환경에서 `SHI_PROJECT_DIR=/mnt/c/.../SHI_DT_2nd_project/mlops`, `AIRFLOW__CORE__DAGS_FOLDER=$SHI_PROJECT_DIR/airflow/dags` 로 맞춘다.
-3. `airflow dags test shi_ship_pulse_local` — 마스터 확인 → `kedro run --pipeline=ship_pulse`(Windows Python) → 결과 점검 → MLflow 등록 확인 → 배포용 결과 복사.
+3. `airflow dags test shi_ship_pulse_local` — 마스터 확인 → `kedro run --pipeline=ship_pulse`(Windows Python) → 결과 점검(대시보드와 차이 %) → MLflow 등록 확인.
 4. MLflow 화면: `mlflow ui --backend-store-uri sqlite:///data/09_tracking/mlflow.db --port 5001` (mlops 폴더에서). Kedro 구조: `kedro viz run --pipeline=ship_pulse`.

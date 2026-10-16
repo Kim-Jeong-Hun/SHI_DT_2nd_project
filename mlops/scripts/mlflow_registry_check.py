@@ -8,7 +8,7 @@ runs = c.search_runs([exp.experiment_id], order_by=["attributes.start_time DESC"
 print("최근 실행:")
 for r in runs:
     m = r.data.metrics
-    print(f"  {r.info.run_name:<16} test_ase={m.get('test_ase', float('nan')):,.0f}  q4={m.get('q4', float('nan')):,.0f}  run={r.info.run_id[:8]}")
+    print(f"  {r.info.run_name:<16} test_ase={m.get('test_ase', float('nan')):,.0f}  재학습4분기={m.get('retrained_q4', float('nan')):,.0f}  대시보드4분기={m.get('dashboard_q4', float('nan')):,.0f}  run={r.info.run_id[:8]}")
 print("등록 모델:")
 for rm in c.search_registered_models():
     if rm.name.startswith("ship_pulse_"):

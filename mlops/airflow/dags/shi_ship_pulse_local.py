@@ -31,16 +31,16 @@ with DAG(
     catchup=False,
     tags=["shi", "ship_pulse", "kedro", "mlflow", "local"],
 ) as dag:
-    check_master = BashOperator(
+    check_master = BashOperator(   # 서비스 런타임 마스터(팀 저장소: deploy/render/custom_runtime · 이 저장소: vendor 사본)
         task_id="check_master_tables",
-        bash_command=" && ".join(f"test -s '{PROJECT_DIR}/data/01_raw/ship_pulse/master/마스터테이블({s}).csv'" for s in SHIPS)
-        + " && echo '마스터 테이블 5개 확인'")
+        bash_command=(f"D={PROJECT_DIR}/deploy/render/custom_runtime/data/master; [ -d \"$D\" ] || D={PROJECT_DIR}/vendor/ship_pulse_service/custom_runtime/data/master; "
+                      "n=$(ls \"$D\"/마스터테이블*.csv | wc -l); echo \"서비스 런타임 마스터 $n개: $D\"; [ \"$n\" -eq 5 ]"))
     train = BashOperator(task_id="kedro_ship_pulse", bash_command=ps("kedro run --pipeline=ship_pulse"))
     verify = BashOperator(
         task_id="verify_outputs",
         bash_command=(f"python3 -c \"import json;r=json.load(open('{OUT}/results.json',encoding='utf-8'));"
-                      "assert len(r)==5, list(r);bad=[k for k,v in r.items() if not v['forecast']['q4']];assert not bad, bad;"
-                      "[print(v['vesselName'],'| 변수',len(v['selection']['features']),'| 검증 ASE',round(v['validation']['metrics']['ase']),"
-                      "'| Test ASE',round(v['test']['metrics']['ase']),'| 4분기',round(v['forecast']['q4']),v['unit']) for v in r.values()]\""))
+                      "assert len(r)==5, list(r);bad=[k for k,v in r.items() if not v['forecast']['retrained']];assert not bad, bad;"
+                      "[print(v['vesselName'],'| 변수',len(v['features']),'| Test ASE',round(v['test']['metrics']['ase']),"
+                      "'| 대시보드와 차이(%)',list(v['forecast']['gapPct'].values())) for v in r.values()]\""))
     registry = BashOperator(task_id="mlflow_registry_check", bash_command=ps("python scripts/mlflow_registry_check.py"))
     check_master >> train >> verify >> registry

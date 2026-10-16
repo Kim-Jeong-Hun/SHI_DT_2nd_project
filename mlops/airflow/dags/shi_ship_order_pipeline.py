@@ -15,7 +15,6 @@ from airflow.sdk import DAG
 PROJECT_DIR = os.environ.get("SHI_PROJECT_DIR", "/mnt/c/Users/Molly/projects/shi-dt-mlops")
 APP = "shi-app"
 SHIPS = ["컨테이너선", "벌크선", "유조선", "가스 운반선", "케미컬 탱커"]
-MASTER = "data/01_raw/ship_pulse/master"
 OUT = "data/07_model_output/ship_pulse"
 
 with DAG(
@@ -29,15 +28,16 @@ with DAG(
 ) as dag:
     containers_up = BashOperator(task_id="docker_containers_up",
                                  bash_command=f"cd {PROJECT_DIR} && docker compose up -d --wait --wait-timeout 300")
-    check_master = BashOperator(
+    check_master = BashOperator(   # 서비스 런타임 마스터(팀 저장소: deploy/render/custom_runtime · 이 저장소: vendor 사본)
         task_id="check_master_tables",
-        bash_command=" && ".join(f"test -s '{PROJECT_DIR}/{MASTER}/마스터테이블({s}).csv'" for s in SHIPS))
+        bash_command=(f"D={PROJECT_DIR}/deploy/render/custom_runtime/data/master; [ -d \"$D\" ] || D={PROJECT_DIR}/vendor/ship_pulse_service/custom_runtime/data/master; "
+                      "n=$(ls \"$D\"/마스터테이블*.csv | wc -l); echo \"서비스 런타임 마스터 $n개: $D\"; [ \"$n\" -eq 5 ]"))
     train = BashOperator(task_id="kedro_ship_pulse",
                          bash_command=f"docker exec -e SHI_PIPELINES=ship {APP} kedro run --pipeline=ship_pulse")
     verify = BashOperator(
         task_id="verify_outputs",
         bash_command=(f"docker exec {APP} python -c \"import json;r=json.load(open('{OUT}/results.json',encoding='utf-8'));"
-                      "assert len(r)==5, list(r);bad=[k for k,v in r.items() if not v['forecast']['q4']];assert not bad, bad;"
+                      "assert len(r)==5, list(r);bad=[k for k,v in r.items() if not v['forecast']['retrained']];assert not bad, bad;"
                       "print({k: round(v['test']['metrics']['ase']) for k,v in r.items()})\""))
     register = BashOperator(task_id="mlflow_track_register",
                             bash_command=f"docker exec -e SHI_PIPELINES=ship {APP} kedro run --pipeline=ship_pulse_track")
