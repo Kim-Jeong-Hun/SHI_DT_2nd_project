@@ -117,6 +117,14 @@ def mlflow_env(tmp_path, monkeypatch):
     return uri
 
 
+def _alias_shas(client):
+    out = {}
+    for v in VIDS:
+        mv = client.get_model_version_by_alias(f"ship_pulse_{v}", "production")
+        out[v] = client.get_model_version(f"ship_pulse_{v}", mv.version).tags.get("results_sha")
+    return out
+
+
 def test_mlflow_registers_five_with_alias(mlflow_env):
     from mlflow import MlflowClient
 
@@ -124,12 +132,58 @@ def test_mlflow_registers_five_with_alias(mlflow_env):
     r = N.track_mlflow()
     assert len(r["registered"]) == 5
     c = MlflowClient()
-    assert N.verify_registry(c) == []
+    assert set(_alias_shas(c).values()) == {N.results_digest()}   # 다섯 alias 모두 이번 결과의 모델
+    assert N.verify_registry(c, digest=N.results_digest()) == []
     assert RC.main(c) == 0
-    c.delete_registered_model_alias("ship_pulse_gas", "production")   # alias 하나가 빠지면 확인 단계가 실패해야 한다
+    assert N.track_mlflow()["mlflow"] == "already logged"          # 같은 결과 · 등록 정상이면 건너뛴다
+    c.delete_registered_model_alias("ship_pulse_gas", "production")   # alias 하나가 빠지면 확인 단계가 실패하고
     assert RC.main(c) == 1
-    with pytest.raises(RuntimeError):   # 같은 결과로 다시 돌려도 빠진 alias 를 그냥 넘기지 않는다
+    assert N.track_mlflow()["mlflow"] == "logged"                   # 같은 결과로 다시 돌리면 복구된다
+    assert set(_alias_shas(c).values()) == {N.results_digest()}
+    assert RC.main(c) == 0
+
+
+def test_failed_alias_then_same_digest_retry_recovers(mlflow_env, monkeypatch):
+    import mlflow
+    from mlflow import MlflowClient
+
+    real = MlflowClient.set_registered_model_alias
+
+    def flaky(self, name, alias, version):
+        if name == "ship_pulse_gas":
+            raise RuntimeError("alias 실패")
+        return real(self, name, alias, version)
+    monkeypatch.setattr(MlflowClient, "set_registered_model_alias", flaky)
+    with pytest.raises(RuntimeError):
         N.track_mlflow()
+    exp = mlflow.get_experiment_by_name("ship_pulse")
+    runs = mlflow.search_runs([exp.experiment_id], filter_string=f"tags.results_sha = '{N.results_digest()}'")
+    assert set(runs["status"]) == {"FAILED"}                        # 실패한 실행은 완료로 남지 않는다
+    monkeypatch.setattr(MlflowClient, "set_registered_model_alias", real)
+    r = N.track_mlflow()                                            # 같은 digest 로 재시도
+    assert r["mlflow"] == "logged"
+    assert set(_alias_shas(MlflowClient()).values()) == {N.results_digest()}
+
+
+def test_stale_aliases_do_not_pass_for_new_results(mlflow_env, monkeypatch):
+    import mlflow.sklearn as msk
+    from mlflow import MlflowClient
+
+    import mlflow_registry_check as RC
+    N.track_mlflow()                                                # 예전 결과로 다섯 alias 를 만들어 둔다
+    old = N.results_digest()
+    N.export_results(*[_fake(v, scale=2.0) for v in VIDS])          # 새 결과(지문이 바뀜)
+    assert N.results_digest() != old
+
+    def boom(*a, **k):
+        raise RuntimeError("log_model 실패")
+    monkeypatch.setattr(msk, "log_model", boom)
+    with pytest.raises(RuntimeError):
+        N.track_mlflow()
+    c = MlflowClient()
+    assert set(_alias_shas(c).values()) == {old}                    # alias 는 예전 모델 그대로(부분 전환 없음)
+    assert N.verify_registry(c, digest=N.results_digest())          # alias 가 있어도 이번 결과가 아니면 문제
+    assert RC.main(c) == 1
 
 
 def test_mlflow_log_failure_fails_task(mlflow_env, monkeypatch):

@@ -189,16 +189,31 @@ def export_results(*vessels: dict) -> dict:
     return {"results": str(OUT / "results.json"), "retrained": str(OUT / "retrained_forecasts.json"), "vessels": list(full)}
 
 
-def verify_registry(client, vessels=None) -> list:
-    """선종별 등록 모델 ship_pulse_<선종> 에 alias production 이 있고 그 버전이 실제로 있는지 본다. 문제 목록을 돌려준다."""
+DIGEST_SALT = b"service-v1"
+
+
+def results_digest(raw: bytes | None = None) -> str:
+    """results.json 내용으로 만든 결과 지문 — MLflow 실행 · 등록 모델 버전에 태그로 남겨 같은 결과인지 가린다."""
+    import hashlib
+    raw = raw if raw is not None else (OUT / "results.json").read_bytes()
+    return hashlib.sha256(raw + DIGEST_SALT).hexdigest()[:16]
+
+
+def verify_registry(client, vessels=None, digest: str | None = None) -> list:
+    """선종별 등록 모델 ship_pulse_<선종> 의 alias production 이 있고, 그 버전이 실제로 있으며,
+    digest 를 주면 그 버전의 results_sha 태그가 digest 와 같은지(= 이번 결과로 만든 모델인지) 본다. 문제 목록을 돌려준다."""
     probs = []
     for vid in vessels or list(SP.SHIPS):
         name = f"ship_pulse_{vid}"
         try:
             mv = client.get_model_version_by_alias(name, "production")
-            client.get_model_version(name, mv.version)
+            mv = client.get_model_version(name, mv.version)
         except Exception as e:   # 모델이 없거나 alias 가 없으면 MlflowException
             probs.append(f"{name}: production alias 없음 ({type(e).__name__})")
+            continue
+        got = (mv.tags or {}).get("results_sha")
+        if digest and got != digest:
+            probs.append(f"{name}: production v{mv.version} 은 다른 결과의 모델(results_sha={got}, 지금={digest})")
     return probs
 
 
@@ -207,8 +222,6 @@ def track_mlflow(_export=None) -> dict:
     uri = os.environ.get("MLFLOW_TRACKING_URI")
     if not uri:
         return {"mlflow": "skipped (MLFLOW_TRACKING_URI 없음)"}
-    import hashlib
-
     import joblib
     import mlflow
     import mlflow.sklearn as msk
@@ -216,15 +229,16 @@ def track_mlflow(_export=None) -> dict:
 
     _modeling(_runtime()[1])   # 저장 모델(sp_service_sof 클래스)을 읽기 전에 런타임 패키지 등록
     raw = (OUT / "results.json").read_bytes()
-    digest = hashlib.sha256(raw + b"service-v1").hexdigest()[:16]
+    digest = results_digest(raw)
     full = json.loads(raw.decode("utf-8"))
     mlflow.set_tracking_uri(uri)
     exp = mlflow.set_experiment(os.environ.get("MLFLOW_SHIP_PULSE_EXPERIMENT", "ship_pulse"))
-    client, registered = MlflowClient(), []
-    if len(mlflow.search_runs([exp.experiment_id], filter_string=f"tags.results_sha = '{digest}'", max_results=1)):
-        probs = verify_registry(client, list(full))
-        if probs:   # 같은 결과가 이미 기록돼 있어도 등록이 빠졌으면 실패로 본다
-            raise RuntimeError("MLflow 등록 확인 실패: " + "; ".join(probs))
+    client, versions = MlflowClient(), {}
+    # 같은 결과를 이미 '끝까지' 기록했고 다섯 alias 가 모두 이번 결과의 모델을 가리킬 때만 건너뛴다.
+    # 실패한 실행(FAILED · RUNNING)은 완료로 치지 않고, alias 가 빠지거나 다른 결과를 가리키면 처음부터 다시 등록한다(복구 경로).
+    done = mlflow.search_runs([exp.experiment_id], filter_string=f"tags.results_sha = '{digest}' and attributes.status = 'FINISHED'",
+                              max_results=1)
+    if len(done) and not verify_registry(client, list(full), digest):
         return {"mlflow": "already logged", "sha": digest}
     with mlflow.start_run(run_name="Ship Pulse 운영 재학습 · 서비스 모델") as parent:
         mlflow.set_tags({"results_sha": digest, "pipeline": "ship_pulse", "basis": "서비스 런타임 + 대시보드 데이터셋", "reference": SP.REFERENCE["source"]})
@@ -247,15 +261,21 @@ def track_mlflow(_export=None) -> dict:
                 m |= {f"gap_pct_{k.replace('-', '_')}": x for k, x in f["gapPct"].items() if x is not None}
                 mlflow.log_metrics({k: float(x) for k, x in m.items() if isinstance(x, (int, float)) and x == x})
                 mlflow.log_dict(v, f"{vid}/result.json")
-                # 모델 로깅 · 등록 · alias 실패는 삼키지 않는다 — Kedro 노드와 Airflow 작업이 실패해야 한다
+                # 모델 로깅 · 등록 실패는 삼키지 않는다 — Kedro 노드와 Airflow 작업이 실패해야 한다
                 info = msk.log_model(joblib.load(MODELS / f"{vid}.joblib")["model"], name=f"ship_pulse_{vid}",
                                      serialization_format="cloudpickle", registered_model_name=f"ship_pulse_{vid}")
                 if info.registered_model_version is None:
                     raise RuntimeError(f"ship_pulse_{vid}: 등록 버전이 없어요")
+                ver = str(info.registered_model_version)
+                for tk, tv in (("results_sha", digest), ("parent_run_id", parent.info.run_id)):
+                    client.set_model_version_tag(f"ship_pulse_{vid}", ver, tk, tv)
                 mlflow.log_metrics({"test_ase": float(v["test"]["metrics"]["ase"]), "next_forecast": float(f["nextForecast"])}, model_id=info.model_id)
-                client.set_registered_model_alias(f"ship_pulse_{vid}", "production", info.registered_model_version)
-                registered.append(f"ship_pulse_{vid} v{info.registered_model_version}")
-    probs = verify_registry(client, list(full))
-    if probs:
-        raise RuntimeError("MLflow 등록 확인 실패: " + "; ".join(probs))
-    return {"mlflow": "logged", "run_id": parent.info.run_id, "registered": registered}
+                versions[vid] = ver
+        # 다섯 모델이 모두 등록된 뒤에만 alias 를 옮긴다 — 중간에 실패하면 production 은 예전 결과 그대로 남고 확인 단계에서 실패한다
+        for vid, ver in versions.items():
+            client.set_registered_model_alias(f"ship_pulse_{vid}", "production", ver)
+        probs = verify_registry(client, list(full), digest)
+        if probs:   # parent run 안에서 실패시켜 이 실행이 FINISHED 로 남지 않게 한다
+            raise RuntimeError("MLflow 등록 확인 실패: " + "; ".join(probs))
+    return {"mlflow": "logged", "run_id": parent.info.run_id, "sha": digest,
+            "registered": [f"ship_pulse_{vid} v{ver}" for vid, ver in versions.items()]}
