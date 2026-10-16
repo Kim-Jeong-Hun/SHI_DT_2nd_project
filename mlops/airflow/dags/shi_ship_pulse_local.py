@@ -1,7 +1,7 @@
 """
 Ship Pulse 재학습 — Docker 없이 로컬에서 시연할 때 쓰는 DAG
   WSL Airflow → (Windows 쪽 Python) Kedro ship_pulse → MLflow(sqlite: data/09_tracking/mlflow.db) 기록 · 모델 등록
-  → 결과 점검 → MLflow 등록 확인 (결과는 mlops/data 아래에만 쓰고, frontend · backend · deploy 파일은 건드리지 않는다)
+  → 결과 점검 → MLflow 등록 확인(5개 모델 · alias production, 하나라도 없으면 실패) (결과는 mlops/data 아래에만 쓰고, frontend · backend · deploy 파일은 건드리지 않는다)
 운영 DAG(shi_ship_order_pipeline)는 같은 순서를 docker exec 로 컨테이너 안에서 돌린다. 이 DAG는 수동 실행 전용.
 """
 import os
@@ -40,6 +40,7 @@ with DAG(
         task_id="verify_outputs",
         bash_command=(f"python3 -c \"import json;r=json.load(open('{OUT}/results.json',encoding='utf-8'));"
                       "assert len(r)==5, list(r);bad=[k for k,v in r.items() if not v['forecast']['retrained']];assert not bad, bad;"
+                      f"import os;assert os.path.exists('{OUT}/retrained_forecasts.json') and os.path.exists('{OUT}/dashboard_reference.json');"
                       "[print(v['vesselName'],'| 변수',len(v['features']),'| Test ASE',round(v['test']['metrics']['ase']),"
                       "'| 대시보드와 차이(%)',list(v['forecast']['gapPct'].values())) for v in r.values()]\""))
     registry = BashOperator(task_id="mlflow_registry_check", bash_command=ps("python scripts/mlflow_registry_check.py"))

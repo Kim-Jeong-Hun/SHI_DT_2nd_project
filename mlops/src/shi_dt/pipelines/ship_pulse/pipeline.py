@@ -1,7 +1,7 @@
 """Ship Pulse 운영 파이프라인 — 서비스(대시보드)와 같은 모델 · 같은 데이터로 재학습하고 MLflow 에 등록한다.
 
   ship_pulse        선종 5개 × (서비스 런타임 데이터 · 모델 사양 → Test 24개월 평가 → 7~12월 재예측 · 최종 모델 저장)
-                    → results.json · notebook_forecasts.json(대시보드 값 그대로) · comparison.json(대시보드 vs 재학습) → MLflow
+                    → retrained_forecasts.json(재학습 결과) · dashboard_reference.json(대시보드 기준값 사본) · comparison.json(차이) → MLflow 등록 · alias 확인
   ship_pulse_track  이미 만든 결과를 MLflow 에만 기록(Render MLflow 서비스 시작 때)
 """
 from functools import partial

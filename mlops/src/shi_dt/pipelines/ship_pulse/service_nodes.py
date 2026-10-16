@@ -3,8 +3,12 @@
 기준은 대시보드다.
   · 모델 사양 · 학습 코드 · 최신 마스터 데이터 = 서비스 런타임(mlops/deploy/render/custom_forecast.py · custom_runtime)
   · 공식 전망값 = 대시보드 데이터셋(frontend/src/data/notebookForecasts.ts → reference.json)
-파이프라인은 그 모델로 Test 24개월을 다시 평가하고, 최신 데이터로 최종 모델을 재학습해 MLflow 에 등록하며,
-재학습 전망과 대시보드 값의 차이를 함께 남긴다. 공식 출력(notebook_forecasts.json)은 대시보드 값 그대로다.
+파이프라인은 그 모델로 Test 24개월을 다시 평가하고, 최신 데이터로 최종 모델을 재학습해 MLflow 에 등록한다.
+산출물은 용도별로 나눈다.
+  · retrained_forecasts.json  이 파이프라인이 재학습해 만든 전망(파이프라인의 공식 출력)
+  · dashboard_reference.json  대시보드 기준값 사본(비교용 입력 · 모델 출력 아님)
+  · comparison.json           둘의 월별 차이
+과거 시점(Test · 7~12월 재현)은 기준월까지의 자료와 목표값만 학습한다 — 기준월 뒤 수주 실적은 쓰지 않는다.
 """
 from __future__ import annotations
 
@@ -23,7 +27,7 @@ ROOT = Path(os.environ.get("SHI_PROJECT_DIR", Path(__file__).resolve().parents[4
 OUT = ROOT / "data" / "07_model_output" / "ship_pulse"
 MODELS = ROOT / "data" / "06_models" / "ship_pulse"
 LEAD = 6   # 서비스 런타임과 같다: 관측월 기준 6개월 뒤 수주(D+6)
-PUB_LAG = 2   # 기준월 뒤 2개월까지 공표된 자료로 학습(수주정보시차 2개월) — 이 규칙으로 대시보드 벌크·가스 6개월 · 케미컬 4분기 값이 그대로 재현됨
+VESSELS = 5
 
 
 def _runtime_dir() -> Path:
@@ -56,7 +60,7 @@ def _modeling(root: Path):
 
 
 def _fit(C, root, meta, derived, origin, asof):
-    """서비스 런타임 fit_and_predict 와 같은 방식. asof=True 면 기준월에 이미 확정된 목표만 학습에 쓴다(평가용)."""
+    """서비스 런타임 fit_and_predict 와 같은 방식. asof=True 면 목표월이 기준월 이하인 행만 학습한다(과거 시점 평가 · 재현)."""
     if meta["name"] == "가스 운반선":
         C.enable_vecm_fallback_when_statsmodels_is_missing()
     model_for = _modeling(root).model_for
@@ -83,9 +87,10 @@ def _fit(C, root, meta, derived, origin, asof):
 
 
 def _asof(C, svc, origin):
-    """기준월 + 공표 시차(2개월)까지 들어온 자료만 남긴 파생 피처 — 서비스 운영 전망과 같은 정보 조건."""
-    fr = svc["frame"].loc[:origin + pd.DateOffset(months=PUB_LAG)]
-    return C.add_derived_features(C.extend_raw(fr, max(fr.index.max(), origin)), svc["meta"]["features"])
+    """기준월까지의 자료만 남긴 파생 피처 — 그 시점에 알 수 있던 정보 조건.
+    예전에는 기준월+2개월까지 남겨, 그때 아직 공표되지 않은 수주 실적이 학습에 섞였다(PR #13 리뷰 P1)."""
+    fr = svc["frame"].loc[:origin]
+    return C.add_derived_features(C.extend_raw(fr, origin), svc["meta"]["features"])
 
 
 def load_service(vid: str) -> dict:
@@ -107,14 +112,14 @@ def _metrics(df: pd.DataFrame) -> dict:
 
 
 def test_service(svc: dict) -> dict:
-    """Test 24개월(조장 기준 구간): 목표월마다 6개월 전 기준월에서, 그때 공표된 자료(기준월+2개월)만으로 서비스 모델을 학습해 예측."""
+    """Test 24개월(조장 기준 구간): 목표월마다 6개월 전 기준월에서, 기준월까지의 자료 · 목표값만으로 서비스 모델을 학습해 예측."""
     C, root = _runtime()
     meta, der = svc["meta"], svc["derived"]
     a, b = pd.Timestamp(SP.TEST[0] + "-01"), pd.Timestamp(SP.TEST[1] + "-01")
     rows = []
     for k, t in enumerate(pd.date_range(a, b, freq="MS")):
         o = t - pd.DateOffset(months=LEAD)
-        _, p, _ = _fit(C, root, meta, _asof(C, svc, o), o, asof=False)
+        _, p, _ = _fit(C, root, meta, _asof(C, svc, o), o, asof=True)
         y = pd.to_numeric(der[C.TARGET], errors="coerce").get(t, np.nan)
         rows.append({"구간": "Test", "창": k // 3 + 1, "월": f"{t:%Y-%m}", "기준월": f"{o:%Y-%m}", "실제": float(y), "예측": p})
     df = pd.DataFrame(rows)
@@ -122,7 +127,8 @@ def test_service(svc: dict) -> dict:
 
 
 def forecast_service(svc: dict) -> dict:
-    """대시보드와 같은 방식(서비스 런타임 · 공표 시차 2개월)으로 7~12월을 다시 예측하고, 최신 기준월 최종 모델을 저장."""
+    """7~12월을 각 기준월(목표월 6개월 전) 시점 정보만으로 다시 예측하고, 최신 기준월 최종 모델을 저장.
+    최종 모델은 지금 확정된 실적 전체로 학습한다(운영 전망 — 학습에 쓰는 실적은 모두 이미 공표된 값)."""
     import joblib
     C, root = _runtime()
     meta, der, vid = svc["meta"], svc["derived"], svc["vid"]
@@ -131,7 +137,7 @@ def forecast_service(svc: dict) -> dict:
     re_ = {}
     for m in months:
         o = pd.Timestamp(m + "-01") - pd.DateOffset(months=LEAD)
-        _, p, _ = _fit(C, root, meta, _asof(C, svc, o), o, asof=False)
+        _, p, _ = _fit(C, root, meta, _asof(C, svc, o), o, asof=True)
         re_[m] = p
     o_last = der.index.max()
     est, nxt, rng = _fit(C, root, meta, der, o_last, asof=False)
@@ -151,16 +157,49 @@ def assemble(vid: str, svc: dict, test: dict, fc: dict) -> dict:
             "dashboard": {k: ref[k] for k in ("q3", "q4", "quarterChange", "peakMonth", "testMae", "testRelativeError", "predictionIntervals95")}}
 
 
+def retrained_forecasts(full: dict) -> dict:
+    """재학습 결과만 모은 공식 출력 — 대시보드 기준값은 넣지 않는다."""
+    out = {}
+    for vid, v in full.items():
+        f = v["forecast"]
+        mon = f["retrained"]
+        ms = sorted(mon)
+        out[vid] = {"vesselName": v["vesselName"], "unit": v["unit"], "model": v["model"], "strategy": v["strategy"],
+                    "monthly": [{"month": m, "value": float(mon[m])} for m in ms],
+                    "q3": float(sum(mon[m] for m in ms[:3])), "q4": float(sum(mon[m] for m in ms[3:])),
+                    "latestOrigin": f["latestOrigin"], "nextTarget": f["nextTarget"], "nextForecast": float(f["nextForecast"]),
+                    "test": v["test"]["metrics"]}
+    return {"source": "kedro ship_pulse 재학습(서비스 런타임 모델 · 기준월 시점 정보)", "vessels": out}
+
+
 def export_results(*vessels: dict) -> dict:
-    """공식 출력은 대시보드 값 그대로(notebook_forecasts.json), 재학습 결과는 대조표(comparison.json)로."""
-    OUT.mkdir(parents=True, exist_ok=True)
+    """재학습 결과(retrained_forecasts.json)와 대시보드 기준값 사본(dashboard_reference.json)을 따로 쓰고, 차이는 comparison.json 에."""
     full = {v["vesselId"]: v for v in vessels}
+    if len(full) != VESSELS:
+        raise ValueError(f"선종 {VESSELS}개가 모두 있어야 해요: {sorted(full)}")
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "notebook_forecasts.json").unlink(missing_ok=True)   # 예전 이름(대시보드 값 복사본) — 재학습 결과로 오해되지 않게 지운다
     (OUT / "results.json").write_text(json.dumps(full, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
-    (OUT / "notebook_forecasts.json").write_text(json.dumps(SP.REFERENCE["vessels"], ensure_ascii=False, indent=1), encoding="utf-8")
+    (OUT / "retrained_forecasts.json").write_text(json.dumps(retrained_forecasts(full), ensure_ascii=False, indent=1), encoding="utf-8")
+    ref = {"source": SP.REFERENCE["source"], "note": "대시보드 기준값 사본 · 비교용 입력(모델 출력 아님)", "vessels": SP.REFERENCE["vessels"]}
+    (OUT / "dashboard_reference.json").write_text(json.dumps(ref, ensure_ascii=False, indent=1), encoding="utf-8")
     cmp_ = [{"선종": v["vesselName"], "월": m, "대시보드": round(v["forecast"]["dashboard"][m], 1), "재학습": round(v["forecast"]["retrained"][m], 1),
              "차이(%)": v["forecast"]["gapPct"][m]} for v in full.values() for m in v["forecast"]["dashboard"]]
     (OUT / "comparison.json").write_text(json.dumps(cmp_, ensure_ascii=False, indent=1), encoding="utf-8")
-    return {"results": str(OUT / "results.json"), "vessels": list(full)}
+    return {"results": str(OUT / "results.json"), "retrained": str(OUT / "retrained_forecasts.json"), "vessels": list(full)}
+
+
+def verify_registry(client, vessels=None) -> list:
+    """선종별 등록 모델 ship_pulse_<선종> 에 alias production 이 있고 그 버전이 실제로 있는지 본다. 문제 목록을 돌려준다."""
+    probs = []
+    for vid in vessels or list(SP.SHIPS):
+        name = f"ship_pulse_{vid}"
+        try:
+            mv = client.get_model_version_by_alias(name, "production")
+            client.get_model_version(name, mv.version)
+        except Exception as e:   # 모델이 없거나 alias 가 없으면 MlflowException
+            probs.append(f"{name}: production alias 없음 ({type(e).__name__})")
+    return probs
 
 
 def track_mlflow(_export=None) -> dict:
@@ -181,14 +220,17 @@ def track_mlflow(_export=None) -> dict:
     full = json.loads(raw.decode("utf-8"))
     mlflow.set_tracking_uri(uri)
     exp = mlflow.set_experiment(os.environ.get("MLFLOW_SHIP_PULSE_EXPERIMENT", "ship_pulse"))
-    if len(mlflow.search_runs([exp.experiment_id], filter_string=f"tags.results_sha = '{digest}'", max_results=1)):
-        return {"mlflow": "already logged", "sha": digest}
     client, registered = MlflowClient(), []
+    if len(mlflow.search_runs([exp.experiment_id], filter_string=f"tags.results_sha = '{digest}'", max_results=1)):
+        probs = verify_registry(client, list(full))
+        if probs:   # 같은 결과가 이미 기록돼 있어도 등록이 빠졌으면 실패로 본다
+            raise RuntimeError("MLflow 등록 확인 실패: " + "; ".join(probs))
+        return {"mlflow": "already logged", "sha": digest}
     with mlflow.start_run(run_name="Ship Pulse 운영 재학습 · 서비스 모델") as parent:
         mlflow.set_tags({"results_sha": digest, "pipeline": "ship_pulse", "basis": "서비스 런타임 + 대시보드 데이터셋", "reference": SP.REFERENCE["source"]})
         mlflow.log_params({"vessels": ",".join(full), "lead_months": LEAD, "test": "~".join(SP.TEST), "seed": 42})
-        mlflow.log_artifact(str(OUT / "comparison.json"))
-        mlflow.log_artifact(str(OUT / "notebook_forecasts.json"))
+        for fn in ("retrained_forecasts.json", "comparison.json", "dashboard_reference.json"):
+            mlflow.log_artifact(str(OUT / fn))
         mlflow.log_metrics({f"{vid}.{k}": float(x) for vid, v in full.items()
                             for k, x in (("test_ase", v["test"]["metrics"]["ase"]), ("dashboard_q4", v["dashboard"]["q4"]),
                                          ("retrained_q4", sum(list(v["forecast"]["retrained"].values())[3:]))) if x == x})
@@ -205,16 +247,15 @@ def track_mlflow(_export=None) -> dict:
                 m |= {f"gap_pct_{k.replace('-', '_')}": x for k, x in f["gapPct"].items() if x is not None}
                 mlflow.log_metrics({k: float(x) for k, x in m.items() if isinstance(x, (int, float)) and x == x})
                 mlflow.log_dict(v, f"{vid}/result.json")
-                try:
-                    info = msk.log_model(joblib.load(MODELS / f"{vid}.joblib")["model"], name=f"ship_pulse_{vid}",
-                                         serialization_format="cloudpickle", registered_model_name=f"ship_pulse_{vid}")
-                except Exception as e:   # 모델 파일을 못 읽어도 지표 · 결과는 남긴다
-                    mlflow.set_tag("model_log_error", str(e)[:250])
-                    continue
+                # 모델 로깅 · 등록 · alias 실패는 삼키지 않는다 — Kedro 노드와 Airflow 작업이 실패해야 한다
+                info = msk.log_model(joblib.load(MODELS / f"{vid}.joblib")["model"], name=f"ship_pulse_{vid}",
+                                     serialization_format="cloudpickle", registered_model_name=f"ship_pulse_{vid}")
+                if info.registered_model_version is None:
+                    raise RuntimeError(f"ship_pulse_{vid}: 등록 버전이 없어요")
                 mlflow.log_metrics({"test_ase": float(v["test"]["metrics"]["ase"]), "next_forecast": float(f["nextForecast"])}, model_id=info.model_id)
-                try:
-                    client.set_registered_model_alias(f"ship_pulse_{vid}", "production", info.registered_model_version)
-                except Exception:
-                    pass
+                client.set_registered_model_alias(f"ship_pulse_{vid}", "production", info.registered_model_version)
                 registered.append(f"ship_pulse_{vid} v{info.registered_model_version}")
+    probs = verify_registry(client, list(full))
+    if probs:
+        raise RuntimeError("MLflow 등록 확인 실패: " + "; ".join(probs))
     return {"mlflow": "logged", "run_id": parent.info.run_id, "registered": registered}

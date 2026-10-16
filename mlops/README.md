@@ -52,10 +52,14 @@ Kedro 에는 선박 수주 파이프라인 5개(`ship_orders` · `ship_orders_pr
 
 기준은 서비스(대시보드)다. 서비스 런타임 `deploy/render/custom_forecast.py` · `custom_runtime/`(최종 변수 · 모형 · 학습 창 · 최신 마스터)을 **고치지 않고 그대로 불러** 같은 모델로 재학습한다.
 
-1. `kedro run --pipeline=ship_pulse` — 선종 5개 × (서비스 런타임 데이터 → Test 24개월 평가(ASE) → 7~12월 재예측 · 최종 모델 저장). 각 기준월에서 그 뒤 2개월까지 공표된 자료만 쓴다(수주정보시차 2개월).
-2. 결과: `data/07_model_output/ship_pulse/` — `notebook_forecasts.json`(공식 출력 = `frontend/src/data/notebookForecasts.ts` 값 그대로), `comparison.json`(대시보드 vs 재학습, 월별 차이 %), `results.json`.
-3. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 서비스 최종 모델을 `ship_pulse_<선종>`으로 등록(alias `production`).
-4. 재현 정도: 벌크선 · 가스 운반선은 7~12월 6개월, 케미컬 탱커는 4분기(10~12월)가 대시보드 값과 같다. 컨테이너선 · 유조선은 차이가 있다 — 대시보드는 컨테이너선 · 케미컬을 Adaptive(창 길이를 바꿔 가며)로 만들었는데 런타임은 고정 창이고, 유조선은 원인 확인 중이다. 가스 운반선 VECM 은 statsmodels 가 있어야 대시보드와 같은 값이 나온다(없으면 런타임 대체 경로).
+1. `kedro run --pipeline=ship_pulse` — 선종 5개 × (서비스 런타임 데이터 → Test 24개월 평가(ASE) → 7~12월 재예측 · 최종 모델 저장). 과거 기준월의 예측(Test · 7~12월 재현)은 **기준월까지의 자료와 목표값만** 학습한다 — 기준월 뒤 수주 실적은 쓰지 않는다. 최신 기준월 최종 모델만 지금까지 확정된 실적 전체로 학습한다.
+2. 결과: `data/07_model_output/ship_pulse/` — 용도별로 나눈다.
+   - `retrained_forecasts.json`: 이 파이프라인이 재학습해 만든 전망(공식 출력)
+   - `dashboard_reference.json`: 대시보드 기준값 사본(`frontend/src/data/notebookForecasts.ts` → `reference.json`, 비교용 입력 · 모델 출력 아님)
+   - `comparison.json`: 둘의 월별 차이(%) · `results.json`: 선종별 상세(Test 표 · 지표)
+3. `MLFLOW_TRACKING_URI`가 있으면 실험 `ship_pulse`에 기록하고 서비스 최종 모델을 `ship_pulse_<선종>`으로 등록(alias `production`). 모델 로깅 · 등록 · alias 가 하나라도 실패하면 작업이 실패한다. `scripts/mlflow_registry_check.py` 는 5개 모델과 alias 를 확인해 없으면 종료 코드 1.
+4. 재학습 값은 대시보드 값과 다르다(대시보드 값을 복사하지 않는다). 차이는 `comparison.json` 에서 본다. 가스 운반선 VECM 은 statsmodels 가 있어야 노트북과 같은 경로로 계산된다(없으면 런타임 대체 경로).
+5. 테스트: `python -m pytest tests -q` (mlops 폴더) — 시점 누수(기준월 뒤 목표값을 바꿔도 예측 불변), 선종 5개 출력, 재학습/기준 출력 분리, MLflow 등록 · alias 실패. PR 마다 GitHub Actions `MLOps tests` 가 돌린다.
 
 ### Docker 없이 로컬에서 Airflow → Kedro → MLflow 확인 (`shi_ship_pulse_local`)
 
