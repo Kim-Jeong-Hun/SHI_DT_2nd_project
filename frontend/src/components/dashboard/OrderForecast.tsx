@@ -210,11 +210,11 @@ export default function VesselOrderForecast({ darkMode, vesselId }: { darkMode: 
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(270px,.7fr)]">
-        <div className="min-h-[260px] rounded-xl border border-slate-100 bg-white p-2" role="img" aria-label={`${forecast.vesselName} 2026년 7월부터 12월까지 월별 수주용량 전망`}>
+      <div className="grid min-h-0 flex-1 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(270px,.7fr)] xl:overflow-hidden">
+        <div className="min-h-[260px] rounded-xl border border-slate-100 bg-white p-2 xl:min-h-0 xl:overflow-hidden" role="img" aria-label={`${forecast.vesselName} 2026년 7월부터 12월까지 월별 수주용량 전망`}>
           <EChartsReact option={option} notMerge style={{ height: "100%", minHeight: 260, width: "100%" }} />
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="flex min-h-0 flex-col gap-3 xl:overflow-y-auto">
           <div className="rounded-xl bg-slate-900 p-4 text-white">
             <p className="text-[11px] font-bold tracking-[.14em] text-sky-300">FORECAST SIGNAL</p>
             <p className="mt-2 text-sm font-semibold leading-6">{forecast.signal}</p>

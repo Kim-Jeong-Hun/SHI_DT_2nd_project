@@ -3,6 +3,7 @@ import EChartsReact from "../common/LocalizedECharts";
 import type { EChartsType } from "echarts";
 import { AlertCircle, BookOpen, CheckCircle2, DatabaseZap, Download, LoaderCircle, Play, RotateCcw, SlidersHorizontal } from "lucide-react";
 import "../../styles/custom-forecast.css";
+import { descriptionOf } from "../../data/dataDictionaryDescriptions";
 import DataDictionary from "./DataDictionary";
 
 type VesselId = "container" | "tanker" | "bulk" | "gas" | "chemical";
@@ -36,6 +37,10 @@ const pipelineByVessel: Record<VesselId, Pick<ScenarioConfig, "vessel" | "unit" 
   chemical: { vessel: "케미컬 탱커", unit: "DWT", model: "XGBoost", strategy: "Adaptive 24·36·48개월 · Uniform · VIF 10", leadMonths: 6, featureCount: 16 },
 };
 const formatted = (value: number, digits = 1) => value.toLocaleString("ko-KR", { maximumFractionDigits: digits });
+const ACTUAL_COLOR = "#176f9b";
+const FORECAST_CONNECTOR_COLOR = "#f59e0b";
+const revisionColor = (change: number) => change > 0 ? "#dc2626" : change < 0 ? "#2563eb" : "#64748b";
+const revisionArea = (change: number) => change > 0 ? "rgba(220,38,38,.08)" : change < 0 ? "rgba(37,99,235,.08)" : "rgba(100,116,139,.07)";
 const escapeHtml = (value: unknown) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
   "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
 })[character] ?? character);
@@ -48,6 +53,10 @@ function reportChart(result: ScenarioResult) {
   const actualByMonth = new Map(result.actuals.map((item) => [item.month, item.value]));
   const forecastByMonth = new Map(result.forecasts.map((item) => [item.month, item]));
   const lastActual = result.actuals.at(-1);
+  const firstForecast = result.forecasts[0];
+  const revisionChange = result.affectedForecasts.at(-1)?.change ?? 0;
+  const forecastColor = revisionColor(revisionChange);
+  const forecastAreaColor = revisionArea(revisionChange);
   const values = [
     ...result.actuals.map((item) => item.value),
     ...result.forecasts.flatMap((item) => [item.baseline, item.scenario]),
@@ -83,18 +92,43 @@ function reportChart(result: ScenarioResult) {
   const affected = new Set(result.affectedForecasts.map((item) => item.month));
   const points = result.forecasts.map((item) => {
     const index = months.indexOf(item.month);
-    return `<circle cx="${x(index)}" cy="${y(item.scenario)}" r="${affected.has(item.month) ? 5 : 3.5}" fill="#176f9b" stroke="#fff" stroke-width="2"/>`;
+    return `<circle cx="${x(index)}" cy="${y(item.scenario)}" r="${affected.has(item.month) ? 5 : 3.5}" fill="${forecastColor}" stroke="#fff" stroke-width="2"/>`;
+  }).join("");
+  const forecastStartMarker = firstForecast ? `<line x1="${x(months.indexOf(firstForecast.month))}" y1="${padding.top}" x2="${x(months.indexOf(firstForecast.month))}" y2="${height - padding.bottom}" stroke="#dc2626" stroke-width="2" stroke-dasharray="6 5"/><text x="${x(months.indexOf(firstForecast.month)) + 7}" y="${padding.top + 14}" style="fill:#dc2626;font-weight:700">예측 시작</text>` : "";
+  const connectorPath = lastActual && firstForecast
+    ? `M${x(months.indexOf(lastActual.month)).toFixed(1)},${y(lastActual.value).toFixed(1)} L${x(months.indexOf(firstForecast.month)).toFixed(1)},${y(firstForecast.scenario).toFixed(1)}`
+    : "";
+  const forecastAreaPath = firstForecast
+    ? `${pathFor((item) => forecastByMonth.get(item)?.scenario)} L${x(months.indexOf(result.forecasts.at(-1)?.month ?? firstForecast.month)).toFixed(1)},${height - padding.bottom} L${x(months.indexOf(firstForecast.month)).toFixed(1)},${height - padding.bottom} Z`
+    : "";
+  const hitWidth = plotWidth / Math.max(months.length - 1, 1);
+  const hoverAreas = months.map((month, index) => {
+    const valuesAtMonth = [
+      { label: "실제 데이터", color: ACTUAL_COLOR, value: actualByMonth.get(month) },
+      { label: "기준 전망", color: "#94a3b8", value: forecastValue(month, "baseline") },
+      { label: "새 정보 반영 전망", color: forecastColor, value: forecastByMonth.get(month)?.scenario },
+    ].filter((item): item is { label: string; color: string; value: number } => typeof item.value === "number");
+    if (!valuesAtMonth.length) return "";
+    const tooltipRows = valuesAtMonth.map((item) => `<span><i style="background:${item.color}"></i>${escapeHtml(item.label)}</span><b>${escapeHtml(item.value.toLocaleString("ko-KR", { minimumFractionDigits: 1, maximumFractionDigits: 1 }))} ${escapeHtml(result.unit)}</b>`).join("");
+    const tooltip = `<strong class="report-tooltip-month">${escapeHtml(month)}</strong><div class="report-tooltip-grid">${tooltipRows}</div>`;
+    const left = Math.max(padding.left, x(index) - hitWidth / 2);
+    const right = Math.min(width - padding.right, x(index) + hitWidth / 2);
+    const ariaValues = valuesAtMonth.map((item) => `${item.label} ${item.value.toLocaleString("ko-KR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${result.unit}`).join(", ");
+    return `<rect class="report-chart-hit" x="${left.toFixed(1)}" y="${padding.top}" width="${Math.max(right - left, 1).toFixed(1)}" height="${plotHeight}" tabindex="0" aria-label="${escapeHtml(`${month}, ${ariaValues}`)}" data-tooltip="${escapeHtml(tooltip)}"/>`;
   }).join("");
 
   return `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeHtml(result.vessel)} 기준 전망과 수정 전망 비교" xmlns="http://www.w3.org/2000/svg">
     <style>text{fill:#64748b;font:11px Arial,sans-serif}</style>
     ${grid}${labels}
-    <path d="${pathFor((item) => actualByMonth.get(item))}" fill="none" stroke="#0f6f98" stroke-width="3"/>
+    <path d="${forecastAreaPath}" fill="${forecastAreaColor}" stroke="none"/>
+    <path d="${pathFor((item) => actualByMonth.get(item))}" fill="none" stroke="${ACTUAL_COLOR}" stroke-width="3"/>
     <path d="${pathFor((item) => forecastValue(item, "baseline"))}" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-dasharray="8 6"/>
-    <path d="${pathFor((item) => forecastValue(item, "scenario"))}" fill="none" stroke="#176f9b" stroke-width="3.5"/>
-    ${points}
+    <path d="${connectorPath}" fill="none" stroke="${FORECAST_CONNECTOR_COLOR}" stroke-width="3"/>
+    <path d="${pathFor((item) => forecastByMonth.get(item)?.scenario)}" fill="none" stroke="${forecastColor}" stroke-width="3.5"/>
+    ${forecastStartMarker}${points}
     <text x="${padding.left}" y="18" fill="#475569">수주용량 (${escapeHtml(result.unit)})</text>
-  </svg>`;
+    ${hoverAreas}
+  </svg><div class="report-chart-tooltip" hidden></div>`;
 }
 
 function createForecastReport(result: ScenarioResult, config: ScenarioConfig, observationMonth: string, inputs: Record<string, string>) {
@@ -102,6 +136,7 @@ function createForecastReport(result: ScenarioResult, config: ScenarioConfig, ob
   const primaryChange = primary?.change ?? 0;
   const changeRate = primary?.baseline ? primaryChange / primary.baseline * 100 : 0;
   const directionClass = primaryChange > 0 ? "up" : primaryChange < 0 ? "down" : "flat";
+  const forecastColor = revisionColor(result.affectedForecasts.at(-1)?.change ?? 0);
   const generatedAt = new Date().toLocaleString("ko-KR", { dateStyle: "long", timeStyle: "short" });
   const forecastRows = result.forecasts.map((item) => `<tr><td>${escapeHtml(item.month)}</td><td>${escapeHtml(formatted(item.baseline))} ${escapeHtml(result.unit)}</td><td>${escapeHtml(formatted(item.scenario))} ${escapeHtml(result.unit)}</td><td class="${item.change > 0 ? "up" : item.change < 0 ? "down" : "flat"}">${item.change > 0 ? "+" : ""}${escapeHtml(formatted(item.change))}</td><td>${item.affected ? "반영" : "변동 없음"}</td></tr>`).join("");
   const inputRows = config.inputSources.map((item) => {
@@ -114,17 +149,43 @@ function createForecastReport(result: ScenarioResult, config: ScenarioConfig, ob
   return `<!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SHIPULSE · ${escapeHtml(result.vessel)} 사용자 지정 예측</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#17243a;font-family:Arial,"Noto Sans KR",sans-serif}main{width:min(1100px,calc(100% - 32px));margin:36px auto}.report{overflow:hidden;border:1px solid #dce3ea;border-radius:20px;background:#fff;box-shadow:0 18px 50px #17243a12}.hero{padding:34px 38px;background:#102b4e;color:#fff}.brand{font-size:12px;font-weight:800;letter-spacing:.18em;color:#7dd3fc}.hero h1{margin:12px 0 6px;font-size:30px}.hero p{margin:0;color:#bfdbfe}.meta,.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e2e8f0}.meta div,.metrics div{padding:18px 20px;background:#fff}.meta span,.metrics span{display:block;color:#64748b;font-size:11px}.meta b,.metrics b{display:block;margin-top:7px;font-size:15px}.metrics b{font-size:21px}.up{color:#dc2626!important}.down{color:#2563eb!important}.flat{color:#64748b!important}.section{padding:28px 38px;border-top:1px solid #e8edf2}.section h2{margin:0 0 16px;font-size:18px}.legend{display:flex;gap:18px;margin:0 0 12px;color:#64748b;font-size:12px}.legend i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}.chart{width:100%;overflow:auto;border:1px solid #edf1f5;border-radius:14px;padding:10px}.chart svg{display:block;min-width:760px;width:100%;height:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:12px 10px;border-bottom:1px solid #e8edf2;text-align:left}th{background:#f8fafc;color:#64748b}.note{padding:18px 38px;background:#f8fafc;color:#64748b;font-size:11px;line-height:1.7}@media(max-width:720px){.meta,.metrics{grid-template-columns:repeat(2,1fr)}.hero,.section{padding:24px}.hero h1{font-size:24px}}@media print{body{background:#fff}main{width:100%;margin:0}.report{border:0;box-shadow:none}.section{break-inside:avoid}}
+*{box-sizing:border-box}body{margin:0;background:#f4f7fb;color:#17243a;font-family:Arial,"Noto Sans KR",sans-serif}main{width:min(1100px,calc(100% - 32px));margin:36px auto}.report{overflow:hidden;border:1px solid #dce3ea;border-radius:20px;background:#fff;box-shadow:0 18px 50px #17243a12}.hero{padding:34px 38px;background:#102b4e;color:#fff}.brand{font-size:12px;font-weight:800;letter-spacing:.18em;color:#7dd3fc}.hero h1{margin:12px 0 6px;font-size:30px}.hero p{margin:0;color:#bfdbfe}.meta,.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#e2e8f0}.meta div,.metrics div{padding:18px 20px;background:#fff}.meta span,.metrics span{display:block;color:#64748b;font-size:11px}.meta b,.metrics b{display:block;margin-top:7px;font-size:15px}.metrics b{font-size:21px}.up{color:#dc2626!important}.down{color:#2563eb!important}.flat{color:#64748b!important}.section{padding:28px 38px;border-top:1px solid #e8edf2}.section h2{margin:0 0 16px;font-size:18px}.legend{display:flex;gap:18px;margin:0 0 12px;color:#64748b;font-size:12px}.legend i{display:inline-block;width:18px;height:3px;margin-right:6px;vertical-align:middle}.chart{position:relative;width:100%;overflow:auto;border:1px solid #edf1f5;border-radius:14px;padding:10px}.chart svg{display:block;min-width:760px;width:100%;height:auto}.report-chart-hit{fill:transparent;pointer-events:all;cursor:crosshair;outline:none}.report-chart-tooltip{position:fixed;z-index:20;min-width:250px;padding:11px 13px;border:1px solid #dce3ea;border-radius:8px;background:#fff;box-shadow:0 8px 24px #17243a26;color:#334155;font-size:12px;pointer-events:none}.report-tooltip-month{display:block;margin-bottom:8px;color:#17243a}.report-tooltip-grid{display:grid;grid-template-columns:auto max-content;gap:6px 18px}.report-tooltip-grid span{display:flex;align-items:center;gap:7px}.report-tooltip-grid i{display:inline-block;width:10px;height:10px;border-radius:50%}.report-tooltip-grid b{text-align:right;font-variant-numeric:tabular-nums}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:12px 10px;border-bottom:1px solid #e8edf2;text-align:left}th{background:#f8fafc;color:#64748b}.note{padding:18px 38px;background:#f8fafc;color:#64748b;font-size:11px;line-height:1.7}@media(max-width:720px){.meta,.metrics{grid-template-columns:repeat(2,1fr)}.hero,.section{padding:24px}.hero h1{font-size:24px}}@media print{body{background:#fff}main{width:100%;margin:0}.report{border:0;box-shadow:none}.section{break-inside:avoid}.report-chart-tooltip{display:none!important}}
 </style></head><body><main><article class="report">
 <header class="hero"><div class="brand">SHIPULSE · CUSTOM FORECAST</div><h1>${escapeHtml(result.vessel)} 사용자 지정 예측 결과</h1><p>${escapeHtml(observationMonth)} 시장 정보를 반영한 수주용량 전망 보고서</p></header>
 <section class="meta"><div><span>저장 시각</span><b>${escapeHtml(generatedAt)}</b></div><div><span>예측 단위</span><b>${escapeHtml(result.unit)}</b></div><div><span>모델</span><b>${escapeHtml(result.model)}</b></div><div><span>반영 규칙</span><b>관측월 → D+${escapeHtml(result.leadMonths)}</b></div></section>
 <section class="metrics"><div><span>전망 변화</span><b class="${directionClass}">${primary?.change && primary.change > 0 ? "+" : ""}${escapeHtml(formatted(primary?.change ?? 0))} · ${changeRate > 0 ? "+" : ""}${escapeHtml(changeRate.toFixed(1))}%</b></div><div><span>기준 전망</span><b>${escapeHtml(formatted(primary?.baseline ?? 0))} ${escapeHtml(result.unit)}</b></div><div><span>수정 전망</span><b class="${directionClass}">${escapeHtml(formatted(primary?.scenario ?? 0))} ${escapeHtml(result.unit)}</b></div><div><span>가장 큰 변경점</span><b>${escapeHtml(primary?.month ?? "-")}</b></div></section>
-<section class="section"><h2>전망 비교</h2><div class="legend"><span><i style="background:#0f6f98"></i>실제 데이터</span><span><i style="background:#94a3b8"></i>기준 전망</span><span><i style="background:#176f9b"></i>새 정보 반영 전망</span></div><div class="chart">${reportChart(result)}</div></section>
+<section class="section"><h2>전망 비교</h2><div class="legend"><span><i style="background:${ACTUAL_COLOR}"></i>실제 데이터</span><span><i style="background:#94a3b8"></i>기준 전망</span><span><i style="background:${forecastColor}"></i>새 정보 반영 전망</span></div><div class="chart">${reportChart(result)}</div></section>
 <section class="section"><h2>월별 예측 결과</h2><table><thead><tr><th>예측월</th><th>기준 전망</th><th>수정 전망</th><th>변화량</th><th>반영 여부</th></tr></thead><tbody>${forecastRows}</tbody></table></section>
 <section class="section"><h2>${escapeHtml(observationMonth)} 입력 정보</h2><table><thead><tr><th>지표</th><th>값</th><th>단위</th><th>출처</th></tr></thead><tbody>${inputRows}</tbody></table></section>
 <section class="section"><h2>분석 조건</h2><p>${escapeHtml(result.assumption)}</p><p>${escapeHtml(result.strategy)}</p></section>
 <footer class="note">본 결과는 과거 데이터와 검증된 모델을 기반으로 한 의사결정 보조 정보입니다. 계약, 투자, 생산 또는 조달 판단에는 최신 시장 정보와 현업 검토를 함께 반영해야 합니다.</footer>
-</article></main></body></html>`;
+</article></main><script>
+document.querySelectorAll(".chart").forEach(function(chart){
+  var tooltip=chart.querySelector(".report-chart-tooltip");
+  if(!tooltip)return;
+  document.body.appendChild(tooltip);
+  chart.querySelectorAll("[data-tooltip]").forEach(function(target){
+    function show(event){
+      tooltip.innerHTML=target.getAttribute("data-tooltip")||"";
+      tooltip.hidden=false;
+      var rect=target.getBoundingClientRect();
+      var clientX=typeof event.clientX==="number"&&event.clientX>0?event.clientX:rect.left+rect.width/2;
+      var clientY=typeof event.clientY==="number"&&event.clientY>0?event.clientY:rect.top;
+      var padding=12;
+      var left=Math.max(padding,Math.min(clientX+14,window.innerWidth-tooltip.offsetWidth-padding));
+      var top=Math.max(padding,Math.min(clientY+14,window.innerHeight-tooltip.offsetHeight-padding));
+      tooltip.style.left=left+"px";
+      tooltip.style.top=top+"px";
+    }
+    function hide(){tooltip.hidden=true;}
+    target.addEventListener("mouseenter",show);
+    target.addEventListener("mousemove",show);
+    target.addEventListener("focus",show);
+    target.addEventListener("mouseleave",hide);
+    target.addEventListener("blur",hide);
+  });
+});
+</script></body></html>`;
 }
 
 function ForecastWorkspace() {
@@ -195,19 +256,29 @@ function ForecastWorkspace() {
     const lastActual = result.actuals.at(-1);
     const firstForecastMonth = result.forecasts[0]?.month;
     const revisionChange = result.affectedForecasts.at(-1)?.change ?? 0;
-    const revisionColor = revisionChange > 0 ? "#dc2626" : revisionChange < 0 ? "#2563eb" : "#64748b";
-    const revisionArea = revisionChange > 0 ? "rgba(220,38,38,.08)" : revisionChange < 0 ? "rgba(37,99,235,.08)" : "rgba(100,116,139,.07)";
+    const forecastColor = revisionColor(revisionChange);
+    const forecastAreaColor = revisionArea(revisionChange);
     return {
       animationDuration: 900,
       grid: { left: 78, right: 34, top: 64, bottom: 56 },
       legend: { top: 15, data: ["실제 데이터", "기준 전망", "새 정보 반영 전망"] },
-      tooltip: { show: true, showContent: true, trigger: "axis", triggerOn: "mousemove", alwaysShowContent: false, hideDelay: 0, enterable: false, confine: true, axisPointer: { type: "line", snap: false, triggerTooltip: true, lineStyle: { color: "#94a3b8", type: "dashed" } }, valueFormatter: (item: number | null | undefined) => item == null ? "-" : `${formatted(item)} ${result.unit}` },
+      tooltip: {
+        show: true, showContent: true, trigger: "axis", triggerOn: "mousemove", alwaysShowContent: false, hideDelay: 0, enterable: false, confine: true,
+        axisPointer: { type: "line", snap: false, triggerTooltip: true, lineStyle: { color: "#94a3b8", type: "dashed" } },
+        formatter: (params: Array<{ axisValueLabel: string; marker: string; seriesName: string; value: number | null }>) => {
+          const visible = params.filter((item) => item.seriesName !== "예측 연결" && typeof item.value === "number");
+          if (!visible.length) return "";
+          const rows = visible.map((item) => `<span>${item.marker}${escapeHtml(item.seriesName)}</span><b style="text-align:right;font-variant-numeric:tabular-nums">${item.value!.toLocaleString("ko-KR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ${escapeHtml(result.unit)}</b>`).join("");
+          return `<div style="margin-bottom:7px;font-weight:700">${escapeHtml(visible[0].axisValueLabel)}</div><div style="display:grid;grid-template-columns:auto max-content;align-items:center;column-gap:18px;row-gap:6px">${rows}</div>`;
+        },
+      },
       xAxis: { type: "category", boundaryGap: false, data: months, axisTick: { show: false }, axisLabel: { color: "#64748b" } },
       yAxis: { type: "value", name: result.unit, scale: true, axisLabel: { color: "#64748b" }, splitLine: { lineStyle: { color: "#e8edf2", type: "dashed" } } },
       series: [
-        { name: "실제 데이터", type: "line", triggerEvent: "line", data: months.map((month) => actualByMonth.get(month) ?? null), showSymbol: false, connectNulls: false, lineStyle: { color: "#176f9b", width: 3 }, itemStyle: { color: "#176f9b" } },
+        { name: "실제 데이터", type: "line", triggerEvent: "line", data: months.map((month) => actualByMonth.get(month) ?? null), showSymbol: false, connectNulls: false, lineStyle: { color: ACTUAL_COLOR, width: 3 }, itemStyle: { color: ACTUAL_COLOR } },
         { name: "기준 전망", type: "line", triggerEvent: "line", data: months.map((month) => forecastByMonth.get(month)?.baseline ?? (month === lastActual?.month ? lastActual.value : null)), showSymbol: false, connectNulls: false, lineStyle: { color: "#94a3b8", width: 2, type: "dashed" }, itemStyle: { color: "#94a3b8" } },
-        { name: "새 정보 반영 전망", type: "line", triggerEvent: "line", data: months.map((month) => forecastByMonth.get(month)?.scenario ?? (month === lastActual?.month ? lastActual.value : null)), connectNulls: false, symbol: "circle", symbolSize: (_value: unknown, params: { name: string }) => params.name === lastActual?.month ? 0 : affected.has(params.name) ? 9 : 5, lineStyle: { color: revisionColor, width: 3 }, itemStyle: { color: revisionColor }, areaStyle: { color: revisionArea }, markLine: firstForecastMonth ? { silent: true, symbol: ["none", "none"], lineStyle: { color: "#dc2626", width: 2, type: "dashed" }, label: { formatter: "예측 시작", color: "#dc2626", fontWeight: 700 }, data: [{ xAxis: firstForecastMonth }] } : undefined },
+        { name: "예측 연결", type: "line", data: months.map((month) => month === lastActual?.month ? lastActual.value : month === firstForecastMonth ? forecastByMonth.get(month)?.scenario ?? null : null), showSymbol: false, connectNulls: true, lineStyle: { color: FORECAST_CONNECTOR_COLOR, width: 3 }, tooltip: { show: false }, silent: true },
+        { name: "새 정보 반영 전망", type: "line", triggerEvent: "line", data: months.map((month) => forecastByMonth.get(month)?.scenario ?? null), connectNulls: false, symbol: "circle", symbolSize: (_value: unknown, params: { name: string }) => affected.has(params.name) ? 9 : 5, lineStyle: { color: forecastColor, width: 3 }, itemStyle: { color: forecastColor }, areaStyle: { color: forecastAreaColor }, markLine: firstForecastMonth ? { silent: true, symbol: ["none", "none"], lineStyle: { color: "#dc2626", width: 2, type: "dashed" }, label: { formatter: "예측 시작", color: "#dc2626", fontWeight: 700 }, data: [{ xAxis: firstForecastMonth }] } : undefined },
       ],
     };
   }, [result]);
@@ -269,7 +340,8 @@ function ForecastWorkspace() {
             <div className="custom-monthly-input-list">
               {config?.inputSources.map((item) => {
                 const known = item.observations[month];
-                return <label key={item.id} className={`custom-monthly-input ${known !== undefined ? "is-known" : "is-required"}`}><span className="custom-monthly-label"><b>{item.label}</b><small>{item.unit} · 최종 파생 피처 {item.features.length}개</small></span>{known !== undefined ? <span className="custom-known-value"><CheckCircle2 size={14} />{formatted(known)} <small>{item.unit}</small></span> : <input type="number" step="any" value={values[item.id] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [item.id]: event.target.value }))} placeholder={`최근 ${formatted(item.latestValue)}`} aria-label={`${month} ${item.label}`} />}</label>;
+                const description = descriptionOf(item.label);
+                return <label key={item.id} className={`custom-monthly-input ${known !== undefined ? "is-known" : "is-required"}`}><span className="custom-monthly-label"><span className="custom-monthly-label-title"><b>{item.label}</b><span className="custom-help-tip custom-label-help-tip" tabIndex={0} aria-label={`${item.label}: ${description}`} title={description}>!<span className="custom-help-copy" role="tooltip">{description}</span></span></span><small>{item.unit} · 최종 파생 피처 {item.features.length}개</small></span>{known !== undefined ? <span className="custom-known-value"><CheckCircle2 size={14} />{formatted(known)} <small>{item.unit}</small></span> : <input type="number" step="any" value={values[item.id] ?? ""} onChange={(event) => setValues((current) => ({ ...current, [item.id]: event.target.value }))} placeholder={`최근 ${formatted(item.latestValue)}`} aria-label={`${month} ${item.label}`} />}</label>;
               })}
             </div>
             {config && month && missingSources.length === 0 && <p className="custom-complete-month"><CheckCircle2 size={14} />{month}은 필요한 정보가 이미 모두 확보되어 있습니다.</p>}
