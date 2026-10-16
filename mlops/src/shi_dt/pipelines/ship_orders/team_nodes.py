@@ -23,7 +23,9 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(os.environ.get("SHI_PROJECT_DIR", Path(__file__).resolve().parents[4]))
-REPO = Path(os.environ.get("SHIP_ORDERS_REPO", ROOT.parent / "ship-order-drive"))
+# 팀 저장소에서는 분석 코드가 저장소 루트(scripts · src)에 있다 — 없으면 예전처럼 Drive 사본(ship-order-drive)
+_ROOT_REPO = ROOT.parent if (ROOT.parent / "scripts" / "분석" / "2026_독립검증.py").exists() else ROOT.parent / "ship-order-drive"
+REPO = Path(os.environ.get("SHIP_ORDERS_REPO", _ROOT_REPO))
 
 # Kedro 노드 · 데이터셋 이름은 영문(Kedro-Viz 표시 · 네임스페이스 규칙), 화면 설명은 한글 주석
 SHIP_KEYS = {"벌크선": "bulk", "케미컬 탱커": "chemical", "컨테이너선": "container", "가스 운반선": "gas", "유조선": "oil"}
