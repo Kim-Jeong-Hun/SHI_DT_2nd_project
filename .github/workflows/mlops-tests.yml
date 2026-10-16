@@ -1,0 +1,38 @@
+name: MLOps tests
+
+on:
+  pull_request:
+    paths:
+      - "mlops/**"
+      - ".github/workflows/mlops-tests.yml"
+  push:
+    branches: [main]
+    paths:
+      - "mlops/**"
+
+permissions:
+  contents: read
+
+jobs:
+  ship-pulse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mlops
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: mlops/requirements.txt
+      - name: Install
+        run: pip install -r requirements.txt statsmodels==0.15.0 pytest==9.1.1
+      - name: Airflow DAG syntax
+        run: python -m py_compile airflow/dags/*.py
+      - name: Ship Pulse tests (시점 누수 · 선종 5개 · 출력 분리 · MLflow 등록/alias)
+        env:
+          PYTHONUTF8: "1"
+          MLFLOW_DISABLE_AGENT_HINT: "1"
+        run: python -m pytest tests -q
